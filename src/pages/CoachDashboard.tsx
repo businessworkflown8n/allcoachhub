@@ -37,6 +37,8 @@ import CoachNotificationRequests from "@/components/coach/CoachNotificationReque
 import CoachReferrals from "@/components/coach/CoachReferrals";
 import DailyZip from "@/pages/DailyZip";
 import CoachSEOPanel from "@/components/coach/CoachSEOPanel";
+import CoachDigitalProducts from "@/components/coach/CoachDigitalProducts";
+import { useDigitalProductAccess } from "@/hooks/useDigitalProductAccess";
 
 const CoachDashboard = () => {
   useSEO({
@@ -50,6 +52,7 @@ const CoachDashboard = () => {
   const { hasAccess: hasWhatsAppAccess } = useWhatsAppAccess();
   const { hasAccess: hasWorkshopAccess } = useWorkshopAccess();
   const features = useCoachFeatures();
+  const { access: dpAccess } = useDigitalProductAccess();
 
   const navItems = [
     { label: "Overview", path: "/coach/overview", icon: <LayoutDashboard className="h-4 w-4" /> },
@@ -80,6 +83,7 @@ const CoachDashboard = () => {
     ...(hasEmailAccess && features.messaging_access ? [{ label: "Campaigns", path: "/coach/campaigns", icon: <Megaphone className="h-4 w-4" /> }] : []),
     ...(hasWhatsAppAccess && features.messaging_access ? [{ label: "WhatsApp Campaigns", path: "/coach/whatsapp", icon: <MessageCircle className="h-4 w-4" /> }] : []),
     ...(hasWorkshopAccess && features.workshops_access ? [{ label: "Workshops", path: "/coach/workshops", icon: <Video className="h-4 w-4" /> }] : []),
+    ...(dpAccess.enabled ? [{ label: "Digital Products", path: "/coach/digital-products", icon: <Package className="h-4 w-4" /> }] : []),
     { label: "Earnings", path: "/coach/earnings", icon: <DollarSign className="h-4 w-4" /> },
     { label: "Notifications", path: "/coach/notifications", icon: <Bell className="h-4 w-4" /> },
     { label: "Invite Coaches", path: "/coach/invite-coaches", icon: <UserPlus className="h-4 w-4" /> },
@@ -124,6 +128,7 @@ const CoachDashboard = () => {
         <Route path="website" element={<CoachWebsiteManager />} />
         <Route path="seo" element={<CoachSEOPanel />} />
         <Route path="blueprint" element={<CoachBlueprintWorkspace />} />
+        <Route path="digital-products/*" element={<CoachDigitalProducts />} />
         <Route path="overview" element={<CoachOverview />} />
         <Route path="*" element={<Navigate to="overview" replace />} />
       </Routes>

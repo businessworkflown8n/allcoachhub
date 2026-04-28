@@ -2845,6 +2845,227 @@ export type Database = {
           },
         ]
       }
+      digital_product_coach_access: {
+        Row: {
+          allowed_types: string[] | null
+          coach_id: string
+          created_at: string
+          enabled: boolean | null
+          id: string
+          max_products: number | null
+          updated_at: string
+        }
+        Insert: {
+          allowed_types?: string[] | null
+          coach_id: string
+          created_at?: string
+          enabled?: boolean | null
+          id?: string
+          max_products?: number | null
+          updated_at?: string
+        }
+        Update: {
+          allowed_types?: string[] | null
+          coach_id?: string
+          created_at?: string
+          enabled?: boolean | null
+          id?: string
+          max_products?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      digital_product_orders: {
+        Row: {
+          amount_paid: number
+          buyer_id: string
+          coach_id: string
+          created_at: string
+          currency: string
+          delivery_status: string
+          gateway_fee: number
+          id: string
+          net_to_coach: number
+          payment_ref: string | null
+          payment_status: string
+          platform_fee: number
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_paid?: number
+          buyer_id: string
+          coach_id: string
+          created_at?: string
+          currency?: string
+          delivery_status?: string
+          gateway_fee?: number
+          id?: string
+          net_to_coach?: number
+          payment_ref?: string | null
+          payment_status?: string
+          platform_fee?: number
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_paid?: number
+          buyer_id?: string
+          coach_id?: string
+          created_at?: string
+          currency?: string
+          delivery_status?: string
+          gateway_fee?: number
+          id?: string
+          net_to_coach?: number
+          payment_ref?: string | null
+          payment_status?: string
+          platform_fee?: number
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "digital_product_orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "digital_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      digital_product_settings: {
+        Row: {
+          allow_discount: boolean
+          allow_paid: boolean
+          allow_refunds: boolean
+          allowed_types: string[]
+          created_at: string
+          global_enabled: boolean
+          id: string
+          max_price: number | null
+          max_products_per_coach: number | null
+          min_price: number | null
+          platform_commission_percent: number
+          require_approval: boolean
+          updated_at: string
+        }
+        Insert: {
+          allow_discount?: boolean
+          allow_paid?: boolean
+          allow_refunds?: boolean
+          allowed_types?: string[]
+          created_at?: string
+          global_enabled?: boolean
+          id?: string
+          max_price?: number | null
+          max_products_per_coach?: number | null
+          min_price?: number | null
+          platform_commission_percent?: number
+          require_approval?: boolean
+          updated_at?: string
+        }
+        Update: {
+          allow_discount?: boolean
+          allow_paid?: boolean
+          allow_refunds?: boolean
+          allowed_types?: string[]
+          created_at?: string
+          global_enabled?: boolean
+          id?: string
+          max_price?: number | null
+          max_products_per_coach?: number | null
+          min_price?: number | null
+          platform_commission_percent?: number
+          require_approval?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      digital_products: {
+        Row: {
+          approval_status: string
+          available_from: string | null
+          available_until: string | null
+          coach_id: string
+          content_text: string | null
+          content_url: string | null
+          cover_image_url: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          discount_price: number | null
+          faq: Json
+          id: string
+          is_paid: boolean
+          limited_time: boolean
+          pass_gateway_fees: boolean
+          price: number | null
+          product_type: string
+          rejection_reason: string | null
+          sales_count: number
+          status: string
+          tags: string[]
+          title: string
+          updated_at: string
+          views_count: number
+        }
+        Insert: {
+          approval_status?: string
+          available_from?: string | null
+          available_until?: string | null
+          coach_id: string
+          content_text?: string | null
+          content_url?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          discount_price?: number | null
+          faq?: Json
+          id?: string
+          is_paid?: boolean
+          limited_time?: boolean
+          pass_gateway_fees?: boolean
+          price?: number | null
+          product_type: string
+          rejection_reason?: string | null
+          sales_count?: number
+          status?: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+          views_count?: number
+        }
+        Update: {
+          approval_status?: string
+          available_from?: string | null
+          available_until?: string | null
+          coach_id?: string
+          content_text?: string | null
+          content_url?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          discount_price?: number | null
+          faq?: Json
+          id?: string
+          is_paid?: boolean
+          limited_time?: boolean
+          pass_gateway_fees?: boolean
+          price?: number | null
+          product_type?: string
+          rejection_reason?: string | null
+          sales_count?: number
+          status?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          views_count?: number
+        }
+        Relationships: []
+      }
       email_campaigns: {
         Row: {
           attached_file_name: string | null
@@ -7047,6 +7268,7 @@ export type Database = {
         Args: { _coach_id: string }
         Returns: Json
       }
+      get_digital_product_access: { Args: { _coach_id: string }; Returns: Json }
       get_effective_feature: {
         Args: { _coach_id: string; _feature_key: string; _plan?: string }
         Returns: Json

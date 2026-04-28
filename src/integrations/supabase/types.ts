@@ -74,6 +74,48 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_agent_conversations: {
+        Row: {
+          coach_id: string | null
+          content: string
+          conversion_probability: number | null
+          created_at: string
+          escalation_flag: boolean | null
+          id: string
+          intent_type: string | null
+          mode: string | null
+          role: string
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          coach_id?: string | null
+          content: string
+          conversion_probability?: number | null
+          created_at?: string
+          escalation_flag?: boolean | null
+          id?: string
+          intent_type?: string | null
+          mode?: string | null
+          role: string
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          coach_id?: string | null
+          content?: string
+          conversion_probability?: number | null
+          created_at?: string
+          escalation_flag?: boolean | null
+          id?: string
+          intent_type?: string | null
+          mode?: string | null
+          role?: string
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ai_blogs: {
         Row: {
           author: string | null

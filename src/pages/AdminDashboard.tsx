@@ -50,6 +50,7 @@ import AdminCoachSubscriptions from "@/components/admin/AdminCoachSubscriptions"
 import AdminFeatureRequests from "@/components/admin/AdminFeatureRequests";
 import AdminKnowledgeHub from "@/components/admin/AdminKnowledgeHub";
 import AdminFeatureControlSystem from "@/components/admin/AdminFeatureControlSystem";
+import AdminDigitalProductsControl from "@/components/admin/AdminDigitalProductsControl";
 
 const navItems = [
   { label: "Analytics", path: "/admin", icon: <BarChart3 className="h-4 w-4" /> },
@@ -90,6 +91,7 @@ const navItems = [
   { label: "Workshop Tracking", path: "/admin/workshop-tracking", icon: <BarChart3 className="h-4 w-4" /> },
   { label: "Feature Control", path: "/admin/feature-control", icon: <ShieldCheck className="h-4 w-4" /> },
   { label: "Feature Control System", path: "/admin/feature-control-system", icon: <Settings className="h-4 w-4" /> },
+  { label: "Digital Products", path: "/admin/digital-products", icon: <Package className="h-4 w-4" /> },
   { label: "Plans", path: "/admin/plans", icon: <CreditCard className="h-4 w-4" /> },
   { label: "Feature Bundles", path: "/admin/bundles", icon: <Package className="h-4 w-4" /> },
   { label: "Coach Subscriptions", path: "/admin/subscriptions", icon: <CreditCard className="h-4 w-4" /> },
@@ -151,6 +153,7 @@ const AdminDashboard = () => {
         <Route path="workshop-tracking" element={<AdminWorkshopTracking />} />
         <Route path="feature-control" element={<AdminCoachFeatureControl />} />
         <Route path="feature-control-system" element={<AdminFeatureControlSystem />} />
+        <Route path="digital-products" element={<AdminDigitalProductsControl />} />
         <Route path="plans" element={<AdminPlans />} />
         <Route path="bundles" element={<AdminBundles />} />
         <Route path="subscriptions" element={<AdminCoachSubscriptions />} />

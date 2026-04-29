@@ -4698,6 +4698,7 @@ export type Database = {
           id: string
           is_active: boolean
           message: string
+          position: string
           scheduled_at: string | null
           scroll_speed: number
           segment: string
@@ -4712,6 +4713,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           message: string
+          position?: string
           scheduled_at?: string | null
           scroll_speed?: number
           segment?: string
@@ -4726,6 +4728,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           message?: string
+          position?: string
           scheduled_at?: string | null
           scroll_speed?: number
           segment?: string

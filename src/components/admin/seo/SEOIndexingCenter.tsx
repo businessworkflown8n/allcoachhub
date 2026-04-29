@@ -212,6 +212,32 @@ const SEOIndexingCenter = () => {
         </TabsList>
 
         <TabsContent value="management" className="space-y-4">
+          {/* Auto-Indexing Mode */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Auto-Indexing Mode</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Choose how URLs are submitted to search engines. <strong>Auto</strong> tries the live Google Indexing API and falls back to sitemap pings on failure. <strong>Live API only</strong> requires a valid Service Account. <strong>Sitemap only</strong> skips the API entirely.
+              </p>
+              <div className="flex items-center gap-3">
+                <Select value={indexingMode} onValueChange={updateIndexingMode} disabled={savingMode}>
+                  <SelectTrigger className="w-[280px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="auto">Auto (API → Sitemap fallback)</SelectItem>
+                    <SelectItem value="live">Live Google Indexing API only</SelectItem>
+                    <SelectItem value="sitemap">Sitemap ping only</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Badge className="text-xs capitalize">{indexingMode}</Badge>
+                {savingMode && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Quick Actions */}
           <Card>
             <CardHeader><CardTitle className="text-lg">Google Indexing API Actions</CardTitle></CardHeader>

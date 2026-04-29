@@ -175,15 +175,55 @@ serve(async (req) => {
   const startedAt = Date.now();
 
   try {
-    const saJson = Deno.env.get("GOOGLE_INDEXING_SERVICE_ACCOUNT_JSON");
-    if (!saJson) throw new Error("Service account not configured");
-
-    const sa: ServiceAccountKey = JSON.parse(saJson);
     const { urls, action = "URL_UPDATED" } = await req.json();
 
     if (!urls || !Array.isArray(urls) || urls.length === 0) {
       throw new Error("urls array is required");
     }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Read admin-controlled mode: 'auto' (try API → fallback), 'live' (API only), 'sitemap' (force sitemap)
+    let mode: "auto" | "live" | "sitemap" = "auto";
+    try {
+      const { data: setting } = await supabase
+        .from("seo_settings")
+        .select("value")
+        .eq("key", "auto_indexing_mode")
+        .maybeSingle();
+      const v = (setting?.value as string) || "auto";
+      if (v === "live" || v === "sitemap" || v === "auto") mode = v;
+    } catch (_) { /* default to auto */ }
+
+    // Force sitemap path if admin set sitemap-only mode
+    if (mode === "sitemap") {
+      const sitemapFallback = await pingSitemap(supabase);
+      const now = new Date().toISOString();
+      const results = [];
+      for (const url of urls) {
+        const fullUrl = toFullUrl(url);
+        const pageUrl = normalizePath(url);
+        await supabase.from("indexing_logs").insert({
+          url: fullUrl, action, status: "submitted",
+          api_response: { mode: "sitemap_forced", sitemap_ping: sitemapFallback },
+        });
+        await supabase.from("seo_page_metadata")
+          .update({ index_status: "submitted", indexing_submitted_at: now })
+          .eq("page_url", pageUrl);
+        results.push({ url: fullUrl, success: true, mode: "sitemap_forced", response: { sitemap: sitemapFallback } });
+      }
+      return jsonResponse({
+        ok: true, submitted: results.length, failed: 0, total: results.length,
+        fallback_submitted: results.length, results, processing_time_ms: Date.now() - startedAt,
+      });
+    }
+
+    const saJson = Deno.env.get("GOOGLE_INDEXING_SERVICE_ACCOUNT_JSON");
+    if (!saJson) throw new Error("Service account not configured");
+
+    const sa: ServiceAccountKey = JSON.parse(saJson);
 
     // Auto-chunk: Google Indexing API allows up to 200 URLs/day; we batch in 100s
     // to keep request payloads small and avoid timeouts. Callers can pass any size.

@@ -246,7 +246,7 @@ serve(async (req) => {
       try {
         const result = await submitUrl(accessToken, fullUrl, action);
 
-        if (!result.ok && shouldUseSitemapFallback(result.data)) {
+        if (!result.ok && mode === "auto" && shouldUseSitemapFallback(result.data)) {
           sitemapFallbackPromise ??= pingSitemap(supabase);
           const sitemapFallback = await sitemapFallbackPromise;
 

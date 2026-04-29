@@ -235,10 +235,6 @@ serve(async (req) => {
 
     const accessToken = await getAccessToken(sa);
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const results = [];
     let sitemapFallbackPromise: Promise<Awaited<ReturnType<typeof pingSitemap>>> | null = null;
 

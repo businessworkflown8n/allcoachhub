@@ -248,6 +248,7 @@ const AdminMarqueeManager = () => {
                         <span className="inline-flex items-center gap-1"><span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: m.text_color }} /> Text</span>
                         <span>Speed: {m.scroll_speed}</span>
                         <span>Order: {m.sort_order}</span>
+                        <span className="rounded-full border border-border px-2 py-0.5 capitalize">{(m as any).position || "header"}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">

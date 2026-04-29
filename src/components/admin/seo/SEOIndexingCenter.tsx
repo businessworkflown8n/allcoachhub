@@ -17,10 +17,36 @@ const SEOIndexingCenter = () => {
   const [submitting, setSubmitting] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [indexingMode, setIndexingMode] = useState<string>("auto");
+  const [savingMode, setSavingMode] = useState(false);
 
   useEffect(() => {
     loadData();
+    loadIndexingMode();
   }, []);
+
+  const loadIndexingMode = async () => {
+    const { data } = await (supabase as any)
+      .from("seo_settings")
+      .select("value")
+      .eq("key", "auto_indexing_mode")
+      .maybeSingle();
+    if (data?.value) setIndexingMode(String(data.value).replace(/"/g, ""));
+  };
+
+  const updateIndexingMode = async (mode: string) => {
+    setSavingMode(true);
+    const { error } = await (supabase as any)
+      .from("seo_settings")
+      .upsert({ key: "auto_indexing_mode", value: mode, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    setSavingMode(false);
+    if (error) {
+      toast({ title: "Failed to update mode", description: error.message, variant: "destructive" });
+      return;
+    }
+    setIndexingMode(mode);
+    toast({ title: "Auto-indexing mode updated", description: `Now using: ${mode}` });
+  };
 
   const loadData = async () => {
     const [pagesRes, logsRes] = await Promise.all([

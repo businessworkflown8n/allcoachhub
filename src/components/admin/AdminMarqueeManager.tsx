@@ -140,13 +140,22 @@ const AdminMarqueeManager = () => {
       <Card className="card-premium">
         <CardHeader><CardTitle className="text-base">{editingId ? "Edit Message" : "Create New Message"}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Segment</label>
               <Select value={form.segment} onValueChange={(v) => setForm({ ...form, segment: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {SEGMENTS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Position</label>
+              <Select value={form.position} onValueChange={(v) => setForm({ ...form, position: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {POSITIONS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

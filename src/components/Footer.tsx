@@ -1,6 +1,7 @@
 import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
 import { useTranslation } from "@/i18n/TranslationProvider";
 import { trackSocialClick } from "@/lib/analytics";
+import MarqueeBar from "@/components/MarqueeBar";
 
 const socials = [
   { name: "X", href: "https://x.com/Aicoachportal", icon: () => (
@@ -20,6 +21,8 @@ const Footer = () => {
   };
 
   return (
+    <>
+    <MarqueeBar segment="website" position="footer" />
     <footer className="border-t border-border bg-card py-10">
       <div className="container mx-auto flex flex-col items-center gap-4 px-4">
         <div className="flex items-center gap-4">
@@ -40,6 +43,7 @@ const Footer = () => {
         <p className="text-sm text-muted-foreground">{t("footer.copyright", { year: new Date().getFullYear().toString() })}</p>
       </div>
     </footer>
+    </>
   );
 };
 

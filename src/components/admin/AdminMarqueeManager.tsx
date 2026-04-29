@@ -78,6 +78,7 @@ const AdminMarqueeManager = () => {
       sort_order: form.sort_order,
       scheduled_at: form.scheduled_at || null,
       expires_at: form.expires_at || null,
+      position: form.position,
     };
 
     if (editingId) {
@@ -116,6 +117,7 @@ const AdminMarqueeManager = () => {
       sort_order: m.sort_order,
       scheduled_at: m.scheduled_at || "",
       expires_at: m.expires_at || "",
+      position: (m as any).position || "header",
     });
     setActiveTab(m.segment);
   };

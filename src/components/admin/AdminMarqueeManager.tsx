@@ -21,12 +21,18 @@ interface MarqueeMessage {
   sort_order: number;
   scheduled_at: string | null;
   expires_at: string | null;
+  position: string;
 }
 
 const SEGMENTS = [
   { value: "website", label: "Main Website" },
   { value: "learner", label: "Learner Dashboard" },
   { value: "coach", label: "Coach Dashboard" },
+];
+
+const POSITIONS = [
+  { value: "header", label: "Header (below menu)" },
+  { value: "footer", label: "Footer" },
 ];
 
 const defaultForm = {
@@ -39,6 +45,7 @@ const defaultForm = {
   sort_order: 0,
   scheduled_at: "",
   expires_at: "",
+  position: "header",
 };
 
 const AdminMarqueeManager = () => {

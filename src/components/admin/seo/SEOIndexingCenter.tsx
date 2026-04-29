@@ -17,10 +17,36 @@ const SEOIndexingCenter = () => {
   const [submitting, setSubmitting] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [indexingMode, setIndexingMode] = useState<string>("auto");
+  const [savingMode, setSavingMode] = useState(false);
 
   useEffect(() => {
     loadData();
+    loadIndexingMode();
   }, []);
+
+  const loadIndexingMode = async () => {
+    const { data } = await (supabase as any)
+      .from("seo_settings")
+      .select("value")
+      .eq("key", "auto_indexing_mode")
+      .maybeSingle();
+    if (data?.value) setIndexingMode(String(data.value).replace(/"/g, ""));
+  };
+
+  const updateIndexingMode = async (mode: string) => {
+    setSavingMode(true);
+    const { error } = await (supabase as any)
+      .from("seo_settings")
+      .upsert({ key: "auto_indexing_mode", value: mode, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    setSavingMode(false);
+    if (error) {
+      toast({ title: "Failed to update mode", description: error.message, variant: "destructive" });
+      return;
+    }
+    setIndexingMode(mode);
+    toast({ title: "Auto-indexing mode updated", description: `Now using: ${mode}` });
+  };
 
   const loadData = async () => {
     const [pagesRes, logsRes] = await Promise.all([
@@ -186,6 +212,32 @@ const SEOIndexingCenter = () => {
         </TabsList>
 
         <TabsContent value="management" className="space-y-4">
+          {/* Auto-Indexing Mode */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Auto-Indexing Mode</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Choose how URLs are submitted to search engines. <strong>Auto</strong> tries the live Google Indexing API and falls back to sitemap pings on failure. <strong>Live API only</strong> requires a valid Service Account. <strong>Sitemap only</strong> skips the API entirely.
+              </p>
+              <div className="flex items-center gap-3">
+                <Select value={indexingMode} onValueChange={updateIndexingMode} disabled={savingMode}>
+                  <SelectTrigger className="w-[280px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="auto">Auto (API → Sitemap fallback)</SelectItem>
+                    <SelectItem value="live">Live Google Indexing API only</SelectItem>
+                    <SelectItem value="sitemap">Sitemap ping only</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Badge className="text-xs capitalize">{indexingMode}</Badge>
+                {savingMode && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Quick Actions */}
           <Card>
             <CardHeader><CardTitle className="text-lg">Google Indexing API Actions</CardTitle></CardHeader>

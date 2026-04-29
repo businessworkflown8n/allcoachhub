@@ -11,27 +11,30 @@ interface MarqueeMessage {
 
 interface MarqueeBarProps {
   segment: "website" | "learner" | "coach";
+  position?: "header" | "footer";
 }
 
-const MarqueeBar = ({ segment }: MarqueeBarProps) => {
+const MarqueeBar = ({ segment, position = "header" }: MarqueeBarProps) => {
   const [messages, setMessages] = useState<MarqueeMessage[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchMessages = async () => {
       const now = new Date().toISOString();
-      const { data } = await supabase
-        .from("marquee_messages")
-        .select("id, message, text_color, bg_color, scroll_speed")
+      const { data } = await (supabase
+        .from("marquee_messages") as any)
+        .select("id, message, text_color, bg_color, scroll_speed, position")
         .eq("segment", segment)
         .eq("is_active", true)
+        .eq("position", position)
         .or(`scheduled_at.is.null,scheduled_at.lte.${now}`)
         .or(`expires_at.is.null,expires_at.gte.${now}`)
         .order("sort_order");
       if (data?.length) setMessages(data);
+      else setMessages([]);
     };
     fetchMessages();
-  }, [segment]);
+  }, [segment, position]);
 
   if (!messages.length) return null;
 
@@ -46,7 +49,7 @@ const MarqueeBar = ({ segment }: MarqueeBarProps) => {
     >
       <div
         ref={containerRef}
-        className="marquee-scroll whitespace-nowrap py-2 text-sm font-medium"
+        className="marquee-scroll whitespace-nowrap py-2 text-sm font-bold"
         style={{
           color: messages[0]?.text_color || "hsl(var(--primary))",
           animationDuration: `${duration}s`,

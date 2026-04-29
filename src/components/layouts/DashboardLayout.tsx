@@ -117,18 +117,19 @@ const DashboardLayout = ({ children, navItems, title, marqueeSegment }: Dashboar
 
       {/* Main content */}
       <div className="flex flex-1 flex-col min-w-0">
-        {marqueeSegment && <MarqueeBar segment={marqueeSegment} />}
         <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/30 bg-background/80 backdrop-blur-xl px-6">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-muted-foreground hover:text-foreground transition-colors">
             <Menu className="h-5 w-5" />
           </button>
           <h1 className="text-lg font-semibold text-foreground tracking-tight">{navItems.find(i => i.path === location.pathname)?.label || title}</h1>
         </header>
+        {marqueeSegment && <MarqueeBar segment={marqueeSegment} position="header" />}
         <main className="flex-1 overflow-auto p-6 lg:p-8">
           <div className="mx-auto max-w-[1400px] space-y-8">
             {children}
           </div>
         </main>
+        {marqueeSegment && <MarqueeBar segment={marqueeSegment} position="footer" />}
       </div>
     </div>
   );

@@ -21,12 +21,18 @@ interface MarqueeMessage {
   sort_order: number;
   scheduled_at: string | null;
   expires_at: string | null;
+  position: string;
 }
 
 const SEGMENTS = [
   { value: "website", label: "Main Website" },
   { value: "learner", label: "Learner Dashboard" },
   { value: "coach", label: "Coach Dashboard" },
+];
+
+const POSITIONS = [
+  { value: "header", label: "Header (below menu)" },
+  { value: "footer", label: "Footer" },
 ];
 
 const defaultForm = {
@@ -39,6 +45,7 @@ const defaultForm = {
   sort_order: 0,
   scheduled_at: "",
   expires_at: "",
+  position: "header",
 };
 
 const AdminMarqueeManager = () => {
@@ -71,6 +78,7 @@ const AdminMarqueeManager = () => {
       sort_order: form.sort_order,
       scheduled_at: form.scheduled_at || null,
       expires_at: form.expires_at || null,
+      position: form.position,
     };
 
     if (editingId) {
@@ -109,6 +117,7 @@ const AdminMarqueeManager = () => {
       sort_order: m.sort_order,
       scheduled_at: m.scheduled_at || "",
       expires_at: m.expires_at || "",
+      position: (m as any).position || "header",
     });
     setActiveTab(m.segment);
   };
@@ -131,13 +140,22 @@ const AdminMarqueeManager = () => {
       <Card className="card-premium">
         <CardHeader><CardTitle className="text-base">{editingId ? "Edit Message" : "Create New Message"}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Segment</label>
               <Select value={form.segment} onValueChange={(v) => setForm({ ...form, segment: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {SEGMENTS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Position</label>
+              <Select value={form.position} onValueChange={(v) => setForm({ ...form, position: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {POSITIONS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -230,6 +248,7 @@ const AdminMarqueeManager = () => {
                         <span className="inline-flex items-center gap-1"><span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: m.text_color }} /> Text</span>
                         <span>Speed: {m.scroll_speed}</span>
                         <span>Order: {m.sort_order}</span>
+                        <span className="rounded-full border border-border px-2 py-0.5 capitalize">{(m as any).position || "header"}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">

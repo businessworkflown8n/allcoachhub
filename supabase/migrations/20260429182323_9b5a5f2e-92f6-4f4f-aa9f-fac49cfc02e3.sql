@@ -1,0 +1,1 @@
+ALTER TABLE public.marquee_messages ADD COLUMN IF NOT EXISTS position text NOT NULL DEFAULT 'header';

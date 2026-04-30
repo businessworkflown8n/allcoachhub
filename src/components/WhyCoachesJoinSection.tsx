@@ -44,10 +44,7 @@ const WhyCoachesJoinSection = () => (
         <p className="text-muted-foreground max-w-lg mx-auto">
           Your first 5 client leads are FREE. No upfront cost, no risk.
         </p>
-        <Link
-          to="/signup/coach"
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
+        <Link to="/signup/coach" className="cta-3d primary lg">
           Join as a Coach — It's Free
         </Link>
       </div>

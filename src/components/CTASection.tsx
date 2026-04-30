@@ -26,10 +26,10 @@ const CTASection = () => {
             {t("cta.subtitle")}
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <button onClick={handlePrimaryCta} className="glow-lime inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3.5 font-semibold text-primary-foreground transition-all hover:brightness-110">
+            <button onClick={handlePrimaryCta} className="cta-3d primary lg">
               {t("cta.primary")} <ArrowRight className="h-4 w-4" />
             </button>
-            <button onClick={handleSecondaryCta} className="rounded-lg border border-border bg-secondary px-8 py-3.5 font-semibold text-foreground transition-colors hover:bg-border">
+            <button onClick={handleSecondaryCta} className="cta-3d secondary lg">
               {t("cta.secondary")}
             </button>
           </div>

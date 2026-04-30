@@ -105,10 +105,7 @@ const EarningsCalculator = () => {
                 <p className="text-xl font-bold text-foreground">{sessionsPerWeek * 4}</p>
               </div>
             </div>
-            <Link
-              to="/signup/coach"
-              className="block w-full rounded-lg bg-primary py-3 text-center font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
+            <Link to="/signup/coach" className="cta-3d primary w-full">
               Start Earning Now — Free Signup
             </Link>
           </div>

@@ -18,6 +18,8 @@ const Index = lazy(() => import("./pages/Index"));
 const RoleSelect = lazy(() => import("./pages/RoleSelect"));
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
+const ThankYouLearner = lazy(() => import("./pages/ThankYouLearner"));
+const ThankYouCoach = lazy(() => import("./pages/ThankYouCoach"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminOTPLogin = lazy(() => import("./pages/AdminOTPLogin"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
@@ -144,6 +146,8 @@ const App = () => (
             <Route path="/auth" element={<Suspense fallback={<PageFallback />}><RoleSelect /></Suspense>} />
             <Route path="/login/:role" element={<Suspense fallback={<PageFallback />}><Login /></Suspense>} />
             <Route path="/signup/:role" element={<Suspense fallback={<PageFallback />}><Signup /></Suspense>} />
+            <Route path="/signup/learner/thank-you-learner" element={<Suspense fallback={<PageFallback />}><ThankYouLearner /></Suspense>} />
+            <Route path="/signup/coach/thank-you-coach" element={<Suspense fallback={<PageFallback />}><ThankYouCoach /></Suspense>} />
             <Route path="/admin/login" element={<Suspense fallback={<PageFallback />}><AdminLogin /></Suspense>} />
             <Route path="/admin/otp-login" element={<Suspense fallback={<PageFallback />}><AdminOTPLogin /></Suspense>} />
             <Route path="/reset-password" element={<Suspense fallback={<PageFallback />}><ResetPassword /></Suspense>} />

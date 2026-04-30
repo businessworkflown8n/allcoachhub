@@ -110,11 +110,8 @@ const CategoriesSection = () => {
         )}
 
         <div className="mt-8 text-center">
-          <Link
-            to="/categories"
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110"
-          >
-            View All Categories →
+          <Link to="/categories" className="cta-3d primary">
+            View All Categories <span className="cta-arrow">→</span>
           </Link>
         </div>
       </div>

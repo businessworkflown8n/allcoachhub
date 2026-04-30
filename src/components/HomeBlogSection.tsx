@@ -81,10 +81,7 @@ const HomeBlogSection = () => {
         </div>
 
         <div className="mt-10 text-center">
-          <Link
-            to="/ai-blogs"
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-all hover:brightness-110"
-          >
+          <Link to="/ai-blogs" className="cta-3d primary">
             View All Articles <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

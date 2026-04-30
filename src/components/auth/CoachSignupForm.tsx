@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,7 @@ import { useCoachCategories } from "@/hooks/useCoachCategories";
 import { captureEmailSignupSubmission } from "@/lib/signupCapture";
 
 const CoachSignupForm = () => {
+  const navigate = useNavigate();
   const { categories, loading: categoriesLoading } = useCoachCategories(true);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -129,6 +131,10 @@ const CoachSignupForm = () => {
 
     setLoading(false);
     setSuccess(true);
+    navigate("/signup/coach/thank-you-coach", {
+      state: { email, fullName, userId: newUserId },
+      replace: true,
+    });
   };
 
   const handleResendVerification = async () => {

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { captureEmailSignupSubmission } from "@/lib/signupCapture";
 
 const LearnerSignupForm = () => {
+  const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
@@ -91,6 +93,10 @@ const LearnerSignupForm = () => {
     }).catch((err) => console.error("Welcome learner email failed:", err));
 
     setSuccess(true);
+    navigate("/signup/learner/thank-you-learner", {
+      state: { email, fullName, userId: newUserId },
+      replace: true,
+    });
   };
 
   const handleResendVerification = async () => {

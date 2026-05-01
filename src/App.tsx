@@ -23,6 +23,7 @@ const ThankYouCoach = lazy(() => import("./pages/ThankYouCoach"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminOTPLogin = lazy(() => import("./pages/AdminOTPLogin"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
+const CoursePlayer = lazy(() => import("./pages/CoursePlayer"));
 const Enroll = lazy(() => import("./pages/Enroll"));
 const LearnerDashboard = lazy(() => import("./pages/LearnerDashboard"));
 const CoachDashboard = lazy(() => import("./pages/CoachDashboard"));
@@ -191,6 +192,11 @@ const App = () => (
             <Route path="/enroll/:courseId" element={
               <ProtectedRoute allowedRole="learner">
                 <Suspense fallback={<PageFallback />}><Enroll /></Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="/learn/:courseId" element={
+              <ProtectedRoute allowedRole="learner">
+                <Suspense fallback={<PageFallback />}><CoursePlayer /></Suspense>
               </ProtectedRoute>
             } />
             <Route path="/learner/*" element={

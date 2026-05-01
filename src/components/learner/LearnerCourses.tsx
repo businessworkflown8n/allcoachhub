@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
-import { BookOpen, Clock } from "lucide-react";
+import { BookOpen, Clock, PlayCircle } from "lucide-react";
 
 const LearnerCourses = () => {
   const { user } = useAuth();
@@ -54,11 +54,16 @@ const LearnerCourses = () => {
                 <div className="h-2 rounded-full bg-primary transition-all" style={{ width: `${Number(e.progress_percent)}%` }} />
               </div>
             </div>
-            <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
-              e.payment_status === "paid" ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"
-            }`}>
-              {e.payment_status}
-            </span>
+            <div className="flex items-center justify-between gap-2">
+              <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                e.payment_status === "completed" || e.payment_status === "paid" ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"
+              }`}>
+                {e.payment_status}
+              </span>
+              <Link to={`/learn/${e.course_id}`} className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:brightness-110">
+                <PlayCircle className="h-3.5 w-3.5" /> {Number(e.progress_percent) > 0 ? "Continue" : "Start"}
+              </Link>
+            </div>
           </div>
         ))}
       </div>

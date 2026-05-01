@@ -83,7 +83,7 @@ serve(async (req) => {
     const { data: tmpl } = await admin.from("certificate_templates").select("id").eq("coach_id", course!.coach_id).limit(1).maybeSingle();
     if (tmpl) templateId = tmpl.id;
     else {
-      const { data: newTmpl } = await admin.from("certificate_templates").insert({ coach_id: course!.coach_id, name: "Default Auto-Generated", template_type: "system" }).select("id").single();
+      const { data: newTmpl } = await admin.from("certificate_templates").insert({ coach_id: course!.coach_id, title: "Default Auto-Generated", course_id }).select("id").single();
       templateId = newTmpl?.id || null;
     }
 

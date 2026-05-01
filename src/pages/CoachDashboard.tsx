@@ -14,6 +14,7 @@ import CoachBlueprintWorkspace from "@/components/coach/blueprint/CoachBlueprint
 import CoachProfile from "@/components/coach/CoachProfile";
 import CoachCourses from "@/components/coach/CoachCourses";
 import CoachCourseForm from "@/components/coach/CoachCourseForm";
+import CurriculumBuilder from "@/components/coach/curriculum/CurriculumBuilder";
 import CoachEnrollments from "@/components/coach/CoachEnrollments";
 import CoachEarnings from "@/components/coach/CoachEarnings";
 import CoachWebinars from "@/components/coach/CoachWebinars";
@@ -100,6 +101,7 @@ const CoachDashboard = () => {
         <Route path="courses" element={features.courses_access ? <CoachCourses /> : <Navigate to="overview" replace />} />
         <Route path="courses/new" element={features.courses_access ? <CoachCourseForm /> : <Navigate to="overview" replace />} />
         <Route path="courses/:id/edit" element={features.courses_access ? <CoachCourseForm /> : <Navigate to="overview" replace />} />
+        <Route path="courses/:id/curriculum" element={features.courses_access ? <CurriculumBuilder /> : <Navigate to="overview" replace />} />
         <Route path="webinars" element={features.workshops_access ? <CoachWebinars /> : <Navigate to="overview" replace />} />
         <Route path="enrollments" element={<CoachEnrollments />} />
         <Route path="clients" element={(features as any).crm_access ? <CoachClients /> : <Navigate to="overview" replace />} />

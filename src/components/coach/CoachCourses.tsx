@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
-import { BookOpen, Plus, Edit, Trash2, Eye, EyeOff, Users, Download, X, Clock, CheckCircle, AlertTriangle } from "lucide-react";
+import { BookOpen, Plus, Edit, Trash2, Eye, EyeOff, Users, Download, X, Clock, CheckCircle, AlertTriangle, ListTree } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -225,6 +225,9 @@ const CoachCourses = () => {
               <div className="flex gap-2 pt-2 border-t border-border">
                 <Link to={`/coach/courses/${c.id}/edit`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
                   <Edit className="h-3 w-3" /> Edit
+                </Link>
+                <Link to={`/coach/courses/${c.id}/curriculum`} className="flex items-center gap-1 text-xs text-primary hover:underline">
+                  <ListTree className="h-3 w-3" /> Curriculum
                 </Link>
                 <button
                   onClick={() => togglePublish(c.id, c.is_published)}

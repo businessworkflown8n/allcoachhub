@@ -2567,10 +2567,13 @@ export type Database = {
           content_type: string
           content_url: string | null
           created_at: string
+          drip_days: number
           duration_minutes: number | null
           id: string
           is_free_preview: boolean
           is_published: boolean
+          live_session_starts_at: string | null
+          live_session_url: string | null
           module_id: string
           sort_order: number
           title: string
@@ -2581,10 +2584,13 @@ export type Database = {
           content_type?: string
           content_url?: string | null
           created_at?: string
+          drip_days?: number
           duration_minutes?: number | null
           id?: string
           is_free_preview?: boolean
           is_published?: boolean
+          live_session_starts_at?: string | null
+          live_session_url?: string | null
           module_id: string
           sort_order?: number
           title: string
@@ -2595,10 +2601,13 @@ export type Database = {
           content_type?: string
           content_url?: string | null
           created_at?: string
+          drip_days?: number
           duration_minutes?: number | null
           id?: string
           is_free_preview?: boolean
           is_published?: boolean
+          live_session_starts_at?: string | null
+          live_session_url?: string | null
           module_id?: string
           sort_order?: number
           title?: string
@@ -4686,6 +4695,45 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "notification_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_progress: {
+        Row: {
+          completed_at: string
+          course_id: string
+          id: string
+          learner_id: string
+          lesson_id: string
+        }
+        Insert: {
+          completed_at?: string
+          course_id: string
+          id?: string
+          learner_id: string
+          lesson_id: string
+        }
+        Update: {
+          completed_at?: string
+          course_id?: string
+          id?: string
+          learner_id?: string
+          lesson_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "course_lessons"
             referencedColumns: ["id"]
           },
         ]
@@ -7370,6 +7418,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      recompute_course_progress: {
+        Args: { _course: string; _learner: string }
+        Returns: number
       }
       reject_notification_request: {
         Args: { _request_id: string; _reviewer_note?: string }

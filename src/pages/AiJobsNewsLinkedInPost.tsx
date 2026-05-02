@@ -400,9 +400,16 @@ const AiJobsNewsLinkedInPost = () => {
                   )}
                 </div>
                 {generated && (
-                  <Button variant="outline" onClick={handleDownload} className="w-full">
-                    <Download className="h-4 w-4 mr-2" /> Download Image (1080×1080)
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button variant="outline" onClick={handleDownload} className="flex-1">
+                      <Download className="h-4 w-4 mr-2" /> Download (1080×1080)
+                    </Button>
+                    <Button asChild className="flex-1">
+                      <a href={JOIN_URL} target="_blank" rel="noopener noreferrer" onClick={() => log("cta_clicked")}>
+                        Join Now →
+                      </a>
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>

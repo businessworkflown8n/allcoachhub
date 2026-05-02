@@ -91,7 +91,11 @@ cc: AI Coach Portal Team`;
 const loadImage = (src: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    // Only set crossOrigin for remote http(s) URLs; data: URLs don't need it
+    // and setting it can cause silent failures on servers without CORS headers.
+    if (/^https?:\/\//i.test(src)) {
+      img.crossOrigin = "anonymous";
+    }
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = src;

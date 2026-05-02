@@ -42,6 +42,7 @@ import CoachDigitalProducts from "@/components/coach/CoachDigitalProducts";
 import { useDigitalProductAccess } from "@/hooks/useDigitalProductAccess";
 import CoachLinkedInPost from "@/components/coach/CoachLinkedInPost";
 import { useFeatureControl } from "@/hooks/useFeatureControl";
+import { useExternalLinkControl } from "@/hooks/useExternalLinkControl";
 
 const CoachDashboard = () => {
   useSEO({
@@ -58,6 +59,7 @@ const CoachDashboard = () => {
   const { access: dpAccess } = useDigitalProductAccess();
   const { data: linkedinFeature } = useFeatureControl("linkedin_post");
   const linkedinEnabled = !!linkedinFeature?.enabled;
+  const { enabled: aiJobsLinkedInEnabled } = useExternalLinkControl("ai_jobs_news_linkedin_post");
 
   const navItems = [
     { label: "Overview", path: "/coach/overview", icon: <LayoutDashboard className="h-4 w-4" /> },
@@ -96,6 +98,7 @@ const CoachDashboard = () => {
     { label: "Prompt Generator", path: "/coach/prompt-generator", icon: <Sparkles className="h-4 w-4" /> },
     { label: "My Website", path: "/coach/website", icon: <Globe className="h-4 w-4" /> },
     ...(linkedinEnabled ? [{ label: "LinkedIn Post", path: "/coach/linkedin-post", icon: <Share2 className="h-4 w-4" /> }] : []),
+    ...(aiJobsLinkedInEnabled ? [{ label: "AI Jobs & News – LinkedIn Post", path: "/ai-jobs-news/linkedin-post", icon: <Share2 className="h-4 w-4" /> }] : []),
     { label: "SEO & Indexing", path: "/coach/seo", icon: <Search className="h-4 w-4" /> },
     { label: "Profile", path: "/coach/profile", icon: <User className="h-4 w-4" /> },
   ];

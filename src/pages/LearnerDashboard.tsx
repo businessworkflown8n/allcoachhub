@@ -45,7 +45,7 @@ const LearnerDashboard = () => {
     { label: "Prompt Generator", path: "/learner/prompt-generator", icon: <Sparkles className="h-4 w-4" /> },
     { label: "Social Media", path: "/learner/social", icon: <Share2 className="h-4 w-4" /> },
     ...(aiJobsLinkedInEnabled
-      ? [{ label: "AI Jobs & News – LinkedIn Post", path: "/ai-jobs-news/linkedin-post", external: true, icon: <Briefcase className="h-4 w-4" /> }]
+      ? [{ label: "AI Jobs & News – LinkedIn Post", path: "/ai-jobs-news/linkedin-post", icon: <Briefcase className="h-4 w-4" /> }]
       : []),
     { label: "Profile", path: "/learner/profile", icon: <User className="h-4 w-4" /> },
     { label: "Wishlist", path: "/learner/wishlist", icon: <Heart className="h-4 w-4" /> },

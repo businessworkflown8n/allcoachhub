@@ -353,8 +353,33 @@ const AiJobsNewsLinkedInPost = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Profile Image URL</Label>
-                <Input value={profileImage} onChange={(e) => setProfileImage(e.target.value)} placeholder="https://..." />
+                <Label>Profile Image</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={profileImage.startsWith("data:") ? "(uploaded image)" : profileImage}
+                    onChange={(e) => setProfileImage(e.target.value)}
+                    placeholder="https://... or upload below"
+                    readOnly={profileImage.startsWith("data:")}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleUpload}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Upload an image — auto-compressed under 100 KB. Recommended (avoids CORS issues).
+                </p>
               </div>
               <div>
                 <Label>Full Name *</Label>

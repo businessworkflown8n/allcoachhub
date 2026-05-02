@@ -405,7 +405,36 @@ const AiMastermindLearning = () => {
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Generate a personalized LinkedIn post + branded badge to publicly commit to this program.
           </p>
+          {linkControl.enabled && (
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+              <Badge variant="secondary" className="gap-1.5">
+                {linkControl.accessMode === "public" ? "🌐 Public link" : "🔒 Private link"}
+              </Badge>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  const url = `${SITE}/Ai-mastermind-learning/${coachSlug}`;
+                  window.open(url, "_blank", "noopener,noreferrer");
+                }}
+              >
+                <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Open Public Page
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  const url = `${SITE}/Ai-mastermind-learning/${coachSlug}?utm_source=share&utm_medium=link`;
+                  navigator.clipboard.writeText(url);
+                  toast({ title: "Link copied" });
+                }}
+              >
+                <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy Link
+              </Button>
+            </div>
+          )}
         </div>
+
 
         <div className="grid lg:grid-cols-2 gap-6">
           <Card>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/useSEO";
 import { Linkedin, Copy, Download, Sparkles, Loader2, ArrowRight } from "lucide-react";
@@ -21,22 +28,45 @@ interface CoachLite {
   linkedin_profile: string | null;
 }
 
+interface CourseLite {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string | null;
+  slug: string | null;
+}
+
 const SITE = "https://www.aicoachportal.com";
+
+const commitmentByCategory = (category?: string | null) => {
+  const c = (category || "").toLowerCase();
+  if (c.includes("market")) return "to master AI-driven marketing & scale campaigns";
+  if (c.includes("automat")) return "to build AI agents & automate workflows";
+  if (c.includes("content")) return "to create high-performing AI content systems";
+  if (c.includes("sales")) return "to close more deals using AI-powered sales systems";
+  if (c.includes("design")) return "to craft world-class design with AI tools";
+  if (c.includes("data") || c.includes("analy")) return "to turn raw data into AI-driven insights";
+  return "to master AI and build real-world systems through this program";
+};
 
 const buildPost = (p: {
   jobRole: string;
   company: string;
   excitement: string;
   coachSlug: string;
+  coachName: string;
   linkedin: string;
-}) => `𝗜’𝗺 𝗱𝗲𝗱𝗶𝗰𝗮𝘁𝗶𝗻𝗴 𝗺𝘆 𝗲𝗻𝘁𝗶𝗿𝗲 𝘄𝗲𝗲𝗸𝗲𝗻𝗱 — 16+ 𝗵𝗼𝘂𝗿𝘀 — 𝘁𝗼 𝗺𝗮𝘀𝘁𝗲𝗿𝗶𝗻𝗴 𝗔𝗜 𝘁𝗼𝗼𝗹𝘀, 𝗮𝗻𝗱 𝗜’𝗺 𝗽𝘂𝘁𝘁𝗶𝗻𝗴 𝗶𝘁 𝗼𝘂𝘁 𝗵𝗲𝗿𝗲 𝘀𝗼 𝘆𝗼𝘂 𝗰𝗮𝗻 𝗵𝗼𝗹𝗱 𝗺𝗲 𝗮𝗰𝗰𝗼𝘂𝗻𝘁𝗮𝗯𝗹𝗲! 🎯
+  courseName: string;
+  courseTagline: string;
+  category: string;
+}) => `𝗜’𝗺 𝗴𝗼𝗶𝗻𝗴 𝗮𝗹𝗹-𝗶𝗻 𝗼𝗻 ${p.courseName} — 𝗮𝗻𝗱 𝗜’𝗺 𝗽𝘂𝘁𝘁𝗶𝗻𝗴 𝗶𝘁 𝗼𝘂𝘁 𝗵𝗲𝗿𝗲 𝘀𝗼 𝘆𝗼𝘂 𝗰𝗮𝗻 𝗵𝗼𝗹𝗱 𝗺𝗲 𝗮𝗰𝗰𝗼𝘂𝗻𝘁𝗮𝗯𝗹𝗲! 🎯
 
-Want to join me in the AI revolution? Don’t miss out 👇
+Want to join me? Don’t miss out 👇
 👉 ${SITE}/Ai-mastermind-learning/${p.coachSlug}?utm_source=linkedin&utm_medium=social&utm_campaign=ai_mastermind
 
-I’ve just joined the AI Coach Portal – AI Mastermind Program 🚀
-
-As a ${p.jobRole || "professional"}${p.company ? ` at ${p.company}` : ""}, I’ve realized the massive potential of AI in transforming how we work. That’s why I’m going all-in on this journey.
+I’ve just joined ${p.courseName}${p.coachName ? ` by ${p.coachName}` : ""} on AICoachPortal 🚀
+${p.courseTagline ? `\n${p.courseTagline}\n` : ""}
+As a ${p.jobRole || "professional"}${p.company ? ` at ${p.company}` : ""}, I’ve realized the massive potential of AI in transforming how we work. That’s why I’m committing ${commitmentByCategory(p.category)}.
 
 Here’s what I’ll be learning 👇
 ⭐ Generative AI for real-world execution
@@ -48,8 +78,6 @@ Here’s what I’ll be learning 👇
 
 This is not just learning — this is execution mode 💡
 
-𝗢𝗻𝗰𝗲 𝘁𝗵𝗶𝘀 𝗷𝗼𝘂𝗿𝗻𝗲𝘆 𝗸𝗶𝗰𝗸𝘀 𝗼𝗳𝗳, 𝗜’𝗹𝗹 𝗯𝗲 𝘀𝗵𝗮𝗿𝗶𝗻𝗴 𝗺𝘆 𝗿𝗲𝗮𝗹 𝗿𝗲𝘀𝘂𝗹𝘁𝘀.
-
 Hold me accountable 🤝
 
 #AI #GenerativeAI #AICoachPortal #BuildInPublic #AIForGrowth #Automation
@@ -59,7 +87,6 @@ ${p.linkedin || "[Add your LinkedIn URL]"}
 
 cc: AI Coach Portal Team`;
 
-// Load image as HTMLImageElement (CORS-safe)
 const loadImage = (src: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const img = new Image();
@@ -86,13 +113,27 @@ const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
   return lines;
 };
 
+const tagFromCategory = (category?: string | null) => {
+  const c = (category || "").toLowerCase();
+  if (c.includes("market")) return "#AI MARKETING";
+  if (c.includes("automat")) return "#AUTOMATION";
+  if (c.includes("content")) return "#AI CONTENT";
+  if (c.includes("sales")) return "#AI SALES";
+  if (c.includes("design")) return "#AI DESIGN";
+  if (c.includes("data") || c.includes("analy")) return "#AI DATA";
+  return "#AI MASTERY";
+};
+
 const AiMastermindLearning = () => {
   const { coachSlug = "" } = useParams();
   const { toast } = useToast();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const [coach, setCoach] = useState<CoachLite | null>(null);
+  const [courses, setCourses] = useState<CourseLite[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [loadingCoach, setLoadingCoach] = useState(true);
+
   const [profileImage, setProfileImage] = useState<string>("");
   const [fullName, setFullName] = useState("");
   const [jobRole, setJobRole] = useState("");
@@ -104,18 +145,23 @@ const AiMastermindLearning = () => {
   const [generating, setGenerating] = useState(false);
   const [imageDataUrl, setImageDataUrl] = useState<string>("");
 
+  const selectedCourse = courses.find((c) => c.id === selectedCourseId);
+  const courseName = selectedCourse?.title || "AI Mastermind Program";
+  const courseTagline =
+    (selectedCourse?.description || "").split("\n")[0].slice(0, 80) || "";
+  const courseCategory = selectedCourse?.category || "";
+
   useSEO({
     title: coach?.full_name
-      ? `${coach.full_name} – AI Mastermind Pledge | AI Coach Portal`
+      ? `${coach.full_name} – ${courseName} | AI Coach Portal`
       : "AI Mastermind Learning – Generate your LinkedIn pledge",
-    description: "Generate your personalized AI Mastermind LinkedIn post and branded badge in seconds.",
+    description: "Generate a personalized LinkedIn post + branded badge for the course you're joining.",
     canonical: `${SITE}/Ai-mastermind-learning/${coachSlug}`,
   });
 
   useEffect(() => {
     (async () => {
       setLoadingCoach(true);
-      // Try slug first, then fallback to user_id
       const cols = "user_id, full_name, slug, avatar_url, job_title, company_name, linkedin_profile";
       let { data } = await supabase
         .from("profiles")
@@ -140,6 +186,17 @@ const AiMastermindLearning = () => {
         setCompany(d.company_name || "");
         setProfileImage(d.avatar_url || "");
         setLinkedinUrl(d.linkedin_profile || "");
+
+        const { data: courseRows } = await supabase
+          .from("courses")
+          .select("id, title, description, category, slug")
+          .eq("coach_id", d.user_id)
+          .eq("is_published", true)
+          .eq("approval_status", "approved")
+          .order("created_at", { ascending: false });
+        const list = (courseRows || []) as CourseLite[];
+        setCourses(list);
+        if (list[0]) setSelectedCourseId(list[0].id);
       }
       setLoadingCoach(false);
     })();
@@ -172,36 +229,68 @@ const AiMastermindLearning = () => {
     canvas.height = H;
     const ctx = canvas.getContext("2d")!;
 
-    // Background gradient (dark + neon)
+    // Background
     const grad = ctx.createLinearGradient(0, 0, W, H);
     grad.addColorStop(0, "#0B0F1A");
     grad.addColorStop(1, "#121826");
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
 
-    // Neon glow circle backdrop
-    const glow = ctx.createRadialGradient(W / 2, 380, 50, W / 2, 380, 480);
-    glow.addColorStop(0, "rgba(190,255,80,0.25)");
-    glow.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, W, H);
+    // Neon side glow accents (mimic ref)
+    const leftGlow = ctx.createLinearGradient(0, 0, 200, 0);
+    leftGlow.addColorStop(0, "rgba(190,255,80,0.0)");
+    leftGlow.addColorStop(0.5, "rgba(190,255,80,0.15)");
+    leftGlow.addColorStop(1, "rgba(190,255,80,0.0)");
+    ctx.fillStyle = leftGlow;
+    ctx.fillRect(60, 100, 30, H - 200);
+    ctx.fillRect(W - 90, 100, 30, H - 200);
 
-    // Top tag
+    // ===== TOP HEADER =====
+    // Left: AICoachPortal
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "bold 38px Inter, system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("AICoachPortal", 80, 120);
+    // small lime dot accent
     ctx.fillStyle = "#BEFF50";
-    ctx.font = "bold 36px Inter, system-ui, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("# AI MASTERMIND", W / 2, 110);
+    ctx.beginPath();
+    ctx.arc(70, 108, 8, 0, Math.PI * 2);
+    ctx.fill();
 
-    // Profile circle
+    // Right: course name + tagline
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "600 32px Inter, sans-serif";
+    ctx.textAlign = "right";
+    const courseLines = wrapText(ctx, courseName, 480);
+    let topY = 110;
+    courseLines.slice(0, 2).forEach((l) => {
+      ctx.fillText(l, W - 80, topY);
+      topY += 38;
+    });
+    if (courseTagline) {
+      ctx.fillStyle = "#BEFF50";
+      ctx.font = "400 22px Inter, sans-serif";
+      ctx.fillText(courseTagline, W - 80, topY + 6);
+    }
+    if (coach?.full_name) {
+      ctx.fillStyle = "#9CA3AF";
+      ctx.font = "400 20px Inter, sans-serif";
+      ctx.fillText(`By ${coach.full_name}`, W - 80, topY + (courseTagline ? 38 : 12));
+    }
+
+    // ===== CENTER PROFILE =====
     const cx = W / 2;
-    const cy = 380;
-    const r = 180;
+    const cy = 470;
+    const r = 175;
     ctx.save();
     ctx.beginPath();
     ctx.arc(cx, cy, r + 8, 0, Math.PI * 2);
     ctx.strokeStyle = "#BEFF50";
     ctx.lineWidth = 6;
+    ctx.shadowColor = "rgba(190,255,80,0.6)";
+    ctx.shadowBlur = 30;
     ctx.stroke();
+    ctx.shadowBlur = 0;
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.closePath();
@@ -210,8 +299,7 @@ const AiMastermindLearning = () => {
     if (profileImage) {
       try {
         const img = await loadImage(profileImage);
-        const size = r * 2;
-        ctx.drawImage(img, cx - r, cy - r, size, size);
+        ctx.drawImage(img, cx - r, cy - r, r * 2, r * 2);
       } catch {
         ctx.fillStyle = "#1f2937";
         ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
@@ -232,37 +320,82 @@ const AiMastermindLearning = () => {
     }
     ctx.restore();
 
-    // Name
+    // ===== ORANGE RIBBON across bottom of profile =====
+    const tag = tagFromCategory(courseCategory);
+    ctx.save();
+    ctx.translate(cx, cy + 110);
+    ctx.fillStyle = "#FF6B1A";
+    ctx.beginPath();
+    ctx.moveTo(-200, 0);
+    ctx.quadraticCurveTo(0, 80, 200, 0);
+    ctx.quadraticCurveTo(0, 50, -200, 0);
+    ctx.fill();
+    // text on ribbon
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "bold 30px Inter, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(tag, 0, 28);
+    ctx.restore();
+
+    // ===== Name / role / company =====
     ctx.fillStyle = "#FFFFFF";
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
-    ctx.font = "bold 56px Inter, sans-serif";
-    ctx.fillText(fullName || "Your Name", W / 2, 660);
+    ctx.font = "bold 54px Inter, sans-serif";
+    ctx.fillText(fullName || "Your Name", W / 2, 770);
 
-    // Role + Company
-    ctx.fillStyle = "#9CA3AF";
-    ctx.font = "400 32px Inter, sans-serif";
-    const roleLine = [jobRole, company].filter(Boolean).join(" • ") || "Coach";
-    ctx.fillText(roleLine, W / 2, 710);
-
-    // Footer pledge
     ctx.fillStyle = "#E5E7EB";
-    ctx.font = "600 30px Inter, sans-serif";
-    const lines = wrapText(
-      ctx,
-      "I am committing 16+ hours to master AI & build real-world systems.",
-      900
-    );
-    let y = 820;
-    for (const l of lines) {
-      ctx.fillText(l, W / 2, y);
-      y += 42;
+    ctx.font = "500 30px Inter, sans-serif";
+    ctx.fillText(jobRole || "Your Role", W / 2, 815);
+
+    if (company) {
+      ctx.fillStyle = "#9CA3AF";
+      ctx.font = "400 28px Inter, sans-serif";
+      ctx.fillText(company, W / 2, 855);
     }
 
-    // Brand footer
-    ctx.fillStyle = "#BEFF50";
-    ctx.font = "bold 28px Inter, sans-serif";
-    ctx.fillText("aicoachportal.com", W / 2, 1010);
+    // ===== Bottom Left commitment =====
+    ctx.fillStyle = "#E5E7EB";
+    ctx.font = "500 22px Inter, sans-serif";
+    ctx.textAlign = "left";
+    const commitText = `"I am committing ${commitmentByCategory(courseCategory)}."`;
+    const commitLines = wrapText(ctx, commitText, 600);
+    let cyText = 950;
+    commitLines.forEach((l) => {
+      ctx.fillText(l, 80, cyText);
+      cyText += 28;
+    });
+
+    // ===== Bottom Right CTA pill =====
+    const btnW = 280;
+    const btnH = 70;
+    const btnX = W - 80 - btnW;
+    const btnY = 950;
+    ctx.fillStyle = "rgba(255,255,255,0.05)";
+    ctx.strokeStyle = "#BEFF50";
+    ctx.lineWidth = 2;
+    const radius = 16;
+    ctx.beginPath();
+    ctx.moveTo(btnX + radius, btnY);
+    ctx.lineTo(btnX + btnW - radius, btnY);
+    ctx.quadraticCurveTo(btnX + btnW, btnY, btnX + btnW, btnY + radius);
+    ctx.lineTo(btnX + btnW, btnY + btnH - radius);
+    ctx.quadraticCurveTo(btnX + btnW, btnY + btnH, btnX + btnW - radius, btnY + btnH);
+    ctx.lineTo(btnX + radius, btnY + btnH);
+    ctx.quadraticCurveTo(btnX, btnY + btnH, btnX, btnY + btnH - radius);
+    ctx.lineTo(btnX, btnY + radius);
+    ctx.quadraticCurveTo(btnX, btnY, btnX + radius, btnY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "600 22px Inter, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Join Now", btnX + btnW / 2, btnY + 28);
+    ctx.fillStyle = "#9CA3AF";
+    ctx.font = "400 16px Inter, sans-serif";
+    ctx.fillText("(Link in Post)", btnX + btnW / 2, btnY + 52);
 
     const dataUrl = canvas.toDataURL("image/png");
     setImageDataUrl(dataUrl);
@@ -280,7 +413,11 @@ const AiMastermindLearning = () => {
       company,
       excitement,
       coachSlug,
+      coachName: coach?.full_name || "",
       linkedin: linkedinUrl,
+      courseName,
+      courseTagline,
+      category: courseCategory,
     });
     setPostText(text);
     const img = await drawBadge();
@@ -298,7 +435,6 @@ const AiMastermindLearning = () => {
   const handleShare = () => {
     const url = `${SITE}/Ai-mastermind-learning/${coachSlug}?utm_source=linkedin&utm_medium=social&utm_campaign=ai_mastermind`;
     const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
-    // copy text as fallback so user can paste
     navigator.clipboard.writeText(postText).catch(() => {});
     window.open(shareUrl, "_blank", "noopener,noreferrer");
     log("shared");
@@ -336,30 +472,49 @@ const AiMastermindLearning = () => {
   return (
     <div className="min-h-screen bg-background py-10 px-4">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
             <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-xs font-semibold text-primary uppercase tracking-wider">AI Mastermind Pledge</span>
+            <span className="text-xs font-semibold text-primary uppercase tracking-wider">
+              {courseName}
+            </span>
           </div>
           <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-3">
-            Join {coach.full_name}'s AI Mastermind Journey
+            Join {coach.full_name}'s {courseName}
           </h1>
+          {courseTagline && (
+            <p className="text-primary text-sm font-medium mb-2">{courseTagline}</p>
+          )}
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Create a personalized LinkedIn post + branded badge to publicly commit to mastering AI in 48 hours.
+            Generate a personalized LinkedIn post + branded badge to publicly commit to this program.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* LEFT: Form */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Avatar className="h-8 w-8"><AvatarImage src={profileImage} /><AvatarFallback>{(fullName[0] || "A").toUpperCase()}</AvatarFallback></Avatar>
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={profileImage} />
+                  <AvatarFallback>{(fullName[0] || "A").toUpperCase()}</AvatarFallback>
+                </Avatar>
                 Your Details
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {courses.length > 0 && (
+                <div>
+                  <Label>Course</Label>
+                  <Select value={selectedCourseId} onValueChange={setSelectedCourseId}>
+                    <SelectTrigger><SelectValue placeholder="Choose a course" /></SelectTrigger>
+                    <SelectContent>
+                      {courses.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div>
                 <Label>Profile Image URL</Label>
                 <Input value={profileImage} onChange={(e) => setProfileImage(e.target.value)} placeholder="https://..." />
@@ -398,7 +553,6 @@ const AiMastermindLearning = () => {
             </CardContent>
           </Card>
 
-          {/* RIGHT: Output */}
           <div className="space-y-6">
             <Card>
               <CardHeader><CardTitle>Generated Post</CardTitle></CardHeader>
@@ -442,11 +596,10 @@ const AiMastermindLearning = () => {
           </div>
         </div>
 
-        {/* Viral CTA */}
         <Card className="mt-10 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
           <CardContent className="py-8 text-center">
-            <h2 className="text-2xl font-bold text-foreground mb-2">Want your own AI journey page?</h2>
-            <p className="text-muted-foreground mb-4">Activate your personal AI Mastermind URL on AI Coach Portal.</p>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Want your own course landing page?</h2>
+            <p className="text-muted-foreground mb-4">Activate your personal AI Coach Portal page and start enrolling learners today.</p>
             <Button asChild size="lg">
               <Link to="/signup/coach">Activate Yours <ArrowRight className="h-4 w-4 ml-2" /></Link>
             </Button>

@@ -492,6 +492,8 @@ const AiMastermindLearning = () => {
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
+
+  if (loadingCoach) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

@@ -465,7 +465,33 @@ const AiMastermindLearning = () => {
     log("downloaded");
   };
 
-  if (loadingCoach) {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Please select an image file", variant: "destructive" });
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "Image too large (max 20MB)", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      const compressed = await compressImage(file);
+      setProfileImage(compressed);
+      toast({
+        title: "Image uploaded",
+        description: `Compressed to ${getDataUrlSizeKB(compressed)} KB`,
+      });
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Upload failed", variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

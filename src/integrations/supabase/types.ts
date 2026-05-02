@@ -4738,6 +4738,57 @@ export type Database = {
           },
         ]
       }
+      linkedin_post_generations: {
+        Row: {
+          action: string
+          coach_id: string
+          coach_slug: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          post_text: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          visitor_company: string | null
+          visitor_excitement: string | null
+          visitor_name: string | null
+          visitor_role: string | null
+        }
+        Insert: {
+          action?: string
+          coach_id: string
+          coach_slug?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          post_text?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          visitor_company?: string | null
+          visitor_excitement?: string | null
+          visitor_name?: string | null
+          visitor_role?: string | null
+        }
+        Update: {
+          action?: string
+          coach_id?: string
+          coach_slug?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          post_text?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          visitor_company?: string | null
+          visitor_excitement?: string | null
+          visitor_name?: string | null
+          visitor_role?: string | null
+        }
+        Relationships: []
+      }
       marquee_messages: {
         Row: {
           bg_color: string

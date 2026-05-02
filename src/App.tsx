@@ -56,6 +56,7 @@ const LandingPageThankYou = lazy(() => import("./pages/LandingPageThankYou"));
 const KnowledgeHub = lazy(() => import("./pages/KnowledgeHub"));
 const KnowledgeTopic = lazy(() => import("./pages/KnowledgeTopic"));
 const KnowledgeQuestion = lazy(() => import("./pages/KnowledgeQuestion"));
+const AiMastermindLearning = lazy(() => import("./pages/AiMastermindLearning"));
 
 // Lazy-loaded global widgets (non-critical)
 
@@ -212,6 +213,8 @@ const App = () => (
             <Route path="/oauth-callback" element={<Suspense fallback={<PageFallback />}><OAuthCallback /></Suspense>} />
             <Route path="/lp/:slug" element={<Suspense fallback={<PageFallback />}><LandingPage /></Suspense>} />
             <Route path="/lp/:slug/thank-you" element={<Suspense fallback={<PageFallback />}><LandingPageThankYou /></Suspense>} />
+            <Route path="/Ai-mastermind-learning/:coachSlug" element={<Suspense fallback={<PageFallback />}><AiMastermindLearning /></Suspense>} />
+            <Route path="/ai-mastermind-learning/:coachSlug" element={<Suspense fallback={<PageFallback />}><AiMastermindLearning /></Suspense>} />
             <Route path="*" element={<Suspense fallback={<PageFallback />}><NotFound /></Suspense>} />
           </Routes>
           <FloatingButtons />

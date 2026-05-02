@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/useSEO";
-import { Linkedin, Copy, Download, Sparkles, Loader2, Lock, Briefcase } from "lucide-react";
+import { Linkedin, Copy, Download, Sparkles, Loader2, Lock, Briefcase, Upload } from "lucide-react";
+import { compressImage, getDataUrlSizeKB } from "@/lib/imageCompress";
 
 const SITE = "https://www.aicoachportal.com";
 const PUBLIC_URL = `${SITE}/ai-jobs-news/linkedin-post`;
@@ -45,7 +46,9 @@ cc: AI Coach Portal Team`;
 const loadImage = (src: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    if (/^https?:\/\//i.test(src)) {
+      img.crossOrigin = "anonymous";
+    }
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = src;
@@ -85,6 +88,8 @@ const AiJobsNewsLinkedInPost = () => {
   const [postText, setPostText] = useState("");
   const [generating, setGenerating] = useState(false);
   const [imageDataUrl, setImageDataUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useSEO({
     title: "AI Jobs & News – LinkedIn Post Generator | AI Coach Portal",
@@ -163,17 +168,17 @@ const AiJobsNewsLinkedInPost = () => {
     ctx.strokeStyle = "#BEFF50"; ctx.lineWidth = 6; ctx.stroke();
     ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.closePath(); ctx.clip();
 
+    let photoDrawn = false;
     if (profileImage) {
       try {
         const img = await loadImage(profileImage);
         ctx.drawImage(img, cx - r, cy - r, r * 2, r * 2);
+        photoDrawn = true;
       } catch {
-        ctx.fillStyle = "#1f2937"; ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
-        ctx.fillStyle = "#BEFF50"; ctx.font = "bold 140px Inter, sans-serif";
-        ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        ctx.fillText((fullName[0] || "A").toUpperCase(), cx, cy);
+        // fall through
       }
-    } else {
+    }
+    if (!photoDrawn) {
       ctx.fillStyle = "#1f2937"; ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
       ctx.fillStyle = "#BEFF50"; ctx.font = "bold 140px Inter, sans-serif";
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
@@ -196,9 +201,48 @@ const AiJobsNewsLinkedInPost = () => {
     ctx.fillStyle = "#BEFF50"; ctx.font = "bold 28px Inter, sans-serif";
     ctx.fillText("aicoachportal.com", W / 2, 1010);
 
-    const dataUrl = canvas.toDataURL("image/png");
-    setImageDataUrl(dataUrl);
-    return dataUrl;
+    try {
+      const dataUrl = canvas.toDataURL("image/png");
+      setImageDataUrl(dataUrl);
+      return dataUrl;
+    } catch (err) {
+      console.warn("Canvas tainted", err);
+      toast({
+        title: "Profile image blocked by CORS",
+        description: "Please upload your image to generate the badge.",
+        variant: "destructive",
+      });
+      setProfileImage("");
+      return "";
+    }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Please select an image file", variant: "destructive" });
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "Image too large (max 20MB)", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      const compressed = await compressImage(file);
+      setProfileImage(compressed);
+      toast({
+        title: "Image uploaded",
+        description: `Compressed to ${getDataUrlSizeKB(compressed)} KB`,
+      });
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Upload failed", variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const handleGenerate = async () => {
@@ -309,8 +353,33 @@ const AiJobsNewsLinkedInPost = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Profile Image URL</Label>
-                <Input value={profileImage} onChange={(e) => setProfileImage(e.target.value)} placeholder="https://..." />
+                <Label>Profile Image</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={profileImage.startsWith("data:") ? "(uploaded image)" : profileImage}
+                    onChange={(e) => setProfileImage(e.target.value)}
+                    placeholder="https://... or upload below"
+                    readOnly={profileImage.startsWith("data:")}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleUpload}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Upload an image — auto-compressed under 100 KB. Recommended (avoids CORS issues).
+                </p>
               </div>
               <div>
                 <Label>Full Name *</Label>

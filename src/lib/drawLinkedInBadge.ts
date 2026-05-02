@@ -132,24 +132,28 @@ export const drawLinkedInBadge = async (
   drawStrip(W - 110);
 
   // ===== TOP HEADER =====
-  // Left: AICoachPortal logo (3x3 dot grid) + wordmark
-  const dotX = 80;
-  const dotY = 110;
-  const dotSize = 8;
-  const dotGap = 16;
-  for (let r = 0; r < 3; r++) {
-    for (let c = 0; c < 3; c++) {
-      ctx.fillStyle = c === 2 && r === 0 ? "#FFFFFF" : NEON;
-      ctx.beginPath();
-      ctx.arc(dotX + c * dotGap, dotY + r * dotGap, dotSize / 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
+  // Left: AICoachPortal monogram (rounded square with "A") + wordmark
+  const logoX = 80;
+  const logoY = 90;
+  const logoSize = 56;
+  ctx.save();
+  ctx.shadowColor = "rgba(0,255,153,0.5)";
+  ctx.shadowBlur = 18;
+  ctx.fillStyle = NEON;
+  roundRect(ctx, logoX, logoY, logoSize, logoSize, 14);
+  ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = "#000000";
+  ctx.font = "800 36px Inter, system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("A", logoX + logoSize / 2, logoY + logoSize / 2 + 2);
+
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = "600 40px Inter, system-ui, sans-serif";
+  ctx.font = "700 40px Inter, system-ui, sans-serif";
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.fillText("AICoachPortal", dotX + 70, dotY + dotGap);
+  ctx.fillText("AICoachPortal", logoX + logoSize + 16, logoY + logoSize / 2);
 
   // Right: Course name (+ optional tagline + by coach)
   ctx.fillStyle = "#FFFFFF";

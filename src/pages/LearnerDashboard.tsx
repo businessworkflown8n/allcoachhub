@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSEO } from "@/hooks/useSEO";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { BookOpen, User, Heart, History, Award, Settings, Video, Zap, Share2, FileText, MessageSquare, Sparkles, Bell, Star, Link as LinkIcon } from "lucide-react";
+import { BookOpen, User, Heart, History, Award, Settings, Video, Zap, Share2, FileText, MessageSquare, Sparkles, Bell, Star, Link as LinkIcon, Briefcase } from "lucide-react";
+import { useExternalLinkControl } from "@/hooks/useExternalLinkControl";
 import LearnerProfile from "@/components/learner/LearnerProfile";
 import LearnerCourses from "@/components/learner/LearnerCourses";
 import LearnerWishlist from "@/components/learner/LearnerWishlist";
@@ -21,6 +22,8 @@ import LearnerReviews from "@/components/learner/LearnerReviews";
 import LearnerCoachMaterials from "@/components/learner/LearnerCoachMaterials";
 
 const LearnerDashboard = () => {
+  const { enabled: aiJobsLinkedInEnabled } = useExternalLinkControl("ai_jobs_news_linkedin_post");
+
   useSEO({
     title: "Learner Dashboard – My Courses & Progress",
     description: "Access your enrolled courses, webinars, certificates, and learning progress.",
@@ -41,6 +44,9 @@ const LearnerDashboard = () => {
     { label: "Daily Zip", path: "/learner/daily-zip", icon: <Zap className="h-4 w-4" /> },
     { label: "Prompt Generator", path: "/learner/prompt-generator", icon: <Sparkles className="h-4 w-4" /> },
     { label: "Social Media", path: "/learner/social", icon: <Share2 className="h-4 w-4" /> },
+    ...(aiJobsLinkedInEnabled
+      ? [{ label: "AI Jobs & News – LinkedIn Post", path: "/ai-jobs-news/linkedin-post", external: true, icon: <Briefcase className="h-4 w-4" /> }]
+      : []),
     { label: "Profile", path: "/learner/profile", icon: <User className="h-4 w-4" /> },
     { label: "Wishlist", path: "/learner/wishlist", icon: <Heart className="h-4 w-4" /> },
     { label: "Payment History", path: "/learner/payments", icon: <History className="h-4 w-4" /> },

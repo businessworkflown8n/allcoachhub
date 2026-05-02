@@ -3524,6 +3524,45 @@ export type Database = {
           },
         ]
       }
+      external_link_controls: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          feature_key: string
+          id: string
+          is_enabled: boolean
+          label: string
+          public_url: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          feature_key: string
+          id?: string
+          is_enabled?: boolean
+          label: string
+          public_url?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          feature_key?: string
+          id?: string
+          is_enabled?: boolean
+          label?: string
+          public_url?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       feature_access_audit_log: {
         Row: {
           changed_by: string | null
@@ -5757,6 +5796,36 @@ export type Database = {
           use_case?: string | null
           user_id?: string
           visibility?: string
+        }
+        Relationships: []
+      }
+      public_linkedin_post_generations: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Relationships: []
       }

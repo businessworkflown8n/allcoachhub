@@ -135,6 +135,9 @@ const tagFromCategory = (category?: string | null) => {
 const AiMastermindLearning = () => {
   const { coachSlug = "" } = useParams();
   const { toast } = useToast();
+  const { user, loading: authLoading } = useAuth();
+  const location = useLocation();
+  const linkControl = useExternalLinkControl("ai_mastermind_learning");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const [coach, setCoach] = useState<CoachLite | null>(null);

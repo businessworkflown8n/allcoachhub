@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/useSEO";
 import { Linkedin, Copy, Download, Sparkles, Loader2, Lock, Briefcase, Upload } from "lucide-react";
 import { compressImage, getDataUrlSizeKB } from "@/lib/imageCompress";
+import { drawLinkedInBadge } from "@/lib/drawLinkedInBadge";
 
 const SITE = "https://www.aicoachportal.com";
 const PUBLIC_URL = `${SITE}/ai-jobs-news/linkedin-post`;
@@ -144,69 +145,18 @@ const AiJobsNewsLinkedInPost = () => {
   const drawBadge = async () => {
     const canvas = canvasRef.current;
     if (!canvas) return "";
-    const W = 1080, H = 1080;
-    canvas.width = W; canvas.height = H;
-    const ctx = canvas.getContext("2d")!;
-
-    const grad = ctx.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0, "#0B0F1A"); grad.addColorStop(1, "#121826");
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
-
-    const glow = ctx.createRadialGradient(W / 2, 380, 50, W / 2, 380, 480);
-    glow.addColorStop(0, "rgba(190,255,80,0.25)");
-    glow.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
-
-    ctx.fillStyle = "#BEFF50";
-    ctx.font = "bold 36px Inter, system-ui, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("# AI JOBS & NEWS", W / 2, 110);
-
-    const cx = W / 2, cy = 380, r = 180;
-    ctx.save();
-    ctx.beginPath(); ctx.arc(cx, cy, r + 8, 0, Math.PI * 2);
-    ctx.strokeStyle = "#BEFF50"; ctx.lineWidth = 6; ctx.stroke();
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.closePath(); ctx.clip();
-
-    let photoDrawn = false;
-    if (profileImage) {
-      try {
-        const img = await loadImage(profileImage);
-        ctx.drawImage(img, cx - r, cy - r, r * 2, r * 2);
-        photoDrawn = true;
-      } catch {
-        // fall through
-      }
-    }
-    if (!photoDrawn) {
-      ctx.fillStyle = "#1f2937"; ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
-      ctx.fillStyle = "#BEFF50"; ctx.font = "bold 140px Inter, sans-serif";
-      ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText((fullName[0] || "A").toUpperCase(), cx, cy);
-    }
-    ctx.restore();
-
-    ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-    ctx.font = "bold 56px Inter, sans-serif";
-    ctx.fillText(fullName || "Your Name", W / 2, 660);
-
-    ctx.fillStyle = "#9CA3AF"; ctx.font = "400 32px Inter, sans-serif";
-    ctx.fillText([jobRole, company].filter(Boolean).join(" • ") || "Member", W / 2, 710);
-
-    ctx.fillStyle = "#E5E7EB"; ctx.font = "600 30px Inter, sans-serif";
-    const lines = wrapText(ctx, "I am committing 16+ hours to master AI & build real-world systems.", 900);
-    let y = 820;
-    for (const l of lines) { ctx.fillText(l, W / 2, y); y += 42; }
-
-    ctx.fillStyle = "#BEFF50"; ctx.font = "bold 28px Inter, sans-serif";
-    ctx.fillText("aicoachportal.com", W / 2, 1010);
-
-    try {
-      const dataUrl = canvas.toDataURL("image/png");
-      setImageDataUrl(dataUrl);
-      return dataUrl;
-    } catch (err) {
-      console.warn("Canvas tainted", err);
+    const result = await drawLinkedInBadge(canvas, {
+      fullName,
+      jobRole,
+      company,
+      profileImage,
+      courseName: "AI Mastermind Program",
+      courseTagline: "AI Jobs & News Edition",
+      tag: "#AI MASTERY",
+      commitmentLine:
+        "I am committing to mastering AI and building real-world systems through this program.",
+    });
+    if (result.taintedFallback) {
       toast({
         title: "Profile image blocked by CORS",
         description: "Please upload your image to generate the badge.",
@@ -215,6 +165,8 @@ const AiJobsNewsLinkedInPost = () => {
       setProfileImage("");
       return "";
     }
+    setImageDataUrl(result.dataUrl);
+    return result.dataUrl;
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/useSEO";
 import { Linkedin, Copy, Download, Sparkles, Loader2, ArrowRight, Upload } from "lucide-react";
 import { compressImage, getDataUrlSizeKB } from "@/lib/imageCompress";
+import { drawLinkedInBadge } from "@/lib/drawLinkedInBadge";
 
 interface CoachLite {
   user_id: string;
@@ -230,184 +231,18 @@ const AiMastermindLearning = () => {
   const drawBadge = async () => {
     const canvas = canvasRef.current;
     if (!canvas) return "";
-    const W = 1080;
-    const H = 1080;
-    canvas.width = W;
-    canvas.height = H;
-    const ctx = canvas.getContext("2d")!;
-
-    // Background
-    const grad = ctx.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0, "#0B0F1A");
-    grad.addColorStop(1, "#121826");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
-
-    // Neon side glow accents (mimic ref)
-    const leftGlow = ctx.createLinearGradient(0, 0, 200, 0);
-    leftGlow.addColorStop(0, "rgba(190,255,80,0.0)");
-    leftGlow.addColorStop(0.5, "rgba(190,255,80,0.15)");
-    leftGlow.addColorStop(1, "rgba(190,255,80,0.0)");
-    ctx.fillStyle = leftGlow;
-    ctx.fillRect(60, 100, 30, H - 200);
-    ctx.fillRect(W - 90, 100, 30, H - 200);
-
-    // ===== TOP HEADER =====
-    // Left: AICoachPortal
-    ctx.fillStyle = "#FFFFFF";
-    ctx.font = "bold 38px Inter, system-ui, sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("AICoachPortal", 80, 120);
-    // small lime dot accent
-    ctx.fillStyle = "#BEFF50";
-    ctx.beginPath();
-    ctx.arc(70, 108, 8, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Right: course name + tagline
-    ctx.fillStyle = "#FFFFFF";
-    ctx.font = "600 32px Inter, sans-serif";
-    ctx.textAlign = "right";
-    const courseLines = wrapText(ctx, courseName, 480);
-    let topY = 110;
-    courseLines.slice(0, 2).forEach((l) => {
-      ctx.fillText(l, W - 80, topY);
-      topY += 38;
+    const result = await drawLinkedInBadge(canvas, {
+      fullName,
+      jobRole,
+      company,
+      profileImage,
+      courseName,
+      courseTagline,
+      coachName: coach?.full_name || "",
+      tag: tagFromCategory(courseCategory),
+      commitmentLine: `I am committing ${commitmentByCategory(courseCategory)}.`,
     });
-    if (courseTagline) {
-      ctx.fillStyle = "#BEFF50";
-      ctx.font = "400 22px Inter, sans-serif";
-      ctx.fillText(courseTagline, W - 80, topY + 6);
-    }
-    if (coach?.full_name) {
-      ctx.fillStyle = "#9CA3AF";
-      ctx.font = "400 20px Inter, sans-serif";
-      ctx.fillText(`By ${coach.full_name}`, W - 80, topY + (courseTagline ? 38 : 12));
-    }
-
-    // ===== CENTER PROFILE =====
-    const cx = W / 2;
-    const cy = 470;
-    const r = 175;
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, r + 8, 0, Math.PI * 2);
-    ctx.strokeStyle = "#BEFF50";
-    ctx.lineWidth = 6;
-    ctx.shadowColor = "rgba(190,255,80,0.6)";
-    ctx.shadowBlur = 30;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.clip();
-
-    let photoDrawn = false;
-    if (profileImage) {
-      try {
-        const img = await loadImage(profileImage);
-        ctx.drawImage(img, cx - r, cy - r, r * 2, r * 2);
-        photoDrawn = true;
-      } catch {
-        // fall through to initials
-      }
-    }
-    if (!photoDrawn) {
-      ctx.fillStyle = "#1f2937";
-      ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
-      ctx.fillStyle = "#BEFF50";
-      ctx.font = "bold 140px Inter, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText((fullName[0] || "A").toUpperCase(), cx, cy);
-    }
-    ctx.restore();
-
-    // ===== ORANGE RIBBON across bottom of profile =====
-    const tag = tagFromCategory(courseCategory);
-    ctx.save();
-    ctx.translate(cx, cy + 110);
-    ctx.fillStyle = "#FF6B1A";
-    ctx.beginPath();
-    ctx.moveTo(-200, 0);
-    ctx.quadraticCurveTo(0, 80, 200, 0);
-    ctx.quadraticCurveTo(0, 50, -200, 0);
-    ctx.fill();
-    // text on ribbon
-    ctx.fillStyle = "#FFFFFF";
-    ctx.font = "bold 30px Inter, sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(tag, 0, 28);
-    ctx.restore();
-
-    // ===== Name / role / company =====
-    ctx.fillStyle = "#FFFFFF";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "alphabetic";
-    ctx.font = "bold 54px Inter, sans-serif";
-    ctx.fillText(fullName || "Your Name", W / 2, 770);
-
-    ctx.fillStyle = "#E5E7EB";
-    ctx.font = "500 30px Inter, sans-serif";
-    ctx.fillText(jobRole || "Your Role", W / 2, 815);
-
-    if (company) {
-      ctx.fillStyle = "#9CA3AF";
-      ctx.font = "400 28px Inter, sans-serif";
-      ctx.fillText(company, W / 2, 855);
-    }
-
-    // ===== Bottom Left commitment =====
-    ctx.fillStyle = "#E5E7EB";
-    ctx.font = "500 22px Inter, sans-serif";
-    ctx.textAlign = "left";
-    const commitText = `"I am committing ${commitmentByCategory(courseCategory)}."`;
-    const commitLines = wrapText(ctx, commitText, 600);
-    let cyText = 950;
-    commitLines.forEach((l) => {
-      ctx.fillText(l, 80, cyText);
-      cyText += 28;
-    });
-
-    // ===== Bottom Right CTA pill =====
-    const btnW = 280;
-    const btnH = 70;
-    const btnX = W - 80 - btnW;
-    const btnY = 950;
-    ctx.fillStyle = "rgba(255,255,255,0.05)";
-    ctx.strokeStyle = "#BEFF50";
-    ctx.lineWidth = 2;
-    const radius = 16;
-    ctx.beginPath();
-    ctx.moveTo(btnX + radius, btnY);
-    ctx.lineTo(btnX + btnW - radius, btnY);
-    ctx.quadraticCurveTo(btnX + btnW, btnY, btnX + btnW, btnY + radius);
-    ctx.lineTo(btnX + btnW, btnY + btnH - radius);
-    ctx.quadraticCurveTo(btnX + btnW, btnY + btnH, btnX + btnW - radius, btnY + btnH);
-    ctx.lineTo(btnX + radius, btnY + btnH);
-    ctx.quadraticCurveTo(btnX, btnY + btnH, btnX, btnY + btnH - radius);
-    ctx.lineTo(btnX, btnY + radius);
-    ctx.quadraticCurveTo(btnX, btnY, btnX + radius, btnY);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = "#FFFFFF";
-    ctx.font = "600 22px Inter, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Join Now", btnX + btnW / 2, btnY + 28);
-    ctx.fillStyle = "#9CA3AF";
-    ctx.font = "400 16px Inter, sans-serif";
-    ctx.fillText("(Link in Post)", btnX + btnW / 2, btnY + 52);
-
-    try {
-      const dataUrl = canvas.toDataURL("image/png");
-      setImageDataUrl(dataUrl);
-      return dataUrl;
-    } catch (err) {
-      // Canvas was tainted by a cross-origin profile image. Re-draw without it.
-      console.warn("Canvas tainted, regenerating without profile image", err);
+    if (result.taintedFallback) {
       toast({
         title: "Profile image blocked by CORS",
         description: "Please upload your image to generate the badge.",
@@ -416,6 +251,8 @@ const AiMastermindLearning = () => {
       setProfileImage("");
       return "";
     }
+    setImageDataUrl(result.dataUrl);
+    return result.dataUrl;
   };
 
   const handleGenerate = async () => {

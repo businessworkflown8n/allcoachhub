@@ -40,6 +40,8 @@ import DailyZip from "@/pages/DailyZip";
 import CoachSEOPanel from "@/components/coach/CoachSEOPanel";
 import CoachDigitalProducts from "@/components/coach/CoachDigitalProducts";
 import { useDigitalProductAccess } from "@/hooks/useDigitalProductAccess";
+import CoachLinkedInPost from "@/components/coach/CoachLinkedInPost";
+import { useFeatureControl } from "@/hooks/useFeatureControl";
 
 const CoachDashboard = () => {
   useSEO({
@@ -54,6 +56,8 @@ const CoachDashboard = () => {
   const { hasAccess: hasWorkshopAccess } = useWorkshopAccess();
   const features = useCoachFeatures();
   const { access: dpAccess } = useDigitalProductAccess();
+  const { data: linkedinFeature } = useFeatureControl("linkedin_post");
+  const linkedinEnabled = !!linkedinFeature?.enabled;
 
   const navItems = [
     { label: "Overview", path: "/coach/overview", icon: <LayoutDashboard className="h-4 w-4" /> },
@@ -91,6 +95,7 @@ const CoachDashboard = () => {
     { label: "Daily Zip", path: "/coach/daily-zip", icon: <Gamepad2 className="h-4 w-4" /> },
     { label: "Prompt Generator", path: "/coach/prompt-generator", icon: <Sparkles className="h-4 w-4" /> },
     { label: "My Website", path: "/coach/website", icon: <Globe className="h-4 w-4" /> },
+    ...(linkedinEnabled ? [{ label: "LinkedIn Post", path: "/coach/linkedin-post", icon: <Share2 className="h-4 w-4" /> }] : []),
     { label: "SEO & Indexing", path: "/coach/seo", icon: <Search className="h-4 w-4" /> },
     { label: "Profile", path: "/coach/profile", icon: <User className="h-4 w-4" /> },
   ];
@@ -130,6 +135,7 @@ const CoachDashboard = () => {
         <Route path="website" element={<CoachWebsiteManager />} />
         <Route path="seo" element={<CoachSEOPanel />} />
         <Route path="blueprint" element={<CoachBlueprintWorkspace />} />
+        <Route path="linkedin-post" element={linkedinEnabled ? <CoachLinkedInPost /> : <Navigate to="overview" replace />} />
         <Route path="digital-products/*" element={<CoachDigitalProducts />} />
         <Route path="overview" element={<CoachOverview />} />
         <Route path="*" element={<Navigate to="overview" replace />} />

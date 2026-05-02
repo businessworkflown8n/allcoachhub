@@ -215,6 +215,26 @@ const AiMastermindLearning = () => {
     })();
   }, [coachSlug]);
 
+  // Track external link click (fires once per page load)
+  useEffect(() => {
+    if (linkControl.loading || authLoading) return;
+    const params = new URLSearchParams(window.location.search);
+    supabase.from("external_link_clicks").insert({
+      feature_key: "ai_mastermind_learning",
+      coach_slug: coachSlug,
+      access_mode: linkControl.accessMode,
+      was_authenticated: !!user,
+      required_login: linkControl.enabled && linkControl.accessMode === "private",
+      user_id: user?.id ?? null,
+      utm_source: params.get("utm_source"),
+      utm_medium: params.get("utm_medium"),
+      utm_campaign: params.get("utm_campaign"),
+      referrer: document.referrer || null,
+      user_agent: navigator.userAgent,
+    } as any);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linkControl.loading, authLoading]);
+
   const log = async (action: string, extra: Partial<{ post_text: string; image_url: string }> = {}) => {
     if (!coach) return;
     const params = new URLSearchParams(window.location.search);

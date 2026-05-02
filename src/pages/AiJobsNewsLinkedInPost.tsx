@@ -88,6 +88,8 @@ const AiJobsNewsLinkedInPost = () => {
   const [postText, setPostText] = useState("");
   const [generating, setGenerating] = useState(false);
   const [imageDataUrl, setImageDataUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useSEO({
     title: "AI Jobs & News – LinkedIn Post Generator | AI Coach Portal",

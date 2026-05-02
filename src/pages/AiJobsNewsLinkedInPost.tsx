@@ -201,9 +201,48 @@ const AiJobsNewsLinkedInPost = () => {
     ctx.fillStyle = "#BEFF50"; ctx.font = "bold 28px Inter, sans-serif";
     ctx.fillText("aicoachportal.com", W / 2, 1010);
 
-    const dataUrl = canvas.toDataURL("image/png");
-    setImageDataUrl(dataUrl);
-    return dataUrl;
+    try {
+      const dataUrl = canvas.toDataURL("image/png");
+      setImageDataUrl(dataUrl);
+      return dataUrl;
+    } catch (err) {
+      console.warn("Canvas tainted", err);
+      toast({
+        title: "Profile image blocked by CORS",
+        description: "Please upload your image to generate the badge.",
+        variant: "destructive",
+      });
+      setProfileImage("");
+      return "";
+    }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Please select an image file", variant: "destructive" });
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "Image too large (max 20MB)", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      const compressed = await compressImage(file);
+      setProfileImage(compressed);
+      toast({
+        title: "Image uploaded",
+        description: `Compressed to ${getDataUrlSizeKB(compressed)} KB`,
+      });
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Upload failed", variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const handleGenerate = async () => {

@@ -154,6 +154,8 @@ const AiJobsNewsLinkedInPost = () => {
       tag: "#AI MASTERY",
       commitmentLine:
         "I am committing to mastering AI and building real-world systems through this program.",
+      ctaLabel: "Join Now",
+      ctaSub: "aicoachportal.com",
     });
     if (result.taintedFallback) {
       toast({

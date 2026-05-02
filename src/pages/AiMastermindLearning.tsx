@@ -355,12 +355,23 @@ const AiMastermindLearning = () => {
     }
   };
 
-  if (loadingCoach) {
+  if (loadingCoach || linkControl.loading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
+  }
+
+  // Access gating:
+  // - External link OFF  → only logged-in users may access (internal use).
+  // - External link ON + private → anonymous users redirected to login (return after).
+  // - External link ON + public  → open to everyone.
+  if (!linkControl.enabled && !user) {
+    return <Navigate to={`/auth?mode=login&redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />;
+  }
+  if (linkControl.enabled && linkControl.accessMode === "private" && !user) {
+    return <Navigate to={`/auth?mode=login&redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />;
   }
 
   if (!coach) {

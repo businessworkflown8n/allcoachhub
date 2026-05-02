@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useExternalLinkControl } from "@/hooks/useExternalLinkControl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +18,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/useSEO";
-import { Linkedin, Copy, Download, Sparkles, Loader2, ArrowRight, Upload } from "lucide-react";
+import { Linkedin, Copy, Download, Sparkles, Loader2, ArrowRight, Upload, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { compressImage, getDataUrlSizeKB } from "@/lib/imageCompress";
 import { drawLinkedInBadge } from "@/lib/drawLinkedInBadge";
 
@@ -133,6 +136,9 @@ const tagFromCategory = (category?: string | null) => {
 const AiMastermindLearning = () => {
   const { coachSlug = "" } = useParams();
   const { toast } = useToast();
+  const { user, loading: authLoading } = useAuth();
+  const location = useLocation();
+  const linkControl = useExternalLinkControl("ai_mastermind_learning");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const [coach, setCoach] = useState<CoachLite | null>(null);
@@ -209,6 +215,26 @@ const AiMastermindLearning = () => {
       setLoadingCoach(false);
     })();
   }, [coachSlug]);
+
+  // Track external link click (fires once per page load)
+  useEffect(() => {
+    if (linkControl.loading || authLoading) return;
+    const params = new URLSearchParams(window.location.search);
+    supabase.from("external_link_clicks").insert({
+      feature_key: "ai_mastermind_learning",
+      coach_slug: coachSlug,
+      access_mode: linkControl.accessMode,
+      was_authenticated: !!user,
+      required_login: linkControl.enabled && linkControl.accessMode === "private",
+      user_id: user?.id ?? null,
+      utm_source: params.get("utm_source"),
+      utm_medium: params.get("utm_medium"),
+      utm_campaign: params.get("utm_campaign"),
+      referrer: document.referrer || null,
+      user_agent: navigator.userAgent,
+    } as any);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linkControl.loading, authLoading]);
 
   const log = async (action: string, extra: Partial<{ post_text: string; image_url: string }> = {}) => {
     if (!coach) return;
@@ -330,12 +356,23 @@ const AiMastermindLearning = () => {
     }
   };
 
-  if (loadingCoach) {
+  if (loadingCoach || linkControl.loading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
+  }
+
+  // Access gating:
+  // - External link OFF  → only logged-in users may access (internal use).
+  // - External link ON + private → anonymous users redirected to login (return after).
+  // - External link ON + public  → open to everyone.
+  if (!linkControl.enabled && !user) {
+    return <Navigate to={`/auth?mode=login&redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />;
+  }
+  if (linkControl.enabled && linkControl.accessMode === "private" && !user) {
+    return <Navigate to={`/auth?mode=login&redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />;
   }
 
   if (!coach) {
@@ -369,7 +406,36 @@ const AiMastermindLearning = () => {
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Generate a personalized LinkedIn post + branded badge to publicly commit to this program.
           </p>
+          {linkControl.enabled && (
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+              <Badge variant="secondary" className="gap-1.5">
+                {linkControl.accessMode === "public" ? "🌐 Public link" : "🔒 Private link"}
+              </Badge>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  const url = `${SITE}/Ai-mastermind-learning/${coachSlug}`;
+                  window.open(url, "_blank", "noopener,noreferrer");
+                }}
+              >
+                <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Open Public Page
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  const url = `${SITE}/Ai-mastermind-learning/${coachSlug}?utm_source=share&utm_medium=link`;
+                  navigator.clipboard.writeText(url);
+                  toast({ title: "Link copied" });
+                }}
+              >
+                <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy Link
+              </Button>
+            </div>
+          )}
         </div>
+
 
         <div className="grid lg:grid-cols-2 gap-6">
           <Card>

@@ -3524,11 +3524,61 @@ export type Database = {
           },
         ]
       }
+      external_link_clicks: {
+        Row: {
+          access_mode: string
+          coach_slug: string | null
+          created_at: string
+          feature_key: string
+          id: string
+          referrer: string | null
+          required_login: boolean
+          user_agent: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          was_authenticated: boolean
+        }
+        Insert: {
+          access_mode?: string
+          coach_slug?: string | null
+          created_at?: string
+          feature_key: string
+          id?: string
+          referrer?: string | null
+          required_login?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          was_authenticated?: boolean
+        }
+        Update: {
+          access_mode?: string
+          coach_slug?: string | null
+          created_at?: string
+          feature_key?: string
+          id?: string
+          referrer?: string | null
+          required_login?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          was_authenticated?: boolean
+        }
+        Relationships: []
+      }
       external_link_controls: {
         Row: {
+          access_mode: string
           category: string
           created_at: string
           description: string | null
+          expires_at: string | null
           feature_key: string
           id: string
           is_enabled: boolean
@@ -3536,11 +3586,14 @@ export type Database = {
           public_url: string | null
           updated_at: string
           updated_by: string | null
+          url_template: string | null
         }
         Insert: {
+          access_mode?: string
           category?: string
           created_at?: string
           description?: string | null
+          expires_at?: string | null
           feature_key: string
           id?: string
           is_enabled?: boolean
@@ -3548,11 +3601,14 @@ export type Database = {
           public_url?: string | null
           updated_at?: string
           updated_by?: string | null
+          url_template?: string | null
         }
         Update: {
+          access_mode?: string
           category?: string
           created_at?: string
           description?: string | null
+          expires_at?: string | null
           feature_key?: string
           id?: string
           is_enabled?: boolean
@@ -3560,6 +3616,7 @@ export type Database = {
           public_url?: string | null
           updated_at?: string
           updated_by?: string | null
+          url_template?: string | null
         }
         Relationships: []
       }

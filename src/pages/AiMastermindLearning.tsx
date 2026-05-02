@@ -16,9 +16,9 @@ interface CoachLite {
   full_name: string | null;
   slug: string | null;
   avatar_url: string | null;
-  designation: string | null;
+  job_title: string | null;
   company_name: string | null;
-  linkedin_url: string | null;
+  linkedin_profile: string | null;
 }
 
 const SITE = "https://www.aicoachportal.com";
@@ -116,28 +116,30 @@ const AiMastermindLearning = () => {
     (async () => {
       setLoadingCoach(true);
       // Try slug first, then fallback to user_id
+      const cols = "user_id, full_name, slug, avatar_url, job_title, company_name, linkedin_profile";
       let { data } = await supabase
         .from("profiles")
-        .select("user_id, full_name, slug, avatar_url, designation, company_name, linkedin_url")
+        .select(cols)
         .eq("slug", coachSlug)
         .maybeSingle();
 
       if (!data) {
         const fb = await supabase
           .from("profiles")
-          .select("user_id, full_name, slug, avatar_url, designation, company_name, linkedin_url")
+          .select(cols)
           .eq("user_id", coachSlug)
           .maybeSingle();
         data = fb.data;
       }
 
       if (data) {
-        setCoach(data as CoachLite);
-        setFullName(data.full_name || "");
-        setJobRole(data.designation || "");
-        setCompany(data.company_name || "");
-        setProfileImage(data.avatar_url || "");
-        setLinkedinUrl(data.linkedin_url || "");
+        const d = data as CoachLite;
+        setCoach(d);
+        setFullName(d.full_name || "");
+        setJobRole(d.job_title || "");
+        setCompany(d.company_name || "");
+        setProfileImage(d.avatar_url || "");
+        setLinkedinUrl(d.linkedin_profile || "");
       }
       setLoadingCoach(false);
     })();

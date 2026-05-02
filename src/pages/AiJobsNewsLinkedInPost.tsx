@@ -16,28 +16,27 @@ import { drawLinkedInBadge } from "@/lib/drawLinkedInBadge";
 
 const SITE = "https://www.aicoachportal.com";
 const PUBLIC_URL = `${SITE}/ai-jobs-news/linkedin-post`;
+const JOIN_URL = `${SITE}/?utm_source=linkedin&utm_medium=badge&utm_campaign=ai_mastermind`;
 
 const buildPost = (p: { jobRole: string; company: string; excitement: string; linkedin: string }) =>
-  `𝗜’𝗺 𝗱𝗲𝗱𝗶𝗰𝗮𝘁𝗶𝗻𝗴 𝗺𝘆 𝗲𝗻𝘁𝗶𝗿𝗲 𝘄𝗲𝗲𝗸𝗲𝗻𝗱 — 16+ 𝗵𝗼𝘂𝗿𝘀 — 𝘁𝗼 𝗺𝗮𝘀𝘁𝗲𝗿𝗶𝗻𝗴 𝗔𝗜 𝘁𝗼𝗼𝗹𝘀, 𝗮𝗻𝗱 𝗜’𝗺 𝗽𝘂𝘁𝘁𝗶𝗻𝗴 𝗶𝘁 𝗼𝘂𝘁 𝗵𝗲𝗿𝗲 𝘀𝗼 𝘆𝗼𝘂 𝗰𝗮𝗻 𝗵𝗼𝗹𝗱 𝗺𝗲 𝗮𝗰𝗰𝗼𝘂𝗻𝘁𝗮𝗯𝗹𝗲! 🎯
+  `𝗜’𝘃𝗲 𝗷𝘂𝘀𝘁 𝘁𝗮𝗸𝗲𝗻 𝗮 𝗯𝗶𝗴 𝗱𝗲𝗰𝗶𝘀𝗶𝗼𝗻 — 𝗜’𝗺 𝗴𝗼𝗶𝗻𝗴 𝗮𝗹𝗹-𝗶𝗻 𝗼𝗻 𝗹𝗲𝗮𝗿𝗻𝗶𝗻𝗴 𝗔𝗜 & 𝗔𝘂𝘁𝗼𝗺𝗮𝘁𝗶𝗼𝗻. 🚀
 
-Want to join me in the AI revolution? Don’t miss out 👇
-👉 ${PUBLIC_URL}?utm_source=linkedin&utm_medium=social&utm_campaign=ai_jobs_news
+𝗜’𝗺 𝗱𝗲𝗱𝗶𝗰𝗮𝘁𝗶𝗻𝗴 𝗺𝘆 𝗲𝗻𝘁𝗶𝗿𝗲 𝘄𝗲𝗲𝗸𝗲𝗻𝗱 — 16+ 𝗵𝗼𝘂𝗿𝘀 — 𝘁𝗼 𝗺𝗮𝘀𝘁𝗲𝗿𝗶𝗻𝗴 𝗔𝗜 𝘁𝗼𝗼𝗹𝘀, 𝗮𝗻𝗱 𝗜’𝗺 𝗽𝘂𝘁𝘁𝗶𝗻𝗴 𝗶𝘁 𝗼𝘂𝘁 𝗵𝗲𝗿𝗲 𝘀𝗼 𝘆𝗼𝘂 𝗰𝗮𝗻 𝗵𝗼𝗹𝗱 𝗺𝗲 𝗮𝗰𝗰𝗼𝘂𝗻𝘁𝗮𝗯𝗹𝗲! 🎯
 
-I’ve just joined the AI Coach Portal – AI Mastermind Program 🚀
+As a ${p.jobRole || "professional"}${p.company ? ` at ${p.company}` : ""}, I’ve realized AI is no longer optional — it’s the single biggest leverage of this decade. So I’m starting my AI Mastermind journey with AI Coach Portal.
 
-As a ${p.jobRole || "professional"}${p.company ? ` at ${p.company}` : ""}, I’ve realized the massive potential of AI in transforming how we work. That’s why I’m going all-in on this journey.
-
-Here’s what I’ll be learning 👇
+Here’s what I’ll be focusing on 👇
 ⭐ Generative AI for real-world execution
-⚙️ AI Agents for automation & growth
-🎨 AI tools for content, ads & scaling
+⚙️ AI Agents & workflow automation
+🎨 AI tools for content, marketing & scaling
 
-𝗜’𝗺 𝗽𝗮𝗿𝘁𝗶𝗰𝘂𝗹𝗮𝗿𝗹𝘆 𝗲𝘅𝗰𝗶𝘁𝗲𝗱 𝗮𝗯𝗼𝘂𝘁:
-👉 ${p.excitement || "Mastering AI tools to scale my growth"}
+𝗪𝗵𝗮𝘁 𝗜’𝗺 𝗺𝗼𝘀𝘁 𝗲𝘅𝗰𝗶𝘁𝗲𝗱 𝗮𝗯𝗼𝘂𝘁:
+👉 ${p.excitement || "Building AI systems that automate my growth on autopilot"}
 
-This is not just learning — this is execution mode 💡
+If you’ve been thinking about starting too — this is your sign. Join me 👇
+👉 ${JOIN_URL}
 
-#AI #GenerativeAI #AICoachPortal #BuildInPublic #AIForGrowth #Automation #AIJobs
+#AI #Automation #GenerativeAI #AICoachPortal #BuildInPublic #LearnInPublic #AIForGrowth
 
 🔗 Connect with me:
 ${p.linkedin || "[Add your LinkedIn URL]"}

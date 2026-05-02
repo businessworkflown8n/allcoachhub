@@ -303,20 +303,17 @@ const AiMastermindLearning = () => {
     ctx.closePath();
     ctx.clip();
 
+    let photoDrawn = false;
     if (profileImage) {
       try {
         const img = await loadImage(profileImage);
         ctx.drawImage(img, cx - r, cy - r, r * 2, r * 2);
+        photoDrawn = true;
       } catch {
-        ctx.fillStyle = "#1f2937";
-        ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
-        ctx.fillStyle = "#BEFF50";
-        ctx.font = "bold 140px Inter, sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText((fullName[0] || "A").toUpperCase(), cx, cy);
+        // fall through to initials
       }
-    } else {
+    }
+    if (!photoDrawn) {
       ctx.fillStyle = "#1f2937";
       ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
       ctx.fillStyle = "#BEFF50";

@@ -51,6 +51,7 @@ import AdminFeatureRequests from "@/components/admin/AdminFeatureRequests";
 import AdminKnowledgeHub from "@/components/admin/AdminKnowledgeHub";
 import AdminFeatureControlSystem from "@/components/admin/AdminFeatureControlSystem";
 import AdminDigitalProductsControl from "@/components/admin/AdminDigitalProductsControl";
+import AdminExternalLinkControl from "@/components/admin/AdminExternalLinkControl";
 
 const navItems = [
   { label: "Analytics", path: "/admin", icon: <BarChart3 className="h-4 w-4" /> },
@@ -102,6 +103,7 @@ const navItems = [
   { label: "Marquee Manager", path: "/admin/marquee", icon: <ScrollText className="h-4 w-4" /> },
   { label: "Settings", path: "/admin/settings", icon: <Settings className="h-4 w-4" /> },
   { label: "Locale & Currency", path: "/admin/locale", icon: <Globe className="h-4 w-4" /> },
+  { label: "External Link Control", path: "/admin/external-links", icon: <LinkIcon className="h-4 w-4" /> },
 ];
 
 const AdminDashboard = () => {
@@ -164,6 +166,7 @@ const AdminDashboard = () => {
         <Route path="marquee" element={<AdminMarqueeManager />} />
         <Route path="settings" element={<AdminSettings />} />
         <Route path="locale" element={<AdminLocaleSettings />} />
+        <Route path="external-links" element={<AdminExternalLinkControl />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     </DashboardLayout>

@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/useSEO";
 import { Linkedin, Copy, Download, Sparkles, Loader2, Lock, Briefcase, Upload } from "lucide-react";
 import { compressImage, getDataUrlSizeKB } from "@/lib/imageCompress";
+import { drawLinkedInBadge } from "@/lib/drawLinkedInBadge";
 
 const SITE = "https://www.aicoachportal.com";
 const PUBLIC_URL = `${SITE}/ai-jobs-news/linkedin-post`;

@@ -149,6 +149,8 @@ const AiMastermindLearning = () => {
   const [postText, setPostText] = useState("");
   const [generating, setGenerating] = useState(false);
   const [imageDataUrl, setImageDataUrl] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const selectedCourse = courses.find((c) => c.id === selectedCourseId);
   const courseName = selectedCourse?.title || "AI Mastermind Program";

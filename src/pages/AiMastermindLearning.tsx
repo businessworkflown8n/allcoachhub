@@ -401,9 +401,21 @@ const AiMastermindLearning = () => {
     ctx.font = "400 16px Inter, sans-serif";
     ctx.fillText("(Link in Post)", btnX + btnW / 2, btnY + 52);
 
-    const dataUrl = canvas.toDataURL("image/png");
-    setImageDataUrl(dataUrl);
-    return dataUrl;
+    try {
+      const dataUrl = canvas.toDataURL("image/png");
+      setImageDataUrl(dataUrl);
+      return dataUrl;
+    } catch (err) {
+      // Canvas was tainted by a cross-origin profile image. Re-draw without it.
+      console.warn("Canvas tainted, regenerating without profile image", err);
+      toast({
+        title: "Profile image blocked by CORS",
+        description: "Please upload your image to generate the badge.",
+        variant: "destructive",
+      });
+      setProfileImage("");
+      return "";
+    }
   };
 
   const handleGenerate = async () => {

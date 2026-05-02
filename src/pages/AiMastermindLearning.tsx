@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/useSEO";
-import { Linkedin, Copy, Download, Sparkles, Loader2, ArrowRight, Upload } from "lucide-react";
+import { Linkedin, Copy, Download, Sparkles, Loader2, ArrowRight, Upload, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { compressImage, getDataUrlSizeKB } from "@/lib/imageCompress";
 import { drawLinkedInBadge } from "@/lib/drawLinkedInBadge";
 

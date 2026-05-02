@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/useSEO";
-import { Linkedin, Copy, Download, Sparkles, Loader2, Lock, Briefcase } from "lucide-react";
+import { Linkedin, Copy, Download, Sparkles, Loader2, Lock, Briefcase, Upload } from "lucide-react";
+import { compressImage, getDataUrlSizeKB } from "@/lib/imageCompress";
 
 const SITE = "https://www.aicoachportal.com";
 const PUBLIC_URL = `${SITE}/ai-jobs-news/linkedin-post`;

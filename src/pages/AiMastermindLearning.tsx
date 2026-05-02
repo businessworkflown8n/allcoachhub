@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/useSEO";
-import { Linkedin, Copy, Download, Sparkles, Loader2, ArrowRight } from "lucide-react";
+import { Linkedin, Copy, Download, Sparkles, Loader2, ArrowRight, Upload } from "lucide-react";
+import { compressImage, getDataUrlSizeKB } from "@/lib/imageCompress";
 
 interface CoachLite {
   user_id: string;

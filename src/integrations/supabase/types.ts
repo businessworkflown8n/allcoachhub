@@ -5672,6 +5672,7 @@ export type Database = {
           last_active_at: string | null
           linkedin_profile: string | null
           marketing_consent: boolean
+          public_listing_status: string
           slug: string | null
           social_links: Json | null
           tags: string[] | null
@@ -5706,6 +5707,7 @@ export type Database = {
           last_active_at?: string | null
           linkedin_profile?: string | null
           marketing_consent?: boolean
+          public_listing_status?: string
           slug?: string | null
           social_links?: Json | null
           tags?: string[] | null
@@ -5740,6 +5742,7 @@ export type Database = {
           last_active_at?: string | null
           linkedin_profile?: string | null
           marketing_consent?: boolean
+          public_listing_status?: string
           slug?: string | null
           social_links?: Json | null
           tags?: string[] | null
@@ -7525,6 +7528,7 @@ export type Database = {
           job_title: string | null
           last_active_at: string | null
           linkedin_profile: string | null
+          public_listing_status: string | null
           slug: string | null
           social_links: Json | null
           tags: string[] | null
@@ -7551,6 +7555,7 @@ export type Database = {
           job_title?: string | null
           last_active_at?: string | null
           linkedin_profile?: string | null
+          public_listing_status?: string | null
           slug?: string | null
           social_links?: Json | null
           tags?: string[] | null
@@ -7577,6 +7582,7 @@ export type Database = {
           job_title?: string | null
           last_active_at?: string | null
           linkedin_profile?: string | null
+          public_listing_status?: string | null
           slug?: string | null
           social_links?: Json | null
           tags?: string[] | null

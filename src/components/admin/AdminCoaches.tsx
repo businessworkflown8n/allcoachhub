@@ -167,6 +167,13 @@ const AdminCoaches = () => {
     return { totalEnrollments: courseEnrollments.length, paidCount: paid.length, unpaidCount: unpaid.length, revenue };
   }, [enrollments]);
 
+  const togglePublicListing = async (coach: any, newStatus: "active" | "hold") => {
+    const { error } = await supabase.from("profiles").update({ public_listing_status: newStatus }).eq("user_id", coach.user_id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    setCoaches(prev => prev.map(c => c.user_id === coach.user_id ? { ...c, public_listing_status: newStatus } : c));
+    toast({ title: newStatus === "active" ? "Coach is now publicly listed" : "Coach put on hold (hidden from public)" });
+  };
+
   const toggleSuspend = async (coach: any) => {
     const newStatus = !coach.is_suspended;
     const { error } = await supabase.from("profiles").update({ is_suspended: newStatus }).eq("user_id", coach.user_id);
@@ -553,9 +560,10 @@ const AdminCoaches = () => {
       </div>
 
       {/* Summary cards */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-6">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-7">
         <div className="rounded-xl border border-border bg-card p-4"><Shield className="h-5 w-5 text-primary mb-2" /><p className="text-2xl font-bold text-foreground">{coaches.length}</p><p className="text-xs text-muted-foreground">Total Coaches</p></div>
         <div className="rounded-xl border border-border bg-card p-4"><CheckCircle className="h-5 w-5 text-green-400 mb-2" /><p className="text-2xl font-bold text-foreground">{activeCoaches}</p><p className="text-xs text-muted-foreground">Active Coaches</p></div>
+        <div className="rounded-xl border border-border bg-card p-4"><Eye className="h-5 w-5 text-emerald-400 mb-2" /><p className="text-2xl font-bold text-foreground">{coaches.filter(c => (c.public_listing_status ?? "active") === "active" && !c.is_suspended).length}</p><p className="text-xs text-muted-foreground">Publicly Listed</p></div>
         <div className="rounded-xl border border-border bg-card p-4"><BookOpen className="h-5 w-5 text-blue-400 mb-2" /><p className="text-2xl font-bold text-foreground">{courses.length}</p><p className="text-xs text-muted-foreground">Courses Created</p></div>
         <div className="rounded-xl border border-border bg-card p-4"><Users className="h-5 w-5 text-purple-400 mb-2" /><p className="text-2xl font-bold text-foreground">{totalStudents.toLocaleString()}</p><p className="text-xs text-muted-foreground">Total Students</p></div>
         <div className="rounded-xl border border-border bg-card p-4"><Star className="h-5 w-5 text-yellow-400 mb-2" /><p className="text-2xl font-bold text-foreground">⭐ {avgRating > 0 ? avgRating.toFixed(1) : "—"}</p><p className="text-xs text-muted-foreground">Avg Rating</p></div>
@@ -698,6 +706,7 @@ const AdminCoaches = () => {
                       </button>
                     </TableHead>
                   ))}
+                  <TableHead>Public Listing</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -739,6 +748,17 @@ const AdminCoaches = () => {
                       </TableCell>
                       <TableCell className="text-muted-foreground text-xs">{c.contact_number || "—"}</TableCell>
                       <TableCell className="text-muted-foreground text-xs">{c.city || "—"}</TableCell>
+                      <TableCell>
+                        <Select value={(c.public_listing_status ?? "active")} onValueChange={(val) => togglePublicListing(c, val as "active" | "hold")}>
+                          <SelectTrigger className={`w-[100px] h-7 text-xs border-0 ${(c.public_listing_status ?? "active") === "active" ? "bg-emerald-500/20 text-emerald-400" : "bg-orange-500/20 text-orange-400"}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="hold">Hold</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <button onClick={() => setPerformanceCoach(c)} className="text-blue-400 hover:text-blue-300" title="Performance"><BarChart3 className="h-4 w-4" /></button>

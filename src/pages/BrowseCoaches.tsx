@@ -104,10 +104,10 @@ const BrowseCoaches = () => {
     const fetchCoaches = async () => {
       setLoading(true);
 
-      // Fetch coach profiles directly — the RLS policy "Anyone can view non-suspended coach profiles"
-      // handles filtering to coaches only, so this works for unauthenticated visitors too.
+      // Use the public view that exposes all non-suspended coach profiles to everyone
+      // (the base profiles table is locked down by RLS to the owner/admins).
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("coach_public_profiles")
         .select("id, user_id, full_name, avatar_url, bio, category, category_id, experience, experience_level, job_title, country, city, tags, slug, certifications, is_suspended")
         .eq("is_suspended", false);
 

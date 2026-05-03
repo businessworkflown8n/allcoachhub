@@ -7503,6 +7503,95 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_public_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          category: string | null
+          category_id: string | null
+          certifications: string[] | null
+          city: string | null
+          company_name: string | null
+          country: string | null
+          created_at: string | null
+          education: string | null
+          experience: string | null
+          experience_level: string | null
+          full_name: string | null
+          id: string | null
+          industry: string | null
+          intro_video_url: string | null
+          is_suspended: boolean | null
+          job_title: string | null
+          last_active_at: string | null
+          linkedin_profile: string | null
+          slug: string | null
+          social_links: Json | null
+          tags: string[] | null
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          category?: string | null
+          category_id?: string | null
+          certifications?: string[] | null
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string | null
+          education?: string | null
+          experience?: string | null
+          experience_level?: string | null
+          full_name?: string | null
+          id?: string | null
+          industry?: string | null
+          intro_video_url?: string | null
+          is_suspended?: boolean | null
+          job_title?: string | null
+          last_active_at?: string | null
+          linkedin_profile?: string | null
+          slug?: string | null
+          social_links?: Json | null
+          tags?: string[] | null
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          category?: string | null
+          category_id?: string | null
+          certifications?: string[] | null
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string | null
+          education?: string | null
+          experience?: string | null
+          experience_level?: string | null
+          full_name?: string | null
+          id?: string | null
+          industry?: string | null
+          intro_video_url?: string | null
+          is_suspended?: boolean | null
+          job_title?: string | null
+          last_active_at?: string | null
+          linkedin_profile?: string | null
+          slug?: string | null
+          social_links?: Json | null
+          tags?: string[] | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "coach_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_reviews: {
         Row: {
           anonymous_reviewer_id: string | null

@@ -749,6 +749,17 @@ const AdminCoaches = () => {
                       <TableCell className="text-muted-foreground text-xs">{c.contact_number || "—"}</TableCell>
                       <TableCell className="text-muted-foreground text-xs">{c.city || "—"}</TableCell>
                       <TableCell>
+                        <Select value={(c.public_listing_status ?? "active")} onValueChange={(val) => togglePublicListing(c, val as "active" | "hold")}>
+                          <SelectTrigger className={`w-[100px] h-7 text-xs border-0 ${(c.public_listing_status ?? "active") === "active" ? "bg-emerald-500/20 text-emerald-400" : "bg-orange-500/20 text-orange-400"}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="hold">Hold</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
                         <div className="flex items-center gap-1">
                           <button onClick={() => setPerformanceCoach(c)} className="text-blue-400 hover:text-blue-300" title="Performance"><BarChart3 className="h-4 w-4" /></button>
                           <button onClick={() => setSelectedCoach(c)} className="text-primary hover:text-primary/80" title="View"><Eye className="h-4 w-4" /></button>

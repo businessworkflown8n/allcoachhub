@@ -35,10 +35,10 @@ const CoachesSection = () => {
   useEffect(() => {
     const fetchCoaches = async () => {
       const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, full_name, avatar_url, bio, category, experience, job_title, country, city, tags, slug, is_suspended")
+        .from("coach_public_profiles")
+        .select("user_id, full_name, avatar_url, bio, category, experience, job_title, country, city, tags, slug, is_suspended, created_at")
         .eq("is_suspended", false)
-        .limit(8);
+        .order("created_at", { ascending: true });
 
       if (!profiles?.length) { setCoaches([]); setLoading(false); return; }
 

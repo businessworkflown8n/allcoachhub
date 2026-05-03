@@ -167,6 +167,13 @@ const AdminCoaches = () => {
     return { totalEnrollments: courseEnrollments.length, paidCount: paid.length, unpaidCount: unpaid.length, revenue };
   }, [enrollments]);
 
+  const togglePublicListing = async (coach: any, newStatus: "active" | "hold") => {
+    const { error } = await supabase.from("profiles").update({ public_listing_status: newStatus }).eq("user_id", coach.user_id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    setCoaches(prev => prev.map(c => c.user_id === coach.user_id ? { ...c, public_listing_status: newStatus } : c));
+    toast({ title: newStatus === "active" ? "Coach is now publicly listed" : "Coach put on hold (hidden from public)" });
+  };
+
   const toggleSuspend = async (coach: any) => {
     const newStatus = !coach.is_suspended;
     const { error } = await supabase.from("profiles").update({ is_suspended: newStatus }).eq("user_id", coach.user_id);

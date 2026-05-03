@@ -5,6 +5,7 @@ declare global {
   interface Window {
     gtag: (...args: any[]) => void;
     dataLayer: any[];
+    fbq?: (...args: any[]) => void;
   }
 }
 
@@ -35,6 +36,12 @@ export const trackPageView = (pagePath: string, pageTitle?: string) => {
     page_title: pageTitle || document.title,
     page_location: window.location.href,
   });
+  // GTM SPA pageview
+  pushDataLayer({ event: "pageview", page: pagePath });
+  // Meta Pixel SPA pageview
+  if (typeof window !== "undefined" && typeof window.fbq === "function") {
+    window.fbq("track", "PageView");
+  }
 };
 
 export const trackVirtualPageView = (pagePath: string, pageTitle: string) => {

@@ -560,9 +560,10 @@ const AdminCoaches = () => {
       </div>
 
       {/* Summary cards */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-6">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-7">
         <div className="rounded-xl border border-border bg-card p-4"><Shield className="h-5 w-5 text-primary mb-2" /><p className="text-2xl font-bold text-foreground">{coaches.length}</p><p className="text-xs text-muted-foreground">Total Coaches</p></div>
         <div className="rounded-xl border border-border bg-card p-4"><CheckCircle className="h-5 w-5 text-green-400 mb-2" /><p className="text-2xl font-bold text-foreground">{activeCoaches}</p><p className="text-xs text-muted-foreground">Active Coaches</p></div>
+        <div className="rounded-xl border border-border bg-card p-4"><Eye className="h-5 w-5 text-emerald-400 mb-2" /><p className="text-2xl font-bold text-foreground">{coaches.filter(c => (c.public_listing_status ?? "active") === "active" && !c.is_suspended).length}</p><p className="text-xs text-muted-foreground">Publicly Listed</p></div>
         <div className="rounded-xl border border-border bg-card p-4"><BookOpen className="h-5 w-5 text-blue-400 mb-2" /><p className="text-2xl font-bold text-foreground">{courses.length}</p><p className="text-xs text-muted-foreground">Courses Created</p></div>
         <div className="rounded-xl border border-border bg-card p-4"><Users className="h-5 w-5 text-purple-400 mb-2" /><p className="text-2xl font-bold text-foreground">{totalStudents.toLocaleString()}</p><p className="text-xs text-muted-foreground">Total Students</p></div>
         <div className="rounded-xl border border-border bg-card p-4"><Star className="h-5 w-5 text-yellow-400 mb-2" /><p className="text-2xl font-bold text-foreground">⭐ {avgRating > 0 ? avgRating.toFixed(1) : "—"}</p><p className="text-xs text-muted-foreground">Avg Rating</p></div>

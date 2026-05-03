@@ -706,6 +706,7 @@ const AdminCoaches = () => {
                       </button>
                     </TableHead>
                   ))}
+                  <TableHead>Public Listing</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>

@@ -5,11 +5,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, GripVertical, Trash2, Edit, ChevronDown, ChevronRight, Video, FileText, BookOpen, Zap, Users, ClipboardList } from "lucide-react";
+import { ArrowLeft, Plus, GripVertical, Trash2, Edit, ChevronDown, ChevronRight, Video, FileText, BookOpen, Zap, Users, ClipboardList, Layers } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import LessonEditor, { LessonRow } from "./LessonEditor";
+import LessonMediaManager from "./LessonMediaManager";
 
 type Module = { id: string; title: string; sort_order: number; lessons: LessonRow[] };
 
@@ -17,7 +18,7 @@ const TYPE_ICON: Record<string, any> = {
   video: Video, pdf: FileText, text: BookOpen, quiz: ClipboardList, assignment: ClipboardList, live: Users,
 };
 
-function SortableLesson({ lesson, onEdit, onDelete }: { lesson: LessonRow; onEdit: () => void; onDelete: () => void }) {
+function SortableLesson({ lesson, onEdit, onDelete, onMedia }: { lesson: LessonRow; onEdit: () => void; onDelete: () => void; onMedia: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: lesson.id! });
   const Icon = TYPE_ICON[lesson.content_type] || BookOpen;
   return (
@@ -33,13 +34,14 @@ function SortableLesson({ lesson, onEdit, onDelete }: { lesson: LessonRow; onEdi
         <p className="text-xs text-muted-foreground capitalize">{lesson.content_type} · {lesson.duration_minutes || 0}m {lesson.drip_days ? `· Day ${lesson.drip_days}` : ""}</p>
       </div>
       {lesson.is_free_preview && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">Free</span>}
+      <Button size="sm" variant="ghost" onClick={onMedia} title="Add Content (Video / YouTube / Images)"><Layers className="h-4 w-4" /></Button>
       <Button size="sm" variant="ghost" onClick={onEdit}><Edit className="h-4 w-4" /></Button>
       <Button size="sm" variant="ghost" onClick={onDelete}><Trash2 className="h-4 w-4 text-destructive" /></Button>
     </div>
   );
 }
 
-function SortableModule({ mod, expanded, onToggle, onRename, onDelete, onAddLesson, onEditLesson, onDeleteLesson, onReorderLessons }: any) {
+function SortableModule({ mod, expanded, onToggle, onRename, onDelete, onAddLesson, onEditLesson, onDeleteLesson, onReorderLessons, onLessonMedia }: any) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: mod.id });
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   return (
@@ -56,7 +58,7 @@ function SortableModule({ mod, expanded, onToggle, onRename, onDelete, onAddLess
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => onReorderLessons(mod.id, e)}>
             <SortableContext items={mod.lessons.map((l: LessonRow) => l.id!)} strategy={verticalListSortingStrategy}>
               {mod.lessons.map((l: LessonRow) => (
-                <SortableLesson key={l.id} lesson={l} onEdit={() => onEditLesson(mod.id, l)} onDelete={() => onDeleteLesson(l.id!)} />
+                <SortableLesson key={l.id} lesson={l} onEdit={() => onEditLesson(mod.id, l)} onDelete={() => onDeleteLesson(l.id!)} onMedia={() => onLessonMedia(l)} />
               ))}
             </SortableContext>
           </DndContext>
@@ -79,6 +81,7 @@ const CurriculumBuilder = () => {
   const [loading, setLoading] = useState(true);
   const [editorOpen, setEditorOpen] = useState(false);
   const [activeLesson, setActiveLesson] = useState<LessonRow | null>(null);
+  const [mediaLesson, setMediaLesson] = useState<LessonRow | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -197,6 +200,7 @@ const CurriculumBuilder = () => {
                   onEditLesson={openEditLesson}
                   onDeleteLesson={deleteLesson}
                   onReorderLessons={handleLessonDragEnd}
+                  onLessonMedia={(l: LessonRow) => setMediaLesson(l)}
                 />
               ))}
             </div>
@@ -206,6 +210,14 @@ const CurriculumBuilder = () => {
 
       {editorOpen && activeLesson && (
         <LessonEditor open={editorOpen} onOpenChange={setEditorOpen} lesson={activeLesson} onSaved={load} />
+      )}
+      {mediaLesson && (
+        <LessonMediaManager
+          open={!!mediaLesson}
+          onOpenChange={(v) => !v && setMediaLesson(null)}
+          lessonId={mediaLesson.id!}
+          lessonTitle={mediaLesson.title}
+        />
       )}
     </div>
   );

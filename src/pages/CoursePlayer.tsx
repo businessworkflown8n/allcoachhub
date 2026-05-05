@@ -34,6 +34,7 @@ const CoursePlayer = () => {
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [activeId, setActiveId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeMedia, setActiveMedia] = useState<any[]>([]);
 
   useSEO({ title: course ? `${course.title} – Learn` : "Course Player", noIndex: true });
 
@@ -69,6 +70,12 @@ const CoursePlayer = () => {
 
   const allLessons = useMemo(() => modules.flatMap((m) => m.lessons), [modules]);
   const active = useMemo(() => allLessons.find((l) => l.id === activeId), [allLessons, activeId]);
+
+  useEffect(() => {
+    if (!activeId) { setActiveMedia([]); return; }
+    supabase.from("lecture_media").select("*").eq("lesson_id", activeId).order("sort_order")
+      .then(({ data }) => setActiveMedia(data || []));
+  }, [activeId]);
 
   const markComplete = async () => {
     if (!user || !active || !courseId) return;
@@ -215,6 +222,41 @@ const CoursePlayer = () => {
             {active.content_type === "quiz" && (
               <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
                 Quiz module — questions will appear here. (Connected to <code>quizzes</code> table.)
+              </div>
+            )}
+
+            {/* Attached lecture media */}
+            {activeMedia.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-foreground">Lesson Media</h3>
+                {activeMedia.filter((m) => m.media_type === "video_upload" || m.media_type === "recording").map((m) => (
+                  <div key={m.id} className="space-y-1">
+                    {m.title && <p className="text-xs text-muted-foreground">{m.title}</p>}
+                    <video src={m.video_url} controls className="aspect-video w-full rounded-xl bg-black" />
+                  </div>
+                ))}
+                {activeMedia.filter((m) => m.media_type === "youtube").map((m) => (
+                  <div key={m.id} className="space-y-1">
+                    {m.title && <p className="text-xs text-muted-foreground">{m.title}</p>}
+                    {m.youtube_mode === "redirect" ? (
+                      <a href={m.youtube_url} target="_blank" rel="noreferrer">
+                        <Button variant="outline"><PlayCircle className="h-4 w-4 mr-1" /> Watch on YouTube</Button>
+                      </a>
+                    ) : (
+                      <iframe src={ytEmbed(m.youtube_url)} className="aspect-video w-full rounded-xl" allowFullScreen title={m.title || "YouTube"} />
+                    )}
+                  </div>
+                ))}
+                {activeMedia.filter((m) => m.media_type === "image").length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {activeMedia.filter((m) => m.media_type === "image").map((m) => (
+                      <a key={m.id} href={m.image_url} target="_blank" rel="noreferrer" className="block">
+                        <img src={m.image_url} alt={m.title || m.caption || "lesson image"} className="w-full h-40 object-cover rounded-lg border border-border" loading="lazy" />
+                        {m.caption && <p className="text-xs text-muted-foreground mt-1">{m.caption}</p>}
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

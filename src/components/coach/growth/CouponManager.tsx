@@ -7,11 +7,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2 } from "lucide-react";
+import FeatureGate from "@/components/shared/FeatureGate";
+import { useCoachPlan } from "@/hooks/useCoachPlan";
 
 interface Props { open: boolean; onClose: () => void; }
 
 const CouponManager = ({ open, onClose }: Props) => {
   const { user } = useAuth();
+  const { plan } = useCoachPlan();
   const [courses, setCourses] = useState<{ id: string; title: string }[]>([]);
   const [coupons, setCoupons] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -58,6 +61,7 @@ const CouponManager = ({ open, onClose }: Props) => {
           <DialogTitle>Offers & Coupons</DialogTitle>
         </DialogHeader>
 
+        <FeatureGate featureKey="coupons_management" featureName="Coupons" plan={plan}>
         <div className="space-y-4">
           {!showForm ? (
             <Button onClick={() => setShowForm(true)} className="w-full">
@@ -117,6 +121,7 @@ const CouponManager = ({ open, onClose }: Props) => {
             </div>
           )}
         </div>
+        </FeatureGate>
       </DialogContent>
     </Dialog>
   );

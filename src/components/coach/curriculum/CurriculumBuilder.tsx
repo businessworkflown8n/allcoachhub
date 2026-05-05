@@ -200,6 +200,7 @@ const CurriculumBuilder = () => {
                   onEditLesson={openEditLesson}
                   onDeleteLesson={deleteLesson}
                   onReorderLessons={handleLessonDragEnd}
+                  onLessonMedia={(l: LessonRow) => setMediaLesson(l)}
                 />
               ))}
             </div>
@@ -209,6 +210,14 @@ const CurriculumBuilder = () => {
 
       {editorOpen && activeLesson && (
         <LessonEditor open={editorOpen} onOpenChange={setEditorOpen} lesson={activeLesson} onSaved={load} />
+      )}
+      {mediaLesson && (
+        <LessonMediaManager
+          open={!!mediaLesson}
+          onOpenChange={(v) => !v && setMediaLesson(null)}
+          lessonId={mediaLesson.id!}
+          lessonTitle={mediaLesson.title}
+        />
       )}
     </div>
   );

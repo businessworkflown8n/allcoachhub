@@ -71,6 +71,12 @@ const CoursePlayer = () => {
   const allLessons = useMemo(() => modules.flatMap((m) => m.lessons), [modules]);
   const active = useMemo(() => allLessons.find((l) => l.id === activeId), [allLessons, activeId]);
 
+  useEffect(() => {
+    if (!activeId) { setActiveMedia([]); return; }
+    supabase.from("lecture_media").select("*").eq("lesson_id", activeId).order("sort_order")
+      .then(({ data }) => setActiveMedia(data || []));
+  }, [activeId]);
+
   const markComplete = async () => {
     if (!user || !active || !courseId) return;
     if (completedIds.has(active.id)) return;

@@ -18,7 +18,7 @@ const TYPE_ICON: Record<string, any> = {
   video: Video, pdf: FileText, text: BookOpen, quiz: ClipboardList, assignment: ClipboardList, live: Users,
 };
 
-function SortableLesson({ lesson, onEdit, onDelete }: { lesson: LessonRow; onEdit: () => void; onDelete: () => void }) {
+function SortableLesson({ lesson, onEdit, onDelete, onMedia }: { lesson: LessonRow; onEdit: () => void; onDelete: () => void; onMedia: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: lesson.id! });
   const Icon = TYPE_ICON[lesson.content_type] || BookOpen;
   return (
@@ -34,6 +34,7 @@ function SortableLesson({ lesson, onEdit, onDelete }: { lesson: LessonRow; onEdi
         <p className="text-xs text-muted-foreground capitalize">{lesson.content_type} · {lesson.duration_minutes || 0}m {lesson.drip_days ? `· Day ${lesson.drip_days}` : ""}</p>
       </div>
       {lesson.is_free_preview && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">Free</span>}
+      <Button size="sm" variant="ghost" onClick={onMedia} title="Add Content (Video / YouTube / Images)"><Layers className="h-4 w-4" /></Button>
       <Button size="sm" variant="ghost" onClick={onEdit}><Edit className="h-4 w-4" /></Button>
       <Button size="sm" variant="ghost" onClick={onDelete}><Trash2 className="h-4 w-4 text-destructive" /></Button>
     </div>

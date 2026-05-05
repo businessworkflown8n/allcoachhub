@@ -91,7 +91,7 @@ const navItems = [
   { label: "Workshop Access", path: "/admin/workshop-access", icon: <Video className="h-4 w-4" /> },
   { label: "Workshop Tracking", path: "/admin/workshop-tracking", icon: <BarChart3 className="h-4 w-4" /> },
   { label: "Feature Control", path: "/admin/feature-control", icon: <ShieldCheck className="h-4 w-4" /> },
-  { label: "Feature Control System", path: "/admin/feature-control-system", icon: <Settings className="h-4 w-4" /> },
+  { label: "Coach Feature Approval", path: "/admin/coach-feature-approval", icon: <Settings className="h-4 w-4" /> },
   { label: "Digital Products", path: "/admin/digital-products", icon: <Package className="h-4 w-4" /> },
   { label: "Plans", path: "/admin/plans", icon: <CreditCard className="h-4 w-4" /> },
   { label: "Feature Bundles", path: "/admin/bundles", icon: <Package className="h-4 w-4" /> },
@@ -153,8 +153,9 @@ const AdminDashboard = () => {
         <Route path="thumbnail-access" element={<AdminThumbnailAccess />} />
         <Route path="workshop-access" element={<AdminWorkshopAccess />} />
         <Route path="workshop-tracking" element={<AdminWorkshopTracking />} />
-        <Route path="feature-control" element={<AdminCoachFeatureControl />} />
+        <Route path="feature-control" element={<AdminFeatureControlSystem />} />
         <Route path="feature-control-system" element={<AdminFeatureControlSystem />} />
+        <Route path="coach-feature-approval" element={<AdminCoachFeatureControl />} />
         <Route path="digital-products" element={<AdminDigitalProductsControl />} />
         <Route path="plans" element={<AdminPlans />} />
         <Route path="bundles" element={<AdminBundles />} />

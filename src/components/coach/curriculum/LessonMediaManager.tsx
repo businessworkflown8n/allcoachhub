@@ -36,7 +36,7 @@ interface Props {
 
 const LessonMediaManager = ({ open, onOpenChange, lessonId, lessonTitle }: Props) => {
   const { user } = useAuth();
-  const plan = useCoachPlan();
+  const { plan } = useCoachPlan();
   const fUpload = useFeatureControl("course_video_upload", plan);
   const fYoutube = useFeatureControl("course_youtube_link", plan);
   const fRecord = useFeatureControl("course_video_recording", plan);

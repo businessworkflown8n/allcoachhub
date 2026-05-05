@@ -4795,6 +4795,68 @@ export type Database = {
           },
         ]
       }
+      lecture_media: {
+        Row: {
+          caption: string | null
+          created_at: string
+          created_by: string | null
+          duration_seconds: number | null
+          id: string
+          image_url: string | null
+          lesson_id: string
+          media_type: string
+          sort_order: number
+          thumbnail_url: string | null
+          title: string | null
+          updated_at: string
+          video_url: string | null
+          youtube_mode: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_seconds?: number | null
+          id?: string
+          image_url?: string | null
+          lesson_id: string
+          media_type: string
+          sort_order?: number
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+          video_url?: string | null
+          youtube_mode?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_seconds?: number | null
+          id?: string
+          image_url?: string | null
+          lesson_id?: string
+          media_type?: string
+          sort_order?: number
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+          video_url?: string | null
+          youtube_mode?: string | null
+          youtube_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lecture_media_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "course_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_progress: {
         Row: {
           completed_at: string

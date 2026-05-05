@@ -5,11 +5,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, GripVertical, Trash2, Edit, ChevronDown, ChevronRight, Video, FileText, BookOpen, Zap, Users, ClipboardList } from "lucide-react";
+import { ArrowLeft, Plus, GripVertical, Trash2, Edit, ChevronDown, ChevronRight, Video, FileText, BookOpen, Zap, Users, ClipboardList, Layers } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import LessonEditor, { LessonRow } from "./LessonEditor";
+import LessonMediaManager from "./LessonMediaManager";
 
 type Module = { id: string; title: string; sort_order: number; lessons: LessonRow[] };
 

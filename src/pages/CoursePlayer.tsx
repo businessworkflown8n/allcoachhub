@@ -34,6 +34,7 @@ const CoursePlayer = () => {
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [activeId, setActiveId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeMedia, setActiveMedia] = useState<any[]>([]);
 
   useSEO({ title: course ? `${course.title} – Learn` : "Course Player", noIndex: true });
 

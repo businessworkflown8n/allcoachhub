@@ -81,6 +81,7 @@ const CurriculumBuilder = () => {
   const [loading, setLoading] = useState(true);
   const [editorOpen, setEditorOpen] = useState(false);
   const [activeLesson, setActiveLesson] = useState<LessonRow | null>(null);
+  const [mediaLesson, setMediaLesson] = useState<LessonRow | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 

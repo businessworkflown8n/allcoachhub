@@ -41,7 +41,7 @@ function SortableLesson({ lesson, onEdit, onDelete, onMedia }: { lesson: LessonR
   );
 }
 
-function SortableModule({ mod, expanded, onToggle, onRename, onDelete, onAddLesson, onEditLesson, onDeleteLesson, onReorderLessons }: any) {
+function SortableModule({ mod, expanded, onToggle, onRename, onDelete, onAddLesson, onEditLesson, onDeleteLesson, onReorderLessons, onLessonMedia }: any) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: mod.id });
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   return (
@@ -58,7 +58,7 @@ function SortableModule({ mod, expanded, onToggle, onRename, onDelete, onAddLess
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => onReorderLessons(mod.id, e)}>
             <SortableContext items={mod.lessons.map((l: LessonRow) => l.id!)} strategy={verticalListSortingStrategy}>
               {mod.lessons.map((l: LessonRow) => (
-                <SortableLesson key={l.id} lesson={l} onEdit={() => onEditLesson(mod.id, l)} onDelete={() => onDeleteLesson(l.id!)} />
+                <SortableLesson key={l.id} lesson={l} onEdit={() => onEditLesson(mod.id, l)} onDelete={() => onDeleteLesson(l.id!)} onMedia={() => onLessonMedia(l)} />
               ))}
             </SortableContext>
           </DndContext>

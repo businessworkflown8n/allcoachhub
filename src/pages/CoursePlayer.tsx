@@ -225,6 +225,41 @@ const CoursePlayer = () => {
               </div>
             )}
 
+            {/* Attached lecture media */}
+            {activeMedia.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-foreground">Lesson Media</h3>
+                {activeMedia.filter((m) => m.media_type === "video_upload" || m.media_type === "recording").map((m) => (
+                  <div key={m.id} className="space-y-1">
+                    {m.title && <p className="text-xs text-muted-foreground">{m.title}</p>}
+                    <video src={m.video_url} controls className="aspect-video w-full rounded-xl bg-black" />
+                  </div>
+                ))}
+                {activeMedia.filter((m) => m.media_type === "youtube").map((m) => (
+                  <div key={m.id} className="space-y-1">
+                    {m.title && <p className="text-xs text-muted-foreground">{m.title}</p>}
+                    {m.youtube_mode === "redirect" ? (
+                      <a href={m.youtube_url} target="_blank" rel="noreferrer">
+                        <Button variant="outline"><PlayCircle className="h-4 w-4 mr-1" /> Watch on YouTube</Button>
+                      </a>
+                    ) : (
+                      <iframe src={ytEmbed(m.youtube_url)} className="aspect-video w-full rounded-xl" allowFullScreen title={m.title || "YouTube"} />
+                    )}
+                  </div>
+                ))}
+                {activeMedia.filter((m) => m.media_type === "image").length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {activeMedia.filter((m) => m.media_type === "image").map((m) => (
+                      <a key={m.id} href={m.image_url} target="_blank" rel="noreferrer" className="block">
+                        <img src={m.image_url} alt={m.title || m.caption || "lesson image"} className="w-full h-40 object-cover rounded-lg border border-border" loading="lazy" />
+                        {m.caption && <p className="text-xs text-muted-foreground mt-1">{m.caption}</p>}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex items-center justify-between border-t border-border pt-4">
               <p className="text-xs text-muted-foreground">{active.duration_minutes ? `${active.duration_minutes} min` : ""}</p>
               <Button onClick={markComplete} disabled={completedIds.has(active.id)}>

@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 interface Props {
   courseId: string;
   moduleId?: string;
+  hideIfEmpty?: boolean;
 }
 
 const STATUS_COLORS: Record<string, string> = {

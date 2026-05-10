@@ -109,7 +109,10 @@ const QuizRunner = ({ lessonId, courseId, hideIfEmpty }: Props) => {
   };
 
   if (loading) return <Skeleton className="h-40 w-full" />;
-  if (!quiz) return <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground flex items-center gap-2"><ClipboardList className="h-4 w-4" /> No quiz attached to this {lessonId ? "lesson" : "course"}.</div>;
+  if (!quiz) {
+    if (hideIfEmpty) return null;
+    return <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground flex items-center gap-2"><ClipboardList className="h-4 w-4" /> No quiz attached to this {lessonId ? "lesson" : "course"}.</div>;
+  }
 
   const used = attempts.length;
   const max = quiz.max_attempts ?? 3;

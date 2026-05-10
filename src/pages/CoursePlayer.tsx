@@ -221,9 +221,7 @@ const CoursePlayer = () => {
             )}
 
             {/* Quiz (lesson-attached) */}
-            {(active.content_type === "quiz" || true) && (
-              <QuizRunner lessonId={active.id} courseId={courseId} />
-            )}
+            <QuizRunner lessonId={active.id} hideIfEmpty={active.content_type !== "quiz"} />
 
             {/* Module assignments */}
             <AssignmentPanel courseId={courseId!} moduleId={active.module_id} />

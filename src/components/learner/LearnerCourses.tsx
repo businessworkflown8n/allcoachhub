@@ -35,11 +35,11 @@ const LearnerCourses = () => {
       // Group coaches
       const coachIds = Array.from(new Set(list.map((e: any) => e.coach_id).filter(Boolean)));
       if (coachIds.length) {
-        const { data: cps } = await supabase.from("profiles").select("user_id, full_name, avatar_url, bio, slug, email, contact_number").in("user_id", coachIds);
+        const { data: cps } = await supabase.from("profiles").select("user_id, full_name, avatar_url, bio, slug, email, whatsapp_number").in("user_id", coachIds);
         const counts: Record<string, number> = {};
         list.forEach((e: any) => { counts[e.coach_id] = (counts[e.coach_id] || 0) + 1; });
         setCoaches((cps || []).map((c: any) => ({
-          ...c, course_count: counts[c.user_id] || 0, whatsapp: c.contact_number,
+          ...c, course_count: counts[c.user_id] || 0, whatsapp: c.whatsapp_number,
         })));
       }
 

@@ -8,6 +8,8 @@ import { toast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { CheckCircle2, Lock, PlayCircle, FileText, BookOpen, Users, ClipboardList, Award, ArrowLeft } from "lucide-react";
+import QuizRunner from "@/components/learner/lms/QuizRunner";
+import AssignmentPanel from "@/components/learner/lms/AssignmentPanel";
 
 type Lesson = any;
 type Module = { id: string; title: string; sort_order: number; lessons: Lesson[] };
@@ -218,12 +220,11 @@ const CoursePlayer = () => {
               </div>
             )}
 
-            {/* Quiz placeholder */}
-            {active.content_type === "quiz" && (
-              <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
-                Quiz module — questions will appear here. (Connected to <code>quizzes</code> table.)
-              </div>
-            )}
+            {/* Quiz (lesson-attached) */}
+            <QuizRunner lessonId={active.id} hideIfEmpty={active.content_type !== "quiz"} />
+
+            {/* Module assignments */}
+            <AssignmentPanel courseId={courseId!} moduleId={active.module_id} hideIfEmpty />
 
             {/* Attached lecture media */}
             {activeMedia.length > 0 && (

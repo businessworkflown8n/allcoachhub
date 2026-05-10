@@ -77,11 +77,14 @@ const AssignmentPanel = ({ courseId, moduleId, hideIfEmpty }: Props) => {
   };
 
   if (loading) return <Skeleton className="h-40 w-full" />;
-  if (!assignments.length) return (
-    <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground flex items-center gap-2">
-      <ClipboardList className="h-4 w-4" /> No assignments {moduleId ? "for this module" : "in this course"}.
-    </div>
-  );
+  if (!assignments.length) {
+    if (hideIfEmpty) return null;
+    return (
+      <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground flex items-center gap-2">
+        <ClipboardList className="h-4 w-4" /> No assignments {moduleId ? "for this module" : "in this course"}.
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

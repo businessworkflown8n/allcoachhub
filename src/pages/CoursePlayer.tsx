@@ -224,7 +224,7 @@ const CoursePlayer = () => {
             <QuizRunner lessonId={active.id} hideIfEmpty={active.content_type !== "quiz"} />
 
             {/* Module assignments */}
-            <AssignmentPanel courseId={courseId!} moduleId={active.module_id} />
+            <AssignmentPanel courseId={courseId!} moduleId={active.module_id} hideIfEmpty />
 
             {/* Attached lecture media */}
             {activeMedia.length > 0 && (

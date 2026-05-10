@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 interface Props {
   lessonId?: string;
   courseId?: string;
+  hideIfEmpty?: boolean;
 }
 
 type Question = {
@@ -20,7 +21,7 @@ type Question = {
   points: number;
 };
 
-const QuizRunner = ({ lessonId, courseId }: Props) => {
+const QuizRunner = ({ lessonId, courseId, hideIfEmpty }: Props) => {
   const { user } = useAuth();
   const [quiz, setQuiz] = useState<any>(null);
   const [questions, setQuestions] = useState<Question[]>([]);

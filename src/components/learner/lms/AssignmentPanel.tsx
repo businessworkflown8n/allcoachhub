@@ -19,7 +19,7 @@ const STATUS_COLORS: Record<string, string> = {
   rejected: "bg-destructive/15 text-destructive",
 };
 
-const AssignmentPanel = ({ courseId, moduleId }: Props) => {
+const AssignmentPanel = ({ courseId, moduleId, hideIfEmpty }: Props) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [assignments, setAssignments] = useState<any[]>([]);

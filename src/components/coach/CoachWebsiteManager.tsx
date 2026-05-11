@@ -83,6 +83,16 @@ interface WebsiteData {
   is_live: boolean;
   admin_note: string;
   content_sections: ContentSections;
+  hero_variant: string;
+  template_id: string | null;
+  header_config: {
+    menu_items?: { label: string; href: string }[];
+    cta_label?: string;
+    cta_href?: string;
+    whatsapp_number?: string;
+    sticky?: boolean;
+    transparent?: boolean;
+  };
 }
 
 const defaultData: WebsiteData = {
@@ -94,6 +104,23 @@ const defaultData: WebsiteData = {
   show_contact: false, show_video: false, show_gallery: false,
   meta_title: "", meta_description: "", status: "draft", is_live: false, admin_note: "",
   content_sections: defaultContent,
+  hero_variant: "classic",
+  template_id: null,
+  header_config: {
+    menu_items: [
+      { label: "Home", href: "#top" },
+      { label: "About", href: "#cw-about" },
+      { label: "Courses", href: "#cw-courses" },
+      { label: "Testimonials", href: "#cw-testimonials" },
+      { label: "FAQ", href: "#cw-faq" },
+      { label: "Contact", href: "#cw-demo" },
+    ],
+    cta_label: "Book Free Demo",
+    cta_href: "#cw-demo",
+    whatsapp_number: "",
+    sticky: true,
+    transparent: false,
+  },
 };
 
 const STATUS_COLORS: Record<string, string> = {

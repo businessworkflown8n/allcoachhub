@@ -60,12 +60,12 @@ export const SignupEmail = ({
 
 export default SignupEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
+const main = { backgroundColor: '#ffffff', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Arial, sans-serif' }
 const container = { padding: '20px 25px' }
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
-  color: '#000000',
+  color: 'hsl(220, 20%, 15%)',
   margin: '0 0 20px',
 }
 const text = {
@@ -76,11 +76,11 @@ const text = {
 }
 const link = { color: 'inherit', textDecoration: 'underline' }
 const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
+  backgroundColor: 'hsl(72, 100%, 50%)',
+  color: 'hsl(220, 20%, 7%)',
   fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
+  borderRadius: '12px',
+  padding: '14px 28px'; fontWeight: "600", padding: "14px 28px"fontWeight:'600',
   textDecoration: 'none',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }

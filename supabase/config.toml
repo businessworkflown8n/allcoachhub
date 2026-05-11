@@ -43,10 +43,10 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.content-review]
-verify_jwt = false
+verify_jwt = true
 
 [functions.demand-insights]
-verify_jwt = false
+verify_jwt = true
 
 [functions.seo-analytics]
 verify_jwt = false
@@ -70,9 +70,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.submit-indexing]
-verify_jwt = false
-
-[functions.funnel-trigger]
 verify_jwt = false
 
 [functions.funnel-processor]

@@ -2,15 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GraduationCap, MapPin, Star, Users, BookOpen, Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import Premium3DButton from "./Premium3DButton";
 
 interface Props {
   site: any;
   coach: any;
   courseCount: number;
   themeColor: string;
+  variant?: "classic" | "gradient" | "particle" | "video";
 }
 
-const CoachWebsiteHero = ({ site, coach, courseCount, themeColor }: Props) => {
+const CoachWebsiteHero = ({ site, coach, courseCount, themeColor, variant = "classic" }: Props) => {
   const bannerUrls: string[] = (site.banner_urls?.length > 0 ? site.banner_urls : site.banner_url ? [site.banner_url] : []);
   const [currentBanner, setCurrentBanner] = useState(0);
 

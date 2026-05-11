@@ -376,6 +376,168 @@ const CoachWebsiteManager = () => {
       )}
 
       <div className={`space-y-6 ${isLocked ? "opacity-60 pointer-events-none" : ""}`}>
+        {/* Premium Templates */}
+        <Card className="border-primary/40 bg-gradient-to-br from-primary/5 to-transparent">
+          <CardContent className="pt-5 pb-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-foreground">Premium Website Templates</p>
+                <p className="text-xs text-muted-foreground">Pick a high-converting design for your niche. 10+ premium layouts.</p>
+              </div>
+            </div>
+            <Button onClick={() => setTemplateGalleryOpen(true)} className="font-semibold">
+              <Layout className="h-4 w-4 mr-2" /> Browse Templates
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Header & Menu */}
+        <Card>
+          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Layout className="h-4 w-4" /> Header & Navigation Menu</CardTitle></CardHeader>
+          <CardContent className="space-y-5">
+            <p className="text-xs text-muted-foreground">Your coach website uses its own custom header — the platform navbar is hidden. Customize the menu, primary CTA, and behavior below.</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Hero Style</Label>
+                <select
+                  value={data.hero_variant}
+                  onChange={(e) => setData((p) => ({ ...p, hero_variant: e.target.value }))}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="classic">Classic — soft glow</option>
+                  <option value="gradient">Gradient — premium mesh</option>
+                  <option value="particle">Particle — animated</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>WhatsApp Number (with country code)</Label>
+                <Input
+                  value={data.header_config.whatsapp_number || ""}
+                  onChange={(e) => setData((p) => ({ ...p, header_config: { ...p.header_config, whatsapp_number: e.target.value } }))}
+                  placeholder="+919876543210"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Primary CTA Label</Label>
+                <Input
+                  value={data.header_config.cta_label || ""}
+                  onChange={(e) => setData((p) => ({ ...p, header_config: { ...p.header_config, cta_label: e.target.value } }))}
+                  placeholder="Book Free Demo"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>CTA Target (anchor or URL)</Label>
+                <Input
+                  value={data.header_config.cta_href || ""}
+                  onChange={(e) => setData((p) => ({ ...p, header_config: { ...p.header_config, cta_href: e.target.value } }))}
+                  placeholder="#cw-demo"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                <div>
+                  <p className="text-sm font-medium">Sticky Header</p>
+                  <p className="text-xs text-muted-foreground">Stay visible on scroll</p>
+                </div>
+                <Switch
+                  checked={data.header_config.sticky !== false}
+                  onCheckedChange={(v) => setData((p) => ({ ...p, header_config: { ...p.header_config, sticky: v } }))}
+                />
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                <div>
+                  <p className="text-sm font-medium">Transparent at Top</p>
+                  <p className="text-xs text-muted-foreground">Glass effect over hero</p>
+                </div>
+                <Switch
+                  checked={!!data.header_config.transparent}
+                  onCheckedChange={(v) => setData((p) => ({ ...p, header_config: { ...p.header_config, transparent: v } }))}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Menu Items</Label>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    setData((p) => ({
+                      ...p,
+                      header_config: {
+                        ...p.header_config,
+                        menu_items: [...(p.header_config.menu_items || []), { label: "New Link", href: "#top" }],
+                      },
+                    }))
+                  }
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" /> Add
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {(data.header_config.menu_items || []).map((mi, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input
+                      value={mi.label}
+                      onChange={(e) => {
+                        const items = [...(data.header_config.menu_items || [])];
+                        items[idx] = { ...items[idx], label: e.target.value };
+                        setData((p) => ({ ...p, header_config: { ...p.header_config, menu_items: items } }));
+                      }}
+                      placeholder="Label"
+                      className="flex-1"
+                    />
+                    <Input
+                      value={mi.href}
+                      onChange={(e) => {
+                        const items = [...(data.header_config.menu_items || [])];
+                        items[idx] = { ...items[idx], href: e.target.value };
+                        setData((p) => ({ ...p, header_config: { ...p.header_config, menu_items: items } }));
+                      }}
+                      placeholder="#cw-courses or https://..."
+                      className="flex-1"
+                    />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => {
+                        const items = [...(data.header_config.menu_items || [])];
+                        if (idx > 0) { [items[idx - 1], items[idx]] = [items[idx], items[idx - 1]];
+                          setData((p) => ({ ...p, header_config: { ...p.header_config, menu_items: items } })); }
+                      }}
+                    ><ArrowUp className="h-4 w-4" /></Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => {
+                        const items = [...(data.header_config.menu_items || [])];
+                        if (idx < items.length - 1) { [items[idx + 1], items[idx]] = [items[idx], items[idx + 1]];
+                          setData((p) => ({ ...p, header_config: { ...p.header_config, menu_items: items } })); }
+                      }}
+                    ><ArrowDown className="h-4 w-4" /></Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => {
+                        const items = (data.header_config.menu_items || []).filter((_, i) => i !== idx);
+                        setData((p) => ({ ...p, header_config: { ...p.header_config, menu_items: items } }));
+                      }}
+                    ><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground">Tip: use <code>#cw-about</code>, <code>#cw-courses</code>, <code>#cw-testimonials</code>, <code>#cw-faq</code>, <code>#cw-demo</code>, <code>#top</code> for in-page anchors.</p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Basic Info */}
         <Card>
           <CardHeader><CardTitle className="text-base">Basic Information</CardTitle></CardHeader>

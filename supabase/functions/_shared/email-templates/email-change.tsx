@@ -85,8 +85,10 @@ const button = {
   backgroundColor: 'hsl(72, 100%, 50%)',
   color: 'hsl(220, 20%, 7%)',
   fontSize: '14px',
+  fontWeight: '600',
   borderRadius: '12px',
-  padding: '14px 28px'; fontWeight: "600", padding: "14px 28px"fontWeight:'600',
+  padding: '14px 28px',
   textDecoration: 'none',
+  display: 'inline-block',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }

@@ -5,6 +5,7 @@ import { useSEO } from "@/hooks/useSEO";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import CoachWebsiteHeader from "@/components/coach-website/CoachWebsiteHeader";
 import CoachWebsiteHero from "@/components/coach-website/CoachWebsiteHero";
 import CoachWebsiteStats from "@/components/coach-website/CoachWebsiteStats";
 import CoachWebsiteAbout from "@/components/coach-website/CoachWebsiteAbout";

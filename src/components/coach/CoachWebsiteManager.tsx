@@ -142,6 +142,28 @@ const CoachWebsiteManager = () => {
   const [exists, setExists] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
   const [leadCount, setLeadCount] = useState(0);
+  const [templateGalleryOpen, setTemplateGalleryOpen] = useState(false);
+
+  const applyTemplate = (tpl: any) => {
+    const cs = tpl.content_sections || {};
+    setData((p) => ({
+      ...p,
+      template_id: tpl.id,
+      theme_color: tpl.theme_color || p.theme_color,
+      hero_variant: tpl.hero_variant || "gradient",
+      content_sections: {
+        ...p.content_sections,
+        ...cs,
+        stats: cs.stats || p.content_sections.stats,
+        usps: cs.usps || p.content_sections.usps,
+        testimonials: cs.testimonials || p.content_sections.testimonials,
+        faqs: cs.faqs || p.content_sections.faqs,
+      },
+      header_config: { ...p.header_config, ...(tpl.header_config || {}) },
+    }));
+    setTemplateGalleryOpen(false);
+    toast({ title: `Template "${tpl.name}" applied`, description: "Click Save Draft to keep these changes." });
+  };
 
   useEffect(() => {
     if (!user) return;

@@ -10,8 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Globe, Save, Send, Eye, Loader2, Upload, Palette, Plus, X, Trash2 } from "lucide-react";
+import { Globe, Save, Send, Eye, Loader2, Upload, Palette, Plus, X, Trash2, Sparkles, Layout, ArrowUp, ArrowDown } from "lucide-react";
 import CoachWebsiteLeads from "./CoachWebsiteLeads";
+import TemplateGallery from "./website/TemplateGallery";
 
 interface ContentSections {
   stats: { value: string; label: string }[];

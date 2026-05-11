@@ -827,6 +827,13 @@ const CoachWebsiteManager = () => {
           )}
         </div>
       )}
+
+      <TemplateGallery
+        open={templateGalleryOpen}
+        onOpenChange={setTemplateGalleryOpen}
+        onApply={applyTemplate}
+        currentTemplateId={data.template_id}
+      />
     </div>
   );
 };

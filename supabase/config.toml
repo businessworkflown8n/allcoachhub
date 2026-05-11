@@ -4,10 +4,34 @@ project_id = "iipxwwrzkdkestikxcpg"
 verify_jwt = false
 
 [functions.generate-seo-blogs]
-verify_jwt = false
+verify_jwt = true
 
 [functions.chatbot]
 verify_jwt = false
+
+[functions.generate-thumbnail]
+verify_jwt = true
+
+[functions.generate-prompt]
+verify_jwt = true
+
+[functions.coach-copilot]
+verify_jwt = true
+
+[functions.ai-agent-engine]
+verify_jwt = true
+
+[functions.generate-ai-blogs]
+verify_jwt = true
+
+[functions.send-material-email]
+verify_jwt = true
+
+[functions.funnel-trigger]
+verify_jwt = true
+
+[functions.inactive-user-reminder]
+verify_jwt = true
 
 [functions.send-campaign-emails]
 verify_jwt = false
@@ -19,10 +43,10 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.content-review]
-verify_jwt = false
+verify_jwt = true
 
 [functions.demand-insights]
-verify_jwt = false
+verify_jwt = true
 
 [functions.seo-analytics]
 verify_jwt = false
@@ -46,9 +70,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.submit-indexing]
-verify_jwt = false
-
-[functions.funnel-trigger]
 verify_jwt = false
 
 [functions.funnel-processor]

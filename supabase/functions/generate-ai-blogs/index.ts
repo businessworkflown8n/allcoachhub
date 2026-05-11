@@ -123,6 +123,23 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
     const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+
+    // Allow CRON_SECRET (scheduled jobs) or admin JWT
+    const cronSecret = Deno.env.get('CRON_SECRET');
+    const provided = req.headers.get('x-cron-secret');
+    const isCron = !!cronSecret && provided === cronSecret;
+    if (!isCron) {
+      const authHeader = req.headers.get('Authorization') || '';
+      if (!authHeader.startsWith('Bearer ')) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      const { data: u } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+      const uid = u?.user?.id;
+      if (!uid) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      const { data: roleRow } = await supabase.from('user_roles').select('role').eq('user_id', uid).eq('role', 'admin').maybeSingle();
+      if (!roleRow) return new Response(JSON.stringify({ error: 'Forbidden — admin only' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     const today = new Date().toISOString().split('T')[0];
     let body: any = {};
     try { body = await req.json(); } catch {}

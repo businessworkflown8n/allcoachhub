@@ -278,6 +278,9 @@ const CoachWebsiteManager = () => {
       show_gallery: data.show_gallery, meta_title: data.meta_title || null,
       meta_description: data.meta_description || null,
       content_sections: data.content_sections,
+      hero_variant: data.hero_variant || "classic",
+      template_id: data.template_id,
+      header_config: data.header_config,
       status: data.status === "rejected" ? "draft" : data.status,
       updated_at: new Date().toISOString(),
     };

@@ -184,6 +184,9 @@ const CoachWebsiteManager = () => {
             demo_heading: cs.demo_heading || defaultContent.demo_heading,
             demo_subtext: cs.demo_subtext || defaultContent.demo_subtext,
           },
+          hero_variant: (website as any).hero_variant || "classic",
+          template_id: (website as any).template_id || null,
+          header_config: { ...defaultData.header_config, ...((website as any).header_config || {}) },
         });
         setExists(true);
         // Fetch lead count

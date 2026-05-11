@@ -83,11 +83,20 @@ const CoachWebsite = () => {
   const themeColor = site.theme_color || "#6366f1";
   const cs = (site.content_sections || {}) as any;
 
+  const headerConfig = (site.header_config || {}) as any;
+  const heroVariant = (site.hero_variant || "classic") as "classic" | "gradient" | "particle" | "video";
+
   return (
     <>
-      <Navbar customLogo={site.logo_url} customName={site.institute_name} customHomeLink={`/coach-website/${slug}`} />
+      <CoachWebsiteHeader
+        logoUrl={site.logo_url}
+        instituteName={site.institute_name}
+        themeColor={themeColor}
+        config={{ ...headerConfig, social_links: socialLinks }}
+        homeHref={`/coach-website/${slug}`}
+      />
       <main className="min-h-screen bg-background pb-16 md:pb-0">
-        <CoachWebsiteHero site={site} coach={coach} courseCount={courses.length} themeColor={themeColor} />
+        <CoachWebsiteHero site={site} coach={coach} courseCount={courses.length} themeColor={themeColor} variant={heroVariant} />
         <CoachWebsiteStats courseCount={courses.length} themeColor={themeColor} contentSections={cs} />
 
         {site.show_about && site.about_text && <CoachWebsiteAbout aboutText={site.about_text} />}

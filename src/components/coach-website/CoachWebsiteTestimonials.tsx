@@ -23,7 +23,7 @@ const CoachWebsiteTestimonials = ({ themeColor, contentSections }: Props) => {
   const t = testimonials[idx];
 
   return (
-    <section className="border-b border-border bg-secondary/20 py-14">
+    <section id="cw-testimonials" className="border-b border-border bg-secondary/20 py-14">
       <div className="container mx-auto px-4">
         <h2 className="mb-8 text-center text-2xl font-bold text-foreground">What Our Students Say</h2>
         <div className="mx-auto max-w-xl text-center">

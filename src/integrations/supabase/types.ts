@@ -1884,10 +1884,71 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_website_templates: {
+        Row: {
+          category: string
+          content_sections: Json | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          display_order: number | null
+          header_config: Json | null
+          hero_variant: string | null
+          id: string
+          is_premium: boolean | null
+          is_published: boolean | null
+          layout_variant: string | null
+          name: string
+          preview_image: string | null
+          section_visibility: Json | null
+          theme_color: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          content_sections?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          header_config?: Json | null
+          hero_variant?: string | null
+          id?: string
+          is_premium?: boolean | null
+          is_published?: boolean | null
+          layout_variant?: string | null
+          name: string
+          preview_image?: string | null
+          section_visibility?: Json | null
+          theme_color?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          content_sections?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          header_config?: Json | null
+          hero_variant?: string | null
+          id?: string
+          is_premium?: boolean | null
+          is_published?: boolean | null
+          layout_variant?: string | null
+          name?: string
+          preview_image?: string | null
+          section_visibility?: Json | null
+          theme_color?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       coach_websites: {
         Row: {
           about_text: string | null
           admin_note: string | null
+          animation_enabled: boolean | null
           banner_url: string | null
           banner_urls: string[] | null
           coach_id: string
@@ -1896,6 +1957,8 @@ export type Database = {
           created_at: string
           description: string | null
           gallery_images: string[] | null
+          header_config: Json | null
+          hero_variant: string | null
           id: string
           institute_name: string
           is_live: boolean
@@ -1912,6 +1975,7 @@ export type Database = {
           social_links: Json | null
           status: string
           tagline: string | null
+          template_id: string | null
           theme_color: string | null
           updated_at: string
           video_url: string | null
@@ -1919,6 +1983,7 @@ export type Database = {
         Insert: {
           about_text?: string | null
           admin_note?: string | null
+          animation_enabled?: boolean | null
           banner_url?: string | null
           banner_urls?: string[] | null
           coach_id: string
@@ -1927,6 +1992,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           gallery_images?: string[] | null
+          header_config?: Json | null
+          hero_variant?: string | null
           id?: string
           institute_name: string
           is_live?: boolean
@@ -1943,6 +2010,7 @@ export type Database = {
           social_links?: Json | null
           status?: string
           tagline?: string | null
+          template_id?: string | null
           theme_color?: string | null
           updated_at?: string
           video_url?: string | null
@@ -1950,6 +2018,7 @@ export type Database = {
         Update: {
           about_text?: string | null
           admin_note?: string | null
+          animation_enabled?: boolean | null
           banner_url?: string | null
           banner_urls?: string[] | null
           coach_id?: string
@@ -1958,6 +2027,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           gallery_images?: string[] | null
+          header_config?: Json | null
+          hero_variant?: string | null
           id?: string
           institute_name?: string
           is_live?: boolean
@@ -1974,6 +2045,7 @@ export type Database = {
           social_links?: Json | null
           status?: string
           tagline?: string | null
+          template_id?: string | null
           theme_color?: string | null
           updated_at?: string
           video_url?: string | null

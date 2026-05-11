@@ -10,8 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Globe, Save, Send, Eye, Loader2, Upload, Palette, Plus, X, Trash2 } from "lucide-react";
+import { Globe, Save, Send, Eye, Loader2, Upload, Palette, Plus, X, Trash2, Sparkles, Layout, ArrowUp, ArrowDown } from "lucide-react";
 import CoachWebsiteLeads from "./CoachWebsiteLeads";
+import TemplateGallery from "./website/TemplateGallery";
 
 interface ContentSections {
   stats: { value: string; label: string }[];
@@ -82,6 +83,16 @@ interface WebsiteData {
   is_live: boolean;
   admin_note: string;
   content_sections: ContentSections;
+  hero_variant: string;
+  template_id: string | null;
+  header_config: {
+    menu_items?: { label: string; href: string }[];
+    cta_label?: string;
+    cta_href?: string;
+    whatsapp_number?: string;
+    sticky?: boolean;
+    transparent?: boolean;
+  };
 }
 
 const defaultData: WebsiteData = {
@@ -93,6 +104,23 @@ const defaultData: WebsiteData = {
   show_contact: false, show_video: false, show_gallery: false,
   meta_title: "", meta_description: "", status: "draft", is_live: false, admin_note: "",
   content_sections: defaultContent,
+  hero_variant: "classic",
+  template_id: null,
+  header_config: {
+    menu_items: [
+      { label: "Home", href: "#top" },
+      { label: "About", href: "#cw-about" },
+      { label: "Courses", href: "#cw-courses" },
+      { label: "Testimonials", href: "#cw-testimonials" },
+      { label: "FAQ", href: "#cw-faq" },
+      { label: "Contact", href: "#cw-demo" },
+    ],
+    cta_label: "Book Free Demo",
+    cta_href: "#cw-demo",
+    whatsapp_number: "",
+    sticky: true,
+    transparent: false,
+  },
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -114,6 +142,28 @@ const CoachWebsiteManager = () => {
   const [exists, setExists] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
   const [leadCount, setLeadCount] = useState(0);
+  const [templateGalleryOpen, setTemplateGalleryOpen] = useState(false);
+
+  const applyTemplate = (tpl: any) => {
+    const cs = tpl.content_sections || {};
+    setData((p) => ({
+      ...p,
+      template_id: tpl.id,
+      theme_color: tpl.theme_color || p.theme_color,
+      hero_variant: tpl.hero_variant || "gradient",
+      content_sections: {
+        ...p.content_sections,
+        ...cs,
+        stats: cs.stats || p.content_sections.stats,
+        usps: cs.usps || p.content_sections.usps,
+        testimonials: cs.testimonials || p.content_sections.testimonials,
+        faqs: cs.faqs || p.content_sections.faqs,
+      },
+      header_config: { ...p.header_config, ...(tpl.header_config || {}) },
+    }));
+    setTemplateGalleryOpen(false);
+    toast({ title: `Template "${tpl.name}" applied`, description: "Click Save Draft to keep these changes." });
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -156,6 +206,9 @@ const CoachWebsiteManager = () => {
             demo_heading: cs.demo_heading || defaultContent.demo_heading,
             demo_subtext: cs.demo_subtext || defaultContent.demo_subtext,
           },
+          hero_variant: (website as any).hero_variant || "classic",
+          template_id: (website as any).template_id || null,
+          header_config: { ...defaultData.header_config, ...((website as any).header_config || {}) },
         });
         setExists(true);
         // Fetch lead count
@@ -247,6 +300,9 @@ const CoachWebsiteManager = () => {
       show_gallery: data.show_gallery, meta_title: data.meta_title || null,
       meta_description: data.meta_description || null,
       content_sections: data.content_sections,
+      hero_variant: data.hero_variant || "classic",
+      template_id: data.template_id,
+      header_config: data.header_config,
       status: data.status === "rejected" ? "draft" : data.status,
       updated_at: new Date().toISOString(),
     };
@@ -342,6 +398,168 @@ const CoachWebsiteManager = () => {
       )}
 
       <div className={`space-y-6 ${isLocked ? "opacity-60 pointer-events-none" : ""}`}>
+        {/* Premium Templates */}
+        <Card className="border-primary/40 bg-gradient-to-br from-primary/5 to-transparent">
+          <CardContent className="pt-5 pb-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-foreground">Premium Website Templates</p>
+                <p className="text-xs text-muted-foreground">Pick a high-converting design for your niche. 10+ premium layouts.</p>
+              </div>
+            </div>
+            <Button onClick={() => setTemplateGalleryOpen(true)} className="font-semibold">
+              <Layout className="h-4 w-4 mr-2" /> Browse Templates
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Header & Menu */}
+        <Card>
+          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Layout className="h-4 w-4" /> Header & Navigation Menu</CardTitle></CardHeader>
+          <CardContent className="space-y-5">
+            <p className="text-xs text-muted-foreground">Your coach website uses its own custom header — the platform navbar is hidden. Customize the menu, primary CTA, and behavior below.</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Hero Style</Label>
+                <select
+                  value={data.hero_variant}
+                  onChange={(e) => setData((p) => ({ ...p, hero_variant: e.target.value }))}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="classic">Classic — soft glow</option>
+                  <option value="gradient">Gradient — premium mesh</option>
+                  <option value="particle">Particle — animated</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>WhatsApp Number (with country code)</Label>
+                <Input
+                  value={data.header_config.whatsapp_number || ""}
+                  onChange={(e) => setData((p) => ({ ...p, header_config: { ...p.header_config, whatsapp_number: e.target.value } }))}
+                  placeholder="+919876543210"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Primary CTA Label</Label>
+                <Input
+                  value={data.header_config.cta_label || ""}
+                  onChange={(e) => setData((p) => ({ ...p, header_config: { ...p.header_config, cta_label: e.target.value } }))}
+                  placeholder="Book Free Demo"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>CTA Target (anchor or URL)</Label>
+                <Input
+                  value={data.header_config.cta_href || ""}
+                  onChange={(e) => setData((p) => ({ ...p, header_config: { ...p.header_config, cta_href: e.target.value } }))}
+                  placeholder="#cw-demo"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                <div>
+                  <p className="text-sm font-medium">Sticky Header</p>
+                  <p className="text-xs text-muted-foreground">Stay visible on scroll</p>
+                </div>
+                <Switch
+                  checked={data.header_config.sticky !== false}
+                  onCheckedChange={(v) => setData((p) => ({ ...p, header_config: { ...p.header_config, sticky: v } }))}
+                />
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                <div>
+                  <p className="text-sm font-medium">Transparent at Top</p>
+                  <p className="text-xs text-muted-foreground">Glass effect over hero</p>
+                </div>
+                <Switch
+                  checked={!!data.header_config.transparent}
+                  onCheckedChange={(v) => setData((p) => ({ ...p, header_config: { ...p.header_config, transparent: v } }))}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Menu Items</Label>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    setData((p) => ({
+                      ...p,
+                      header_config: {
+                        ...p.header_config,
+                        menu_items: [...(p.header_config.menu_items || []), { label: "New Link", href: "#top" }],
+                      },
+                    }))
+                  }
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" /> Add
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {(data.header_config.menu_items || []).map((mi, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input
+                      value={mi.label}
+                      onChange={(e) => {
+                        const items = [...(data.header_config.menu_items || [])];
+                        items[idx] = { ...items[idx], label: e.target.value };
+                        setData((p) => ({ ...p, header_config: { ...p.header_config, menu_items: items } }));
+                      }}
+                      placeholder="Label"
+                      className="flex-1"
+                    />
+                    <Input
+                      value={mi.href}
+                      onChange={(e) => {
+                        const items = [...(data.header_config.menu_items || [])];
+                        items[idx] = { ...items[idx], href: e.target.value };
+                        setData((p) => ({ ...p, header_config: { ...p.header_config, menu_items: items } }));
+                      }}
+                      placeholder="#cw-courses or https://..."
+                      className="flex-1"
+                    />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => {
+                        const items = [...(data.header_config.menu_items || [])];
+                        if (idx > 0) { [items[idx - 1], items[idx]] = [items[idx], items[idx - 1]];
+                          setData((p) => ({ ...p, header_config: { ...p.header_config, menu_items: items } })); }
+                      }}
+                    ><ArrowUp className="h-4 w-4" /></Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => {
+                        const items = [...(data.header_config.menu_items || [])];
+                        if (idx < items.length - 1) { [items[idx + 1], items[idx]] = [items[idx], items[idx + 1]];
+                          setData((p) => ({ ...p, header_config: { ...p.header_config, menu_items: items } })); }
+                      }}
+                    ><ArrowDown className="h-4 w-4" /></Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => {
+                        const items = (data.header_config.menu_items || []).filter((_, i) => i !== idx);
+                        setData((p) => ({ ...p, header_config: { ...p.header_config, menu_items: items } }));
+                      }}
+                    ><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground">Tip: use <code>#cw-about</code>, <code>#cw-courses</code>, <code>#cw-testimonials</code>, <code>#cw-faq</code>, <code>#cw-demo</code>, <code>#top</code> for in-page anchors.</p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Basic Info */}
         <Card>
           <CardHeader><CardTitle className="text-base">Basic Information</CardTitle></CardHeader>
@@ -609,6 +827,13 @@ const CoachWebsiteManager = () => {
           )}
         </div>
       )}
+
+      <TemplateGallery
+        open={templateGalleryOpen}
+        onOpenChange={setTemplateGalleryOpen}
+        onApply={applyTemplate}
+        currentTemplateId={data.template_id}
+      />
     </div>
   );
 };

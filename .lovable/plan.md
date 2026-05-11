@@ -1,56 +1,100 @@
-## Learner LMS Dashboard — Implementation Plan
+## Premium Coach Website & Landing Page Builder Upgrade
 
-The platform already has the full backbone (enrollments, course_modules, course_lessons, lecture_media, quizzes, quiz_questions, quiz_attempts, assignments, assignment_submissions, lesson_progress, issued_certificates, recompute_course_progress RPC). I will not duplicate any of it. This plan wires a premium LMS UX on top.
+This is a very large scope. To ship something production-ready (not a mockup), I'm proposing a **phased plan**. Phase 1 ships now end-to-end; Phases 2–4 follow in subsequent prompts. Existing coach websites & landing pages remain fully functional throughout.
 
-Given the size of the spec, I'll deliver it in **one cohesive Phase 1** that covers the 80% that matters end-to-end. Anything not in Phase 1 is listed as a follow-up so we don't ship half-built features.
+---
 
-### Phase 1 — Ships now
+### Scope reality check
 
-**1. Header / KPI strip** on `/learner/courses`
-- Welcome + avatar, total / in-progress / completed courses, certificates earned, overall avg %.
-- Search box + filter chips (All / In Progress / Completed / Not Started / Recently Added).
+The original prompt covers ~80 distinct features (drag-drop builder, GrapesJS, Three.js, GSAP, AI generators, heatmaps, mega menus, custom domains, Zapier/n8n, AMP, A/B testing, etc.). Building all of that in one go would take weeks and would ship broken. Instead I'll deliver a **premium, conversion-focused upgrade** of the *existing* coach website builder that already lives at `/coach/website` and `/coach-website/:slug`, then layer advanced builder features after.
 
-**2. Assigned Coaches rail**
-- Derived from `enrollments.coach_id` → `profiles`.
-- Horizontal scrollable cards: avatar, name, expertise, course count, WhatsApp / Email / Book Session buttons (re-uses existing contact-access logic).
+Tech note: This project is **React 18 + Vite + Tailwind** (not Next.js). I'll use Framer Motion (already common in the stack), Tailwind, and the existing Supabase backend. No GrapesJS / Three.js / Next.js migration — those would require rewriting the platform.
 
-**3. Course cards (replace current `LearnerCourses.tsx`)**
-- Thumbnail, title, coach, modules + lessons count, duration, progress bar, last-watched lesson title.
-- Smart CTA: "Start" / "Continue" / "Review" / "Locked" based on `progress_percent` and `payment_status`.
+---
 
-**4. LMS Course Player (upgrade existing `CoursePlayer.tsx`)**
-- Two-pane layout: left = collapsible module → lesson accordion with completion ticks; right = active lesson.
-- Lesson renderer already supports YouTube + uploaded video + images via `lecture_media`; I'll add: PDF inline viewer, external link, audio, downloadable attachments list, "Mark complete" button (writes `lesson_progress`, calls `recompute_course_progress` RPC), auto-advance to next lesson, resume from last viewed lesson (localStorage + `lesson_progress.last_position_seconds`).
-- Tabs under player: Overview · Resources · Notes (per-lesson, stored in `lesson_progress.notes` if column exists, else new `lesson_notes` table) · Quiz · Assignment.
+### Phase 1 — Premium Templates + Custom Header + Hero/CTA Polish (ships now)
 
-**5. Quiz runner** (uses existing `quizzes` / `quiz_questions` / `quiz_attempts`)
-- MCQ / true-false / multi-select / descriptive.
-- Timer, instant scoring, pass/fail, retry.
+**1. Remove default Navbar from coach websites**
+- `src/pages/CoachWebsite.tsx`: replace `<Navbar customLogo... />` with a new `<CoachWebsiteHeader />` driven entirely by the coach's own settings (logo, menu items, CTA button, social icons, sticky/transparent toggle, mobile hamburger).
+- Add `header_config` JSONB column to `coach_websites` (menu items, style, CTA, socials, sticky/transparent flags).
 
-**6. Assignment submission** (uses existing `assignments` / `assignment_submissions`)
-- Upload to `course-content` bucket, link submission, status badge (submitted / reviewed / approved / rejected) + coach feedback.
+**2. Premium Template Library (10 ready-made templates to start)**
+- New table `coach_website_templates` (name, category, preview_image, content_sections JSON, theme_color, layout_variant, is_premium).
+- Seed 10 templates across the highest-impact categories: AI Coaching, Business Coaching, Fitness, Trading, Digital Marketing, Webinar Funnel, Masterclass, Consulting, High-Ticket Funnel, Lead Gen.
+- New page `src/pages/coach/WebsiteTemplates.tsx` — gallery with category filter, preview, "Use this template" → clones config into the coach's `coach_websites` row.
+- Admin moderation: add `is_published`, `created_by` so admins can add/approve templates from `/admin` (Phase 2 adds full admin UI; Phase 1 ships seeded templates).
 
-**7. Certificates tab** — already exists; I'll surface "Download" + LinkedIn share on completed courses inside the player too.
+**3. Premium Hero + 3D CTA upgrade**
+- Refactor `CoachWebsiteHero.tsx` with: gradient/particle background option, glassmorphism card, 3D-style CTA (depth shadow, glow, magnetic hover via Framer Motion), animated stats counter, fade-in on scroll.
+- Add `hero_variant` field (`classic | gradient | video | particle`) chosen per template.
+- New shared component `Premium3DButton` reusable across all CTAs (Book Demo, Enroll, Final CTA).
 
-**8. Progress tracking**
-- Circular progress on course header.
-- Each lesson auto-marks complete at 90% video watched (uses existing `lesson_progress`).
+**4. Premium animations layer**
+- Add Framer Motion-based fade/slide/scale for every section on scroll.
+- Glassmorphism utility classes in `index.css` (`.glass-card`, `.neon-glow`, `.magnetic-hover`).
+- Smooth scroll already enabled — verify and polish.
 
-### Phase 2 — Follow-ups (NOT in this build)
+**5. Layout variants per template**
+- Each section component (`CoachWebsiteCourses`, `CoachWebsiteTestimonials`, `CoachWebsiteFAQ`, `CoachWebsiteFinalCTA`) gets a `variant` prop (`classic | grid | carousel | spotlight`) so templates render visibly different.
 
-- Live class scheduling/attendance (Zoom/Meet/Teams join flows).
-- Push + WhatsApp notifications for new lesson / deadline / live reminder (current system has in-app + email only).
-- Subtitle (.vtt) upload pipeline & DRM-style anti-download.
-- Weekly activity graph + learning streak analytics widgets.
-- Coach-side review UI for assignments (separate coach dashboard task).
+**6. Coach builder UX upgrades (in `/coach/website`)**
+- "Choose Template" entry point at top of the builder.
+- New "Header & Menu" tab — manage logo, favicon, menu items (drag-reorder), CTA button, social icons, sticky/transparent toggles, WhatsApp floating button.
+- Live mobile/tablet/desktop preview toggle (CSS-based, no rebuild).
 
-### Technical notes
-- All queries are RLS-safe — learners already only see rows where `learner_id = auth.uid()`.
-- New file: `src/components/learner/lms/` with `LearnerLMSDashboard.tsx`, `AssignedCoachesRail.tsx`, `CourseGrid.tsx`, `LessonRenderer.tsx`, `QuizRunner.tsx`, `AssignmentPanel.tsx`, `ModuleSidebar.tsx`.
-- `LearnerCourses.tsx` becomes a thin wrapper around `LearnerLMSDashboard`.
-- `CoursePlayer.tsx` refactored to use `ModuleSidebar` + `LessonRenderer`.
-- One small migration: add `notes text` and `last_position_seconds int` to `lesson_progress` if missing; add `lesson_notes` only if needed.
-- Design tokens only (no raw colors); skeleton loaders; mobile-first; existing dark theme.
+---
 
-### What I need from you
-Confirm Phase 1 scope. If you want any Phase-2 item pulled forward (especially Live Classes or Notifications), say which ones — those each add meaningful work.
+### Phase 2 — Advanced Builder + AI Assist (follow-up prompt)
+- Section-level drag-reorder + show/hide for all 12+ sections
+- Inline text editing inside the preview iframe
+- AI Headline / CTA / SEO Meta generator (Lovable AI Gateway, Gemini)
+- Reusable "Save as my template"
+- 6 more premium templates
+
+### Phase 3 — Forms, Funnels, Integrations
+- Multi-step forms, conditional fields, OTP
+- Webhook + Zapier-style outbound, GTM/Meta Pixel field, custom CSS/JS
+- Countdown timer, scarcity widgets, sticky CTA bar with offer
+
+### Phase 4 — Analytics + Custom Domain + Admin Template Studio
+- Per-page visitor / conversion / device analytics (already partly in `landing_pages` analytics)
+- Custom domain workflow (admin approval)
+- Admin Template Studio (create/edit/publish premium templates from `/admin`)
+- A/B testing, heatmap (Microsoft Clarity embed)
+
+---
+
+### Files Phase 1 will touch
+
+**Database (one migration)**
+- `coach_websites`: add `header_config JSONB`, `hero_variant TEXT`, `template_id UUID`, `animation_enabled BOOLEAN`
+- `coach_website_templates`: new table + RLS (public read for `is_published`, admin write)
+- Seed 10 templates
+
+**New files**
+- `src/components/coach-website/CoachWebsiteHeader.tsx` (replaces default Navbar on public coach sites)
+- `src/components/coach-website/Premium3DButton.tsx`
+- `src/components/coach/website/HeaderMenuEditor.tsx`
+- `src/components/coach/website/TemplateGallery.tsx`
+- `src/pages/coach/WebsiteTemplates.tsx`
+- `src/lib/coachWebsiteTemplates.ts` (template seed metadata helpers)
+
+**Edited**
+- `src/pages/CoachWebsite.tsx` — swap Navbar for CoachWebsiteHeader, pass variants
+- `src/components/coach-website/CoachWebsiteHero.tsx` — premium hero variants + 3D CTA
+- All `CoachWebsite*` section components — accept optional `variant` prop, add Framer Motion entrance animations
+- `src/index.css` — glassmorphism, neon glow, 3D button utilities
+- The existing `/coach/website` builder page — add "Templates" + "Header & Menu" tabs
+
+---
+
+### What I will NOT do in Phase 1 (and why)
+- **Full GrapesJS / drag-drop free-form builder** — replacing the structured builder breaks SEO, RLS-validated content, and the existing approval workflow. We keep the section-based model and add variants instead.
+- **Three.js / WebGL hero** — heavy bundle, hurts mobile performance budget (90+ score requirement in your memory).
+- **Custom domains, AMP, n8n/Zapier** — separate infra work, scheduled for Phase 3/4.
+- **Next.js migration** — project is Vite + React 18; switching frameworks would break everything.
+
+---
+
+### Confirm to proceed
+Reply **"Approved"** and I'll ship Phase 1 in this thread (migration + ~12 files). If you want any Phase 2/3/4 item pulled into Phase 1, name it and I'll re-scope.

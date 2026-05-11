@@ -18,7 +18,7 @@ const CoachWebsiteFAQ = ({ contentSections }: Props) => {
   if (faqs.length === 0) return null;
 
   return (
-    <section className="border-b border-border py-14">
+    <section id="cw-faq" className="border-b border-border py-14">
       <div className="container mx-auto px-4">
         <h2 className="mb-8 text-center text-2xl font-bold text-foreground">Frequently Asked Questions</h2>
         <div className="mx-auto max-w-2xl">

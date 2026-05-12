@@ -653,32 +653,26 @@ const CoachWebsiteManager = () => {
           </CardContent>
         </Card>
 
-        {/* Section Toggles */}
+        {/* Section Order & Visibility (Drag & Drop) */}
         <Card>
-          <CardHeader><CardTitle className="text-base">Content Sections</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Layout className="h-4 w-4" /> Page Sections — Drag to Reorder
+            </CardTitle>
+          </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {[
-                { key: "show_about", label: "About Us" },
-                { key: "show_courses", label: "Courses" },
-                { key: "show_testimonials", label: "Testimonials" },
-                { key: "show_contact", label: "Contact Info" },
-                { key: "show_video", label: "Intro Video" },
-              ].map(({ key, label }) => (
-                <div key={key} className="flex items-center justify-between rounded-lg border border-border p-3">
-                  <span className="text-sm text-foreground">{label}</span>
-                  <Switch checked={(data as any)[key]} onCheckedChange={(v) => setData((p) => ({ ...p, [key]: v }))} />
-                </div>
-              ))}
-            </div>
-            {data.show_about && (
-              <div className="space-y-2">
+            <SectionReorder
+              value={data.section_order}
+              onChange={(next) => setData((p) => ({ ...p, section_order: next }))}
+            />
+            {data.section_order.find((s) => s.id === "about")?.visible && (
+              <div className="space-y-2 pt-2 border-t border-border">
                 <Label>About Us Content</Label>
                 <Textarea value={data.about_text} onChange={(e) => setData((p) => ({ ...p, about_text: e.target.value }))} rows={4} placeholder="Write about your institute..." />
               </div>
             )}
-            {data.show_video && (
-              <div className="space-y-2">
+            {data.section_order.find((s) => s.id === "video")?.visible && (
+              <div className="space-y-2 pt-2 border-t border-border">
                 <Label>Intro Video (YouTube URL)</Label>
                 <Input value={data.video_url} onChange={(e) => setData((p) => ({ ...p, video_url: e.target.value }))} placeholder="https://youtube.com/watch?v=..." />
               </div>

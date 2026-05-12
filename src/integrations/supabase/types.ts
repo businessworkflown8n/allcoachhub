@@ -1965,6 +1965,7 @@ export type Database = {
           logo_url: string | null
           meta_description: string | null
           meta_title: string | null
+          section_order: Json | null
           show_about: boolean | null
           show_contact: boolean | null
           show_courses: boolean | null
@@ -2000,6 +2001,7 @@ export type Database = {
           logo_url?: string | null
           meta_description?: string | null
           meta_title?: string | null
+          section_order?: Json | null
           show_about?: boolean | null
           show_contact?: boolean | null
           show_courses?: boolean | null
@@ -2035,6 +2037,7 @@ export type Database = {
           logo_url?: string | null
           meta_description?: string | null
           meta_title?: string | null
+          section_order?: Json | null
           show_about?: boolean | null
           show_contact?: boolean | null
           show_courses?: boolean | null

@@ -123,6 +123,7 @@ const defaultData: WebsiteData = {
     sticky: true,
     transparent: false,
   },
+  section_order: DEFAULT_SECTION_ORDER,
 };
 
 const STATUS_COLORS: Record<string, string> = {

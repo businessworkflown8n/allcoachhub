@@ -309,6 +309,7 @@ const CoachWebsiteManager = () => {
       hero_variant: data.hero_variant || "classic",
       template_id: data.template_id,
       header_config: data.header_config,
+      section_order: data.section_order,
       status: data.status === "rejected" ? "draft" : data.status,
       updated_at: new Date().toISOString(),
     };

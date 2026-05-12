@@ -212,6 +212,9 @@ const CoachWebsiteManager = () => {
           hero_variant: (website as any).hero_variant || "classic",
           template_id: (website as any).template_id || null,
           header_config: { ...defaultData.header_config, ...((website as any).header_config || {}) },
+          section_order: Array.isArray((website as any).section_order) && (website as any).section_order.length > 0
+            ? (website as any).section_order as SectionItem[]
+            : DEFAULT_SECTION_ORDER,
         });
         setExists(true);
         // Fetch lead count

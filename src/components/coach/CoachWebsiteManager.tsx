@@ -94,6 +94,7 @@ interface WebsiteData {
     sticky?: boolean;
     transparent?: boolean;
   };
+  section_order: SectionItem[];
 }
 
 const defaultData: WebsiteData = {

@@ -86,6 +86,56 @@ const CoachWebsite = () => {
   const headerConfig = (site.header_config || {}) as any;
   const heroVariant = (site.hero_variant || "classic") as "classic" | "gradient" | "particle" | "video";
 
+  const DEFAULT_ORDER = [
+    { id: "hero", visible: true },
+    { id: "stats", visible: true },
+    { id: "about", visible: site.show_about !== false },
+    { id: "usp", visible: true },
+    { id: "courses", visible: site.show_courses !== false },
+    { id: "coach_profile", visible: true },
+    { id: "video", visible: !!site.show_video },
+    { id: "testimonials", visible: site.show_testimonials !== false },
+    { id: "demo", visible: true },
+    { id: "faq", visible: true },
+    { id: "social", visible: true },
+    { id: "final_cta", visible: true },
+  ];
+  const sectionOrder: { id: string; visible: boolean }[] =
+    Array.isArray(site.section_order) && site.section_order.length > 0
+      ? site.section_order
+      : DEFAULT_ORDER;
+
+  const renderSection = (id: string) => {
+    switch (id) {
+      case "hero":
+        return <CoachWebsiteHero key="hero" site={site} coach={coach} courseCount={courses.length} themeColor={themeColor} variant={heroVariant} />;
+      case "stats":
+        return <CoachWebsiteStats key="stats" courseCount={courses.length} themeColor={themeColor} contentSections={cs} />;
+      case "about":
+        return site.about_text ? <CoachWebsiteAbout key="about" aboutText={site.about_text} /> : null;
+      case "usp":
+        return <CoachWebsiteUSP key="usp" themeColor={themeColor} contentSections={cs} />;
+      case "courses":
+        return <CoachWebsiteCourses key="courses" courses={courses} themeColor={themeColor} />;
+      case "coach_profile":
+        return <CoachWebsiteCoachProfile key="coach_profile" coach={coach} themeColor={themeColor} />;
+      case "video":
+        return site.video_url ? <CoachWebsiteVideo key="video" videoUrl={site.video_url} themeColor={themeColor} /> : null;
+      case "testimonials":
+        return <CoachWebsiteTestimonials key="testimonials" themeColor={themeColor} contentSections={cs} />;
+      case "demo":
+        return <CoachWebsiteDemoForm key="demo" coachId={site.coach_id} instituteName={site.institute_name} themeColor={themeColor} contentSections={cs} slug={slug} />;
+      case "faq":
+        return <CoachWebsiteFAQ key="faq" contentSections={cs} />;
+      case "social":
+        return <CoachWebsiteSocial key="social" socialLinks={socialLinks} />;
+      case "final_cta":
+        return <CoachWebsiteFinalCTA key="final_cta" themeColor={themeColor} contentSections={cs} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <CoachWebsiteHeader
@@ -96,28 +146,7 @@ const CoachWebsite = () => {
         homeHref={`/coach-website/${slug}`}
       />
       <main className="min-h-screen bg-background pb-16 md:pb-0">
-        <CoachWebsiteHero site={site} coach={coach} courseCount={courses.length} themeColor={themeColor} variant={heroVariant} />
-        <CoachWebsiteStats courseCount={courses.length} themeColor={themeColor} contentSections={cs} />
-
-        {site.show_about && site.about_text && <CoachWebsiteAbout aboutText={site.about_text} />}
-
-        <CoachWebsiteUSP themeColor={themeColor} contentSections={cs} />
-
-        {site.show_courses && <CoachWebsiteCourses courses={courses} themeColor={themeColor} />}
-
-        <CoachWebsiteCoachProfile coach={coach} themeColor={themeColor} />
-
-        {site.show_video && site.video_url && <CoachWebsiteVideo videoUrl={site.video_url} themeColor={themeColor} />}
-
-        {site.show_testimonials !== false && <CoachWebsiteTestimonials themeColor={themeColor} contentSections={cs} />}
-
-        <CoachWebsiteDemoForm coachId={site.coach_id} instituteName={site.institute_name} themeColor={themeColor} contentSections={cs} slug={slug} />
-
-        <CoachWebsiteFAQ contentSections={cs} />
-
-        <CoachWebsiteSocial socialLinks={socialLinks} />
-
-        <CoachWebsiteFinalCTA themeColor={themeColor} contentSections={cs} />
+        {sectionOrder.filter((s) => s.visible).map((s) => renderSection(s.id))}
       </main>
       <Footer />
       <CoachWebsiteStickyCTA themeColor={themeColor} />

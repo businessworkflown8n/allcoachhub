@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Globe, Save, Send, Eye, Loader2, Upload, Palette, Plus, X, Trash2, Sparkles, Layout, ArrowUp, ArrowDown } from "lucide-react";
 import CoachWebsiteLeads from "./CoachWebsiteLeads";
 import TemplateGallery from "./website/TemplateGallery";
+import SectionReorder, { DEFAULT_SECTION_ORDER, SectionItem } from "./website/SectionReorder";
 
 interface ContentSections {
   stats: { value: string; label: string }[];
@@ -93,6 +94,7 @@ interface WebsiteData {
     sticky?: boolean;
     transparent?: boolean;
   };
+  section_order: SectionItem[];
 }
 
 const defaultData: WebsiteData = {
@@ -121,6 +123,7 @@ const defaultData: WebsiteData = {
     sticky: true,
     transparent: false,
   },
+  section_order: DEFAULT_SECTION_ORDER,
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -209,6 +212,9 @@ const CoachWebsiteManager = () => {
           hero_variant: (website as any).hero_variant || "classic",
           template_id: (website as any).template_id || null,
           header_config: { ...defaultData.header_config, ...((website as any).header_config || {}) },
+          section_order: Array.isArray((website as any).section_order) && (website as any).section_order.length > 0
+            ? (website as any).section_order as SectionItem[]
+            : DEFAULT_SECTION_ORDER,
         });
         setExists(true);
         // Fetch lead count
@@ -294,15 +300,19 @@ const CoachWebsiteManager = () => {
       logo_url: data.logo_url || null, banner_url: data.banner_urls[0] || data.banner_url || null,
       banner_urls: data.banner_urls, theme_color: data.theme_color || "#6366f1",
       video_url: data.video_url || null, about_text: data.about_text || null,
-      social_links: data.social_links, show_courses: data.show_courses,
-      show_testimonials: data.show_testimonials, show_about: data.show_about,
-      show_contact: data.show_contact, show_video: data.show_video,
+      social_links: data.social_links,
+      show_courses: data.section_order.find((s) => s.id === "courses")?.visible ?? data.show_courses,
+      show_testimonials: data.section_order.find((s) => s.id === "testimonials")?.visible ?? data.show_testimonials,
+      show_about: data.section_order.find((s) => s.id === "about")?.visible ?? data.show_about,
+      show_contact: data.show_contact,
+      show_video: data.section_order.find((s) => s.id === "video")?.visible ?? data.show_video,
       show_gallery: data.show_gallery, meta_title: data.meta_title || null,
       meta_description: data.meta_description || null,
       content_sections: data.content_sections,
       hero_variant: data.hero_variant || "classic",
       template_id: data.template_id,
       header_config: data.header_config,
+      section_order: data.section_order,
       status: data.status === "rejected" ? "draft" : data.status,
       updated_at: new Date().toISOString(),
     };
@@ -643,32 +653,26 @@ const CoachWebsiteManager = () => {
           </CardContent>
         </Card>
 
-        {/* Section Toggles */}
+        {/* Section Order & Visibility (Drag & Drop) */}
         <Card>
-          <CardHeader><CardTitle className="text-base">Content Sections</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Layout className="h-4 w-4" /> Page Sections — Drag to Reorder
+            </CardTitle>
+          </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {[
-                { key: "show_about", label: "About Us" },
-                { key: "show_courses", label: "Courses" },
-                { key: "show_testimonials", label: "Testimonials" },
-                { key: "show_contact", label: "Contact Info" },
-                { key: "show_video", label: "Intro Video" },
-              ].map(({ key, label }) => (
-                <div key={key} className="flex items-center justify-between rounded-lg border border-border p-3">
-                  <span className="text-sm text-foreground">{label}</span>
-                  <Switch checked={(data as any)[key]} onCheckedChange={(v) => setData((p) => ({ ...p, [key]: v }))} />
-                </div>
-              ))}
-            </div>
-            {data.show_about && (
-              <div className="space-y-2">
+            <SectionReorder
+              value={data.section_order}
+              onChange={(next) => setData((p) => ({ ...p, section_order: next }))}
+            />
+            {data.section_order.find((s) => s.id === "about")?.visible && (
+              <div className="space-y-2 pt-2 border-t border-border">
                 <Label>About Us Content</Label>
                 <Textarea value={data.about_text} onChange={(e) => setData((p) => ({ ...p, about_text: e.target.value }))} rows={4} placeholder="Write about your institute..." />
               </div>
             )}
-            {data.show_video && (
-              <div className="space-y-2">
+            {data.section_order.find((s) => s.id === "video")?.visible && (
+              <div className="space-y-2 pt-2 border-t border-border">
                 <Label>Intro Video (YouTube URL)</Label>
                 <Input value={data.video_url} onChange={(e) => setData((p) => ({ ...p, video_url: e.target.value }))} placeholder="https://youtube.com/watch?v=..." />
               </div>

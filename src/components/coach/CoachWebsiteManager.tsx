@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Globe, Save, Send, Eye, Loader2, Upload, Palette, Plus, X, Trash2, Sparkles, Layout, ArrowUp, ArrowDown } from "lucide-react";
 import CoachWebsiteLeads from "./CoachWebsiteLeads";
 import TemplateGallery from "./website/TemplateGallery";
+import SectionReorder, { DEFAULT_SECTION_ORDER, SectionItem } from "./website/SectionReorder";
 
 interface ContentSections {
   stats: { value: string; label: string }[];

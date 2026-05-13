@@ -129,6 +129,10 @@ const defaultData: WebsiteData = {
     transparent: false,
   },
   section_order: DEFAULT_SECTION_ORDER,
+  source_mode: "builder",
+  external_url: "",
+  custom_html: "",
+  github_repo_url: "",
 };
 
 const STATUS_COLORS: Record<string, string> = {

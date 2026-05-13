@@ -449,9 +449,14 @@ const CoachWebsiteManager = () => {
                 <p className="text-xs text-muted-foreground">Pick a high-converting design for your niche. 10+ premium layouts.</p>
               </div>
             </div>
-            <Button onClick={() => setTemplateGalleryOpen(true)} className="font-semibold">
-              <Layout className="h-4 w-4 mr-2" /> Browse Templates
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={saveAsTemplate} className="font-semibold">
+                <Save className="h-4 w-4 mr-2" /> Save as my template
+              </Button>
+              <Button onClick={() => setTemplateGalleryOpen(true)} className="font-semibold">
+                <Layout className="h-4 w-4 mr-2" /> Browse Templates
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

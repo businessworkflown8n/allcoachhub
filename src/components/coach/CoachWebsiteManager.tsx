@@ -454,8 +454,17 @@ const CoachWebsiteManager = () => {
       )}
 
       <div className={`space-y-6 ${isLocked ? "opacity-60 pointer-events-none" : ""}`}>
+        {/* Website Source */}
+        <WebsiteSourceEditor
+          sourceMode={data.source_mode}
+          externalUrl={data.external_url}
+          customHtml={data.custom_html}
+          githubRepoUrl={data.github_repo_url}
+          onChange={(patch) => setData((p) => ({ ...p, ...patch }))}
+        />
+
         {/* Premium Templates */}
-        <Card className="border-primary/40 bg-gradient-to-br from-primary/5 to-transparent">
+        <Card className={`border-primary/40 bg-gradient-to-br from-primary/5 to-transparent ${data.source_mode !== "builder" ? "opacity-50 pointer-events-none" : ""}`}>
           <CardContent className="pt-5 pb-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15">

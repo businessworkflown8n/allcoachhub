@@ -96,6 +96,10 @@ interface WebsiteData {
     transparent?: boolean;
   };
   section_order: SectionItem[];
+  source_mode: SourceMode;
+  external_url: string;
+  custom_html: string;
+  github_repo_url: string;
 }
 
 const defaultData: WebsiteData = {

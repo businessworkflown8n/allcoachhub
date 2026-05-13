@@ -253,6 +253,10 @@ const CoachWebsiteManager = () => {
           section_order: Array.isArray((website as any).section_order) && (website as any).section_order.length > 0
             ? (website as any).section_order as SectionItem[]
             : DEFAULT_SECTION_ORDER,
+          source_mode: ((website as any).source_mode as SourceMode) || "builder",
+          external_url: (website as any).external_url || "",
+          custom_html: (website as any).custom_html || "",
+          github_repo_url: (website as any).github_repo_url || "",
         });
         setExists(true);
         // Fetch lead count

@@ -14,6 +14,7 @@ import { Globe, Save, Send, Eye, Loader2, Upload, Palette, Plus, X, Trash2, Spar
 import CoachWebsiteLeads from "./CoachWebsiteLeads";
 import TemplateGallery from "./website/TemplateGallery";
 import SectionReorder, { DEFAULT_SECTION_ORDER, SectionItem } from "./website/SectionReorder";
+import WebsiteSourceEditor, { SourceMode } from "./website/WebsiteSourceEditor";
 
 interface ContentSections {
   stats: { value: string; label: string }[];

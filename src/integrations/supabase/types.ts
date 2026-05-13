@@ -1958,8 +1958,11 @@ export type Database = {
           contact_info: Json | null
           content_sections: Json | null
           created_at: string
+          custom_html: string | null
           description: string | null
+          external_url: string | null
           gallery_images: string[] | null
+          github_repo_url: string | null
           header_config: Json | null
           hero_variant: string | null
           id: string
@@ -1977,6 +1980,7 @@ export type Database = {
           show_video: boolean | null
           slug: string
           social_links: Json | null
+          source_mode: string
           status: string
           tagline: string | null
           template_id: string | null
@@ -1994,8 +1998,11 @@ export type Database = {
           contact_info?: Json | null
           content_sections?: Json | null
           created_at?: string
+          custom_html?: string | null
           description?: string | null
+          external_url?: string | null
           gallery_images?: string[] | null
+          github_repo_url?: string | null
           header_config?: Json | null
           hero_variant?: string | null
           id?: string
@@ -2013,6 +2020,7 @@ export type Database = {
           show_video?: boolean | null
           slug: string
           social_links?: Json | null
+          source_mode?: string
           status?: string
           tagline?: string | null
           template_id?: string | null
@@ -2030,8 +2038,11 @@ export type Database = {
           contact_info?: Json | null
           content_sections?: Json | null
           created_at?: string
+          custom_html?: string | null
           description?: string | null
+          external_url?: string | null
           gallery_images?: string[] | null
+          github_repo_url?: string | null
           header_config?: Json | null
           hero_variant?: string | null
           id?: string
@@ -2049,6 +2060,7 @@ export type Database = {
           show_video?: boolean | null
           slug?: string
           social_links?: Json | null
+          source_mode?: string
           status?: string
           tagline?: string | null
           template_id?: string | null

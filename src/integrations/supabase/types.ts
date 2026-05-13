@@ -1900,6 +1900,7 @@ export type Database = {
           layout_variant: string | null
           name: string
           preview_image: string | null
+          section_order: Json | null
           section_visibility: Json | null
           theme_color: string | null
           updated_at: string | null
@@ -1919,6 +1920,7 @@ export type Database = {
           layout_variant?: string | null
           name: string
           preview_image?: string | null
+          section_order?: Json | null
           section_visibility?: Json | null
           theme_color?: string | null
           updated_at?: string | null
@@ -1938,6 +1940,7 @@ export type Database = {
           layout_variant?: string | null
           name?: string
           preview_image?: string | null
+          section_order?: Json | null
           section_visibility?: Json | null
           theme_color?: string | null
           updated_at?: string | null

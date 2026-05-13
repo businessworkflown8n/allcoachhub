@@ -389,6 +389,34 @@ const CoachWebsiteManager = () => {
     }
   };
 
+  const publishNow = async () => {
+    // Validate source-specific requirements
+    if (data.source_mode === "external_url" && !data.external_url) {
+      toast({ title: "External URL required", description: "Paste the URL you want to embed.", variant: "destructive" });
+      return;
+    }
+    if (data.source_mode === "html_file" && !data.custom_html) {
+      toast({ title: "HTML required", description: "Upload or paste your HTML file.", variant: "destructive" });
+      return;
+    }
+    if (data.source_mode === "github" && (!data.github_repo_url || !data.external_url)) {
+      toast({ title: "GitHub details required", description: "Add both the repo URL and the deployed live URL.", variant: "destructive" });
+      return;
+    }
+    await saveDraft();
+    if (data.status === "approved") {
+      const { error } = await supabase.from("coach_websites").update({ is_live: true, updated_at: new Date().toISOString() }).eq("coach_id", user!.id);
+      if (!error) {
+        setData((p) => ({ ...p, is_live: true }));
+        toast({ title: "Website published", description: "Your public coach page is now live." });
+      } else {
+        toast({ title: "Publish failed", description: error.message, variant: "destructive" });
+      }
+    } else {
+      await submitForApproval();
+    }
+  };
+
   const isLocked = data.status === "pending";
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;

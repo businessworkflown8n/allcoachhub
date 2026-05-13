@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Sparkles, Check } from "lucide-react";
+import { Loader2, Sparkles, Check, Trash2, User } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 interface Template {
@@ -17,7 +19,10 @@ interface Template {
   layout_variant: string;
   content_sections: any;
   header_config: any;
+  section_order?: any;
   is_premium: boolean;
+  is_published: boolean;
+  created_by: string | null;
 }
 
 interface Props {
@@ -28,26 +33,48 @@ interface Props {
 }
 
 const TemplateGallery = ({ open, onOpenChange, onApply, currentTemplateId }: Props) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("All");
 
+  const load = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("coach_website_templates" as any)
+      .select("*")
+      .order("display_order", { ascending: true });
+    setTemplates((data as any) || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (!open) return;
-    (async () => {
-      setLoading(true);
-      const { data } = await supabase
-        .from("coach_website_templates" as any)
-        .select("*")
-        .eq("is_published", true)
-        .order("display_order", { ascending: true });
-      setTemplates((data as any) || []);
-      setLoading(false);
-    })();
+    load();
   }, [open]);
 
-  const categories = ["All", ...Array.from(new Set(templates.map((t) => t.category)))];
-  const filtered = filter === "All" ? templates : templates.filter((t) => t.category === filter);
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Delete this saved template?")) return;
+    const { error } = await supabase.from("coach_website_templates" as any).delete().eq("id", id);
+    if (error) {
+      toast({ title: "Could not delete", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Template deleted" });
+    setTemplates((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const myTemplates = templates.filter((t) => !t.is_published && t.created_by === user?.id);
+  const publicTemplates = templates.filter((t) => t.is_published);
+
+  const baseList = filter === "My Templates" ? myTemplates : publicTemplates;
+  const categories = ["All", ...Array.from(new Set(publicTemplates.map((t) => t.category)))];
+  if (myTemplates.length > 0) categories.push("My Templates");
+
+  const filtered = filter === "All" || filter === "My Templates"
+    ? baseList
+    : publicTemplates.filter((t) => t.category === filter);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -57,7 +84,7 @@ const TemplateGallery = ({ open, onOpenChange, onApply, currentTemplateId }: Pro
             <Sparkles className="h-5 w-5 text-primary" /> Premium Website Templates
           </DialogTitle>
           <DialogDescription>
-            Pick a ready-made design tuned for conversion. Applying a template updates your hero style, theme color, and content sections — your courses, banner, and logo are kept.
+            Pick a ready-made design or reuse one of your saved templates. Applying a template updates your hero style, theme color, layout order, and content sections — your courses, banner, and logo are kept.
           </DialogDescription>
         </DialogHeader>
 
@@ -67,12 +94,13 @@ const TemplateGallery = ({ open, onOpenChange, onApply, currentTemplateId }: Pro
               key={c}
               onClick={() => setFilter(c)}
               className={cn(
-                "rounded-full px-3 py-1 text-xs font-medium border transition-colors",
+                "rounded-full px-3 py-1 text-xs font-medium border transition-colors flex items-center gap-1",
                 filter === c
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-background text-foreground/80 border-border hover:bg-muted"
               )}
             >
+              {c === "My Templates" && <User className="h-3 w-3" />}
               {c}
             </button>
           ))}
@@ -81,10 +109,17 @@ const TemplateGallery = ({ open, onOpenChange, onApply, currentTemplateId }: Pro
         <div className="flex-1 overflow-y-auto pr-1 -mr-1">
           {loading ? (
             <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-12 text-sm text-muted-foreground">
+              {filter === "My Templates"
+                ? "You haven't saved any templates yet. Use \"Save as my template\" to reuse your current layout."
+                : "No templates found."}
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map((t) => {
                 const isCurrent = currentTemplateId === t.id;
+                const isMine = !t.is_published && t.created_by === user?.id;
                 return (
                   <div
                     key={t.id}
@@ -96,11 +131,16 @@ const TemplateGallery = ({ open, onOpenChange, onApply, currentTemplateId }: Pro
                         background: `linear-gradient(135deg, ${t.theme_color}, ${t.theme_color}88), radial-gradient(ellipse at top right, #ffffff22, transparent 60%)`,
                       }}
                     >
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-background font-bold text-lg drop-shadow">{t.name}</span>
+                      <div className="absolute inset-0 flex items-center justify-center px-3 text-center">
+                        <span className="text-background font-bold text-lg drop-shadow line-clamp-2">{t.name}</span>
                       </div>
                       {t.is_premium && (
                         <Badge className="absolute top-2 right-2 bg-amber-400/90 text-amber-950 text-[10px]">PREMIUM</Badge>
+                      )}
+                      {isMine && (
+                        <Badge className="absolute top-2 left-2 bg-background/90 text-foreground text-[10px] gap-1">
+                          <User className="h-2.5 w-2.5" /> Mine
+                        </Badge>
                       )}
                     </div>
                     <div className="p-3 space-y-2">
@@ -109,14 +149,26 @@ const TemplateGallery = ({ open, onOpenChange, onApply, currentTemplateId }: Pro
                         {isCurrent && <Badge variant="secondary" className="text-[10px] gap-1"><Check className="h-3 w-3" /> Active</Badge>}
                       </div>
                       <p className="text-xs text-foreground/70 line-clamp-2 min-h-[2.5rem]">{t.description}</p>
-                      <Button
-                        size="sm"
-                        className="w-full"
-                        onClick={() => onApply(t)}
-                        style={{ backgroundColor: t.theme_color, color: "#0B0F1A" }}
-                      >
-                        {isCurrent ? "Re-apply" : "Use this template"}
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => onApply(t)}
+                          style={{ backgroundColor: t.theme_color, color: "#0B0F1A" }}
+                        >
+                          {isCurrent ? "Re-apply" : "Use this template"}
+                        </Button>
+                        {isMine && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDelete(t.id)}
+                            aria-label="Delete template"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

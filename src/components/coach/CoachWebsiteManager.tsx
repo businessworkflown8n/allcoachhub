@@ -163,9 +163,38 @@ const CoachWebsiteManager = () => {
         faqs: cs.faqs || p.content_sections.faqs,
       },
       header_config: { ...p.header_config, ...(tpl.header_config || {}) },
+      section_order: Array.isArray(tpl.section_order) && tpl.section_order.length > 0
+        ? tpl.section_order
+        : p.section_order,
     }));
     setTemplateGalleryOpen(false);
     toast({ title: `Template "${tpl.name}" applied`, description: "Click Save Draft to keep these changes." });
+  };
+
+  const saveAsTemplate = async () => {
+    if (!user) return;
+    const name = window.prompt("Name your template", `${data.institute_name || "My"} Template`);
+    if (!name) return;
+    const category = window.prompt("Category (e.g. Coaching, Fitness, Consulting)", "My Templates") || "My Templates";
+    const { error } = await supabase.from("coach_website_templates" as any).insert({
+      name,
+      category,
+      description: `Saved from ${data.institute_name || "my website"}`,
+      theme_color: data.theme_color,
+      hero_variant: data.hero_variant,
+      layout_variant: "classic",
+      content_sections: data.content_sections as any,
+      header_config: data.header_config as any,
+      section_order: data.section_order as any,
+      is_premium: false,
+      is_published: false,
+      created_by: user.id,
+    });
+    if (error) {
+      toast({ title: "Could not save template", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Template saved", description: "Find it in Browse Templates → My Templates." });
   };
 
   useEffect(() => {
@@ -420,9 +449,14 @@ const CoachWebsiteManager = () => {
                 <p className="text-xs text-muted-foreground">Pick a high-converting design for your niche. 10+ premium layouts.</p>
               </div>
             </div>
-            <Button onClick={() => setTemplateGalleryOpen(true)} className="font-semibold">
-              <Layout className="h-4 w-4 mr-2" /> Browse Templates
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={saveAsTemplate} className="font-semibold">
+                <Save className="h-4 w-4 mr-2" /> Save as my template
+              </Button>
+              <Button onClick={() => setTemplateGalleryOpen(true)} className="font-semibold">
+                <Layout className="h-4 w-4 mr-2" /> Browse Templates
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

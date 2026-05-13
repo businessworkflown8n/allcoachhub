@@ -355,6 +355,10 @@ const CoachWebsiteManager = () => {
       template_id: data.template_id,
       header_config: data.header_config,
       section_order: data.section_order,
+      source_mode: data.source_mode,
+      external_url: data.external_url || null,
+      custom_html: data.custom_html || null,
+      github_repo_url: data.github_repo_url || null,
       status: data.status === "rejected" ? "draft" : data.status,
       updated_at: new Date().toISOString(),
     };

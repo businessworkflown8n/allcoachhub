@@ -136,6 +136,47 @@ const CoachWebsite = () => {
     }
   };
 
+  const sourceMode = (site.source_mode || "builder") as "builder" | "external_url" | "html_file" | "github";
+
+  if (sourceMode === "external_url" || sourceMode === "github") {
+    const url = site.external_url;
+    if (!url) {
+      return (
+        <>
+          <Navbar />
+          <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 bg-background px-4 text-center">
+            <h1 className="text-2xl font-bold text-foreground">Website not configured</h1>
+            <p className="text-muted-foreground">The coach hasn't set the external URL yet.</p>
+          </div>
+          <Footer />
+        </>
+      );
+    }
+    return (
+      <main className="min-h-screen bg-background">
+        <iframe
+          src={url}
+          title={site.institute_name}
+          className="w-full h-screen border-0"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+        />
+      </main>
+    );
+  }
+
+  if (sourceMode === "html_file") {
+    return (
+      <main className="min-h-screen bg-background">
+        <iframe
+          srcDoc={site.custom_html || "<p>No HTML uploaded.</p>"}
+          title={site.institute_name}
+          className="w-full h-screen border-0"
+          sandbox="allow-scripts allow-forms allow-popups"
+        />
+      </main>
+    );
+  }
+
   return (
     <>
       <CoachWebsiteHeader

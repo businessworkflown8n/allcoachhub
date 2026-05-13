@@ -14,6 +14,7 @@ import { Globe, Save, Send, Eye, Loader2, Upload, Palette, Plus, X, Trash2, Spar
 import CoachWebsiteLeads from "./CoachWebsiteLeads";
 import TemplateGallery from "./website/TemplateGallery";
 import SectionReorder, { DEFAULT_SECTION_ORDER, SectionItem } from "./website/SectionReorder";
+import WebsiteSourceEditor, { SourceMode } from "./website/WebsiteSourceEditor";
 
 interface ContentSections {
   stats: { value: string; label: string }[];
@@ -95,6 +96,10 @@ interface WebsiteData {
     transparent?: boolean;
   };
   section_order: SectionItem[];
+  source_mode: SourceMode;
+  external_url: string;
+  custom_html: string;
+  github_repo_url: string;
 }
 
 const defaultData: WebsiteData = {
@@ -124,6 +129,10 @@ const defaultData: WebsiteData = {
     transparent: false,
   },
   section_order: DEFAULT_SECTION_ORDER,
+  source_mode: "builder",
+  external_url: "",
+  custom_html: "",
+  github_repo_url: "",
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -244,6 +253,10 @@ const CoachWebsiteManager = () => {
           section_order: Array.isArray((website as any).section_order) && (website as any).section_order.length > 0
             ? (website as any).section_order as SectionItem[]
             : DEFAULT_SECTION_ORDER,
+          source_mode: ((website as any).source_mode as SourceMode) || "builder",
+          external_url: (website as any).external_url || "",
+          custom_html: (website as any).custom_html || "",
+          github_repo_url: (website as any).github_repo_url || "",
         });
         setExists(true);
         // Fetch lead count
@@ -342,6 +355,10 @@ const CoachWebsiteManager = () => {
       template_id: data.template_id,
       header_config: data.header_config,
       section_order: data.section_order,
+      source_mode: data.source_mode,
+      external_url: data.external_url || null,
+      custom_html: data.custom_html || null,
+      github_repo_url: data.github_repo_url || null,
       status: data.status === "rejected" ? "draft" : data.status,
       updated_at: new Date().toISOString(),
     };
@@ -437,8 +454,17 @@ const CoachWebsiteManager = () => {
       )}
 
       <div className={`space-y-6 ${isLocked ? "opacity-60 pointer-events-none" : ""}`}>
+        {/* Website Source */}
+        <WebsiteSourceEditor
+          sourceMode={data.source_mode}
+          externalUrl={data.external_url}
+          customHtml={data.custom_html}
+          githubRepoUrl={data.github_repo_url}
+          onChange={(patch) => setData((p) => ({ ...p, ...patch }))}
+        />
+
         {/* Premium Templates */}
-        <Card className="border-primary/40 bg-gradient-to-br from-primary/5 to-transparent">
+        <Card className={`border-primary/40 bg-gradient-to-br from-primary/5 to-transparent ${data.source_mode !== "builder" ? "opacity-50 pointer-events-none" : ""}`}>
           <CardContent className="pt-5 pb-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15">

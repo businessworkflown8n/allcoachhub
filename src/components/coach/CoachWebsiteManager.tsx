@@ -389,6 +389,34 @@ const CoachWebsiteManager = () => {
     }
   };
 
+  const publishNow = async () => {
+    // Validate source-specific requirements
+    if (data.source_mode === "external_url" && !data.external_url) {
+      toast({ title: "External URL required", description: "Paste the URL you want to embed.", variant: "destructive" });
+      return;
+    }
+    if (data.source_mode === "html_file" && !data.custom_html) {
+      toast({ title: "HTML required", description: "Upload or paste your HTML file.", variant: "destructive" });
+      return;
+    }
+    if (data.source_mode === "github" && (!data.github_repo_url || !data.external_url)) {
+      toast({ title: "GitHub details required", description: "Add both the repo URL and the deployed live URL.", variant: "destructive" });
+      return;
+    }
+    await saveDraft();
+    if (data.status === "approved") {
+      const { error } = await supabase.from("coach_websites").update({ is_live: true, updated_at: new Date().toISOString() }).eq("coach_id", user!.id);
+      if (!error) {
+        setData((p) => ({ ...p, is_live: true }));
+        toast({ title: "Website published", description: "Your public coach page is now live." });
+      } else {
+        toast({ title: "Publish failed", description: error.message, variant: "destructive" });
+      }
+    } else {
+      await submitForApproval();
+    }
+  };
+
   const isLocked = data.status === "pending";
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -462,6 +490,34 @@ const CoachWebsiteManager = () => {
           githubRepoUrl={data.github_repo_url}
           onChange={(patch) => setData((p) => ({ ...p, ...patch }))}
         />
+
+        {/* Publish action for chosen source */}
+        <Card className="border-primary/40 bg-gradient-to-br from-primary/10 to-transparent">
+          <CardContent className="pt-5 pb-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+            <div>
+              <p className="text-sm font-bold text-foreground">
+                Ready to publish? Source: <span className="text-primary capitalize">{data.source_mode.replace("_", " ")}</span>
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {data.status === "approved"
+                  ? "Click Publish to make your selected source live on your public coach page."
+                  : "Click Publish to save your changes and submit for admin approval. Once approved, your selected source goes live."}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {data.slug && (
+                <a href={`/coach-website/${data.slug}`} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline"><Eye className="h-4 w-4 mr-1" /> Preview</Button>
+                </a>
+              )}
+              <Button onClick={publishNow} disabled={saving} className="font-semibold">
+                {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Send className="h-4 w-4 mr-1" />}
+                {data.status === "approved" ? "Publish Now" : "Save & Publish"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
 
         {/* Premium Templates */}
         <Card className={`border-primary/40 bg-gradient-to-br from-primary/5 to-transparent ${data.source_mode !== "builder" ? "opacity-50 pointer-events-none" : ""}`}>

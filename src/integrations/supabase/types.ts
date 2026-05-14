@@ -7268,34 +7268,144 @@ export type Database = {
       }
       whatsapp_access: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           coach_id: string
           created_at: string
           daily_message_limit: number | null
           granted_by: string | null
           id: string
           is_active: boolean
+          is_approved: boolean
+          meta_display_name: string | null
+          meta_phone_number_id: string | null
+          meta_waba_id: string | null
           monthly_campaign_credits: number | null
           updated_at: string
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           coach_id: string
           created_at?: string
           daily_message_limit?: number | null
           granted_by?: string | null
           id?: string
           is_active?: boolean
+          is_approved?: boolean
+          meta_display_name?: string | null
+          meta_phone_number_id?: string | null
+          meta_waba_id?: string | null
           monthly_campaign_credits?: number | null
           updated_at?: string
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           coach_id?: string
           created_at?: string
           daily_message_limit?: number | null
           granted_by?: string | null
           id?: string
           is_active?: boolean
+          is_approved?: boolean
+          meta_display_name?: string | null
+          meta_phone_number_id?: string | null
+          meta_waba_id?: string | null
           monthly_campaign_credits?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      whatsapp_automation_runs: {
+        Row: {
+          automation_id: string
+          coach_id: string
+          conversation_id: string | null
+          created_at: string
+          error: string | null
+          id: string
+          result: Json | null
+          status: string
+          trigger_payload: Json | null
+        }
+        Insert: {
+          automation_id: string
+          coach_id: string
+          conversation_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          result?: Json | null
+          status?: string
+          trigger_payload?: Json | null
+        }
+        Update: {
+          automation_id?: string
+          coach_id?: string
+          conversation_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          result?: Json | null
+          status?: string
+          trigger_payload?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_automation_runs_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_automations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_automations: {
+        Row: {
+          actions: Json
+          ai_persona: string | null
+          coach_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          last_run_at: string | null
+          name: string
+          total_runs: number
+          trigger_config: Json
+          trigger_type: string
+          updated_at: string
+          use_ai_reply: boolean
+        }
+        Insert: {
+          actions?: Json
+          ai_persona?: string | null
+          coach_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          name: string
+          total_runs?: number
+          trigger_config?: Json
+          trigger_type: string
+          updated_at?: string
+          use_ai_reply?: boolean
+        }
+        Update: {
+          actions?: Json
+          ai_persona?: string | null
+          coach_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          name?: string
+          total_runs?: number
+          trigger_config?: Json
+          trigger_type?: string
+          updated_at?: string
+          use_ai_reply?: boolean
         }
         Relationships: []
       }
@@ -7311,6 +7421,7 @@ export type Database = {
           sent_at: string | null
           status: string
           template_id: string | null
+          template_variables: Json | null
           total_clicked: number | null
           total_delivered: number | null
           total_failed: number | null
@@ -7331,6 +7442,7 @@ export type Database = {
           sent_at?: string | null
           status?: string
           template_id?: string | null
+          template_variables?: Json | null
           total_clicked?: number | null
           total_delivered?: number | null
           total_failed?: number | null
@@ -7351,6 +7463,7 @@ export type Database = {
           sent_at?: string | null
           status?: string
           template_id?: string | null
+          template_variables?: Json | null
           total_clicked?: number | null
           total_delivered?: number | null
           total_failed?: number | null
@@ -7366,6 +7479,56 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "whatsapp_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_coach_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          coach_id: string
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan_id: string
+          provider: string | null
+          provider_subscription_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          coach_id: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id: string
+          provider?: string | null
+          provider_subscription_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          coach_id?: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id?: string
+          provider?: string | null
+          provider_subscription_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_coach_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_subscription_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -7405,6 +7568,224 @@ export type Database = {
           phone?: string
           source?: string | null
           tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      whatsapp_conversations: {
+        Row: {
+          assigned_to: string | null
+          coach_id: string
+          contact_id: string | null
+          contact_name: string | null
+          created_at: string
+          id: string
+          is_archived: boolean
+          last_message_at: string
+          last_message_preview: string | null
+          unread_count: number
+          updated_at: string
+          wa_phone: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          coach_id: string
+          contact_id?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          last_message_at?: string
+          last_message_preview?: string | null
+          unread_count?: number
+          updated_at?: string
+          wa_phone: string
+        }
+        Update: {
+          assigned_to?: string | null
+          coach_id?: string
+          contact_id?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          last_message_at?: string
+          last_message_preview?: string | null
+          unread_count?: number
+          updated_at?: string
+          wa_phone?: string
+        }
+        Relationships: []
+      }
+      whatsapp_credit_transactions: {
+        Row: {
+          balance_after: number
+          campaign_id: string | null
+          coach_id: string
+          created_at: string
+          delta: number
+          id: string
+          notes: string | null
+          payment_id: string | null
+          reason: string
+        }
+        Insert: {
+          balance_after: number
+          campaign_id?: string | null
+          coach_id: string
+          created_at?: string
+          delta: number
+          id?: string
+          notes?: string | null
+          payment_id?: string | null
+          reason: string
+        }
+        Update: {
+          balance_after?: number
+          campaign_id?: string | null
+          coach_id?: string
+          created_at?: string
+          delta?: number
+          id?: string
+          notes?: string | null
+          payment_id?: string | null
+          reason?: string
+        }
+        Relationships: []
+      }
+      whatsapp_credits: {
+        Row: {
+          balance: number
+          coach_id: string
+          created_at: string
+          id: string
+          last_reset_at: string | null
+          monthly_quota: number
+          next_reset_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          coach_id: string
+          created_at?: string
+          id?: string
+          last_reset_at?: string | null
+          monthly_quota?: number
+          next_reset_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          coach_id?: string
+          created_at?: string
+          id?: string
+          last_reset_at?: string | null
+          monthly_quota?: number
+          next_reset_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      whatsapp_messages: {
+        Row: {
+          campaign_id: string | null
+          coach_id: string
+          content: string | null
+          conversation_id: string
+          created_at: string
+          direction: string
+          error: string | null
+          id: string
+          media_type: string | null
+          media_url: string | null
+          sent_by: string | null
+          status: string
+          template_id: string | null
+          template_name: string | null
+          wa_message_id: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          coach_id: string
+          content?: string | null
+          conversation_id: string
+          created_at?: string
+          direction: string
+          error?: string | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          sent_by?: string | null
+          status?: string
+          template_id?: string | null
+          template_name?: string | null
+          wa_message_id?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          coach_id?: string
+          content?: string | null
+          conversation_id?: string
+          created_at?: string
+          direction?: string
+          error?: string | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          sent_by?: string | null
+          status?: string
+          template_id?: string | null
+          template_name?: string | null
+          wa_message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_subscription_plans: {
+        Row: {
+          created_at: string
+          features: Json
+          id: string
+          is_active: boolean
+          monthly_messages: number
+          name: string
+          price_inr: number
+          price_usd: number
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          monthly_messages: number
+          name: string
+          price_inr?: number
+          price_usd?: number
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          monthly_messages?: number
+          name?: string
+          price_inr?: number
+          price_usd?: number
+          slug?: string
+          sort_order?: number
           updated_at?: string
         }
         Relationships: []
@@ -7850,6 +8231,23 @@ export type Database = {
       reject_notification_request: {
         Args: { _request_id: string; _reviewer_note?: string }
         Returns: Json
+      }
+      wa_admin_grant_credits: {
+        Args: {
+          _amount: number
+          _coach_id: string
+          _notes?: string
+          _reason?: string
+        }
+        Returns: Json
+      }
+      wa_consume_credit: {
+        Args: { _campaign_id?: string; _coach_id: string; _count: number }
+        Returns: Json
+      }
+      wa_get_or_create_conversation: {
+        Args: { _coach_id: string; _contact_name?: string; _wa_phone: string }
+        Returns: string
       }
     }
     Enums: {

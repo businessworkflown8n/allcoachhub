@@ -1,100 +1,103 @@
-## Premium Coach Website & Landing Page Builder Upgrade
+# WhatsApp Dashboard Module — Full Build Plan
 
-This is a very large scope. To ship something production-ready (not a mockup), I'm proposing a **phased plan**. Phase 1 ships now end-to-end; Phases 2–4 follow in subsequent prompts. Existing coach websites & landing pages remain fully functional throughout.
+## Goal
+Production-grade multi-tenant WhatsApp module: each coach gets a dedicated branded portal at `/wa/:coachSlug`, admin controls access + credits, Meta WhatsApp Cloud API powers real sending, Razorpay + Stripe top up credits, and a premium dark-mode WhatsApp-style UI handles bulk send, scheduling, CRM inbox, automation, templates, and analytics.
 
----
+## Architecture decision
+- **Auth:** reuse Supabase auth (RLS, roles, password reset already work). Each coach gets a branded sub-portal `/wa/:coachSlug` with its own login screen — same auth backend, isolated UX. This is what "separate login per coach" means in practice without duplicating password storage.
+- **Tenancy:** all WhatsApp data scoped by `coach_id` via RLS. Already partially in place.
+- **Sending:** all Meta Cloud API calls go through edge functions — never from the browser.
 
-### Scope reality check
+## Phase A — Data + access control (DB + admin)
+New / extended tables:
+- `whatsapp_access` — extend with `meta_phone_number_id`, `meta_waba_id`, `meta_display_name`, `is_approved`, `approved_at`
+- `whatsapp_credits` — `coach_id`, `balance`, `monthly_quota`, `reset_at`, `last_reset_at`
+- `whatsapp_credit_transactions` — `coach_id`, `delta`, `reason` (`topup|send|refund|admin_grant|monthly_reset`), `campaign_id?`, `payment_id?`, `balance_after`
+- `whatsapp_subscription_plans` — `name`, `monthly_messages`, `price_inr`, `price_usd`, `features jsonb`, `is_active`
+- `whatsapp_coach_subscriptions` — `coach_id`, `plan_id`, `status`, `current_period_end`, `provider` (`razorpay|stripe`), `provider_subscription_id`
+- Extend `whatsapp_campaigns` — add `scheduled_at`, `template_variables jsonb`, `status` enum widening
+- `whatsapp_conversations` — `coach_id`, `contact_id`, `wa_phone`, `last_message_at`, `unread_count`, `assigned_to`
+- `whatsapp_messages` — `conversation_id`, `direction` (`inbound|outbound`), `wa_message_id`, `content`, `media_url`, `template_id`, `status`, `error`
+- `whatsapp_automations` — `coach_id`, `trigger_type` (`keyword|new_contact|enrollment|inactivity`), `trigger_config jsonb`, `actions jsonb`, `is_active`
+- `whatsapp_automation_runs` — execution log
+- DB function `wa_consume_credit(coach_id, count)` — atomic deduction with row lock
+- DB function `wa_admin_grant_credits(coach_id, amount, reason)` — admin only via `has_role`
+- All tables: RLS = coach owns own rows + admin sees all via `has_role(auth.uid(),'admin')`
 
-The original prompt covers ~80 distinct features (drag-drop builder, GrapesJS, Three.js, GSAP, AI generators, heatmaps, mega menus, custom domains, Zapier/n8n, AMP, A/B testing, etc.). Building all of that in one go would take weeks and would ship broken. Instead I'll deliver a **premium, conversion-focused upgrade** of the *existing* coach website builder that already lives at `/coach/website` and `/coach-website/:slug`, then layer advanced builder features after.
+## Phase B — Edge functions (Meta Cloud API)
+Secrets needed: `META_WHATSAPP_ACCESS_TOKEN`, `META_WHATSAPP_APP_SECRET` (webhook verify), `META_WHATSAPP_VERIFY_TOKEN`
+Per-coach values stored in `whatsapp_access` row (phone number id, WABA id).
 
-Tech note: This project is **React 18 + Vite + Tailwind** (not Next.js). I'll use Framer Motion (already common in the stack), Tailwind, and the existing Supabase backend. No GrapesJS / Three.js / Next.js migration — those would require rewriting the platform.
+Functions:
+- `wa-send-message` — single send, deducts credit, writes to `whatsapp_messages`
+- `wa-send-bulk` — campaign runner, batches, schedules via pg_cron
+- `wa-webhook` — receives delivery + read + inbound from Meta, updates `whatsapp_messages`/`whatsapp_conversations`, triggers automations
+- `wa-template-sync` — pulls coach's approved templates from Meta
+- `wa-automation-engine` — evaluates triggers, executes action chain (with optional Lovable AI reply via google/gemini-2.5-flash)
+- `wa-credits-topup-razorpay` — order create + verify
+- `wa-credits-topup-stripe` — checkout session + webhook
+- `wa-subscribe-razorpay` / `wa-subscribe-stripe` — recurring plan
+- `wa-monthly-reset` — pg_cron, resets monthly quota credits
 
----
+All use Deno std 0.190.0, manual `corsHeaders`, JWT verify in code.
 
-### Phase 1 — Premium Templates + Custom Header + Hero/CTA Polish (ships now)
+## Phase C — Coach UI at `/wa/:coachSlug`
+New layout `WhatsAppPortalLayout` — dark, sidebar-driven, WhatsApp green accents over neon lime base.
+Pages:
+- `/wa/:slug/login` — branded login, shows coach's institute name + logo
+- `/wa/:slug` — dashboard (credits widget, today's sends, delivery rate, active campaigns)
+- `/wa/:slug/inbox` — split-pane WhatsApp-style CRM: conversations list + chat thread + contact panel; realtime via Supabase channel on `whatsapp_messages`
+- `/wa/:slug/campaigns` — list + builder (audience picker, template + variables, schedule, preview)
+- `/wa/:slug/templates` — gallery + Meta sync + create-template form
+- `/wa/:slug/contacts` — table, CSV import, tags
+- `/wa/:slug/automations` — visual trigger→action builder, AI reply toggle
+- `/wa/:slug/analytics` — chart.js cards: sent/delivered/read/clicked/replied + top templates + cost
+- `/wa/:slug/billing` — current plan, credit balance, top-up (Razorpay/Stripe), invoice history
 
-**1. Remove default Navbar from coach websites**
-- `src/pages/CoachWebsite.tsx`: replace `<Navbar customLogo... />` with a new `<CoachWebsiteHeader />` driven entirely by the coach's own settings (logo, menu items, CTA button, social icons, sticky/transparent toggle, mobile hamburger).
-- Add `header_config` JSONB column to `coach_websites` (menu items, style, CTA, socials, sticky/transparent flags).
+Animations: framer-motion already in deps; subtle fade/slide on cards, message bubbles slide-in.
 
-**2. Premium Template Library (10 ready-made templates to start)**
-- New table `coach_website_templates` (name, category, preview_image, content_sections JSON, theme_color, layout_variant, is_premium).
-- Seed 10 templates across the highest-impact categories: AI Coaching, Business Coaching, Fitness, Trading, Digital Marketing, Webinar Funnel, Masterclass, Consulting, High-Ticket Funnel, Lead Gen.
-- New page `src/pages/coach/WebsiteTemplates.tsx` — gallery with category filter, preview, "Use this template" → clones config into the coach's `coach_websites` row.
-- Admin moderation: add `is_published`, `created_by` so admins can add/approve templates from `/admin` (Phase 2 adds full admin UI; Phase 1 ships seeded templates).
+## Phase D — Admin panel additions
+New tab in `AdminDashboard` → "WhatsApp Control":
+- Coach list with toggle `whatsapp_access.is_active` and `is_approved`
+- Credit allocator (grant N credits, set monthly quota, reason field)
+- Subscription plan CRUD
+- Campaign monitor (all coaches, status filter)
+- Usage report (per coach: sent/delivered/cost/credits used in date range — uses GlobalDateRangePicker)
+- Approval queue for new WhatsApp connections (Meta WABA verification)
+- Billing controls (refund credits, comp plan)
 
-**3. Premium Hero + 3D CTA upgrade**
-- Refactor `CoachWebsiteHero.tsx` with: gradient/particle background option, glassmorphism card, 3D-style CTA (depth shadow, glow, magnetic hover via Framer Motion), animated stats counter, fade-in on scroll.
-- Add `hero_variant` field (`classic | gradient | video | particle`) chosen per template.
-- New shared component `Premium3DButton` reusable across all CTAs (Book Demo, Enroll, Final CTA).
+## Phase E — Payments
+Razorpay (existing infra reused) + Stripe BYOK.
+- New Razorpay edge function for credit packs + plan subscription
+- New Stripe edge function (`wa-credits-topup-stripe`, webhook handler)
+- Will request `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` when ready
 
-**4. Premium animations layer**
-- Add Framer Motion-based fade/slide/scale for every section on scroll.
-- Glassmorphism utility classes in `index.css` (`.glass-card`, `.neon-glow`, `.magnetic-hover`).
-- Smooth scroll already enabled — verify and polish.
+## Phase F — AI automation
+- Use Lovable AI Gateway (`google/gemini-2.5-flash`) via existing `LOVABLE_API_KEY`
+- Automation action `ai_reply` — passes inbound message + last 10 turns + coach's persona
+- Chatbot-style auto-responder when coach offline, with handoff trigger
 
-**5. Layout variants per template**
-- Each section component (`CoachWebsiteCourses`, `CoachWebsiteTestimonials`, `CoachWebsiteFAQ`, `CoachWebsiteFinalCTA`) gets a `variant` prop (`classic | grid | carousel | spotlight`) so templates render visibly different.
+## Files (~45)
+**Migrations (1):** one mega-migration for all tables + RLS + functions
+**Edge functions (10):** as listed in Phase B
+**Coach portal (15):** layout + 9 pages + 5 shared components (CreditWidget, MessageBubble, ConversationListItem, TemplatePicker, AutomationNode)
+**Admin (6):** WhatsAppControl tab + 5 sub-components
+**Hooks (4):** useWhatsAppCredits, useWhatsAppRealtime, useCoachWaConfig, useWaSubscription
+**Routing (2):** App.tsx routes + a coach slug resolver
+**Types update:** auto-regen after migration
 
-**6. Coach builder UX upgrades (in `/coach/website`)**
-- "Choose Template" entry point at top of the builder.
-- New "Header & Menu" tab — manage logo, favicon, menu items (drag-reorder), CTA button, social icons, sticky/transparent toggles, WhatsApp floating button.
-- Live mobile/tablet/desktop preview toggle (CSS-based, no rebuild).
+## Risk callouts
+1. Meta requires pre-approved message templates for outbound to non-opted-in users. Coaches must register templates via Meta Business Manager first; we sync them.
+2. Webhook URL must be HTTPS + reachable — uses Supabase edge function URL, registered in Meta app dashboard manually after first deploy.
+3. Stripe webhook signing secret — needed before live Stripe top-ups work.
+4. ~45 files in one go is heavy; if anything breaks during build I'll fix forward, not rebuild.
 
----
+## Sequencing within "all at once"
+1. Migration (request approval)
+2. Secrets request (Meta credentials)
+3. Edge functions
+4. Coach portal UI
+5. Admin panel additions
+6. Stripe wiring (when key provided)
 
-### Phase 2 — Advanced Builder + AI Assist (follow-up prompt)
-- Section-level drag-reorder + show/hide for all 12+ sections
-- Inline text editing inside the preview iframe
-- AI Headline / CTA / SEO Meta generator (Lovable AI Gateway, Gemini)
-- Reusable "Save as my template"
-- 6 more premium templates
-
-### Phase 3 — Forms, Funnels, Integrations
-- Multi-step forms, conditional fields, OTP
-- Webhook + Zapier-style outbound, GTM/Meta Pixel field, custom CSS/JS
-- Countdown timer, scarcity widgets, sticky CTA bar with offer
-
-### Phase 4 — Analytics + Custom Domain + Admin Template Studio
-- Per-page visitor / conversion / device analytics (already partly in `landing_pages` analytics)
-- Custom domain workflow (admin approval)
-- Admin Template Studio (create/edit/publish premium templates from `/admin`)
-- A/B testing, heatmap (Microsoft Clarity embed)
-
----
-
-### Files Phase 1 will touch
-
-**Database (one migration)**
-- `coach_websites`: add `header_config JSONB`, `hero_variant TEXT`, `template_id UUID`, `animation_enabled BOOLEAN`
-- `coach_website_templates`: new table + RLS (public read for `is_published`, admin write)
-- Seed 10 templates
-
-**New files**
-- `src/components/coach-website/CoachWebsiteHeader.tsx` (replaces default Navbar on public coach sites)
-- `src/components/coach-website/Premium3DButton.tsx`
-- `src/components/coach/website/HeaderMenuEditor.tsx`
-- `src/components/coach/website/TemplateGallery.tsx`
-- `src/pages/coach/WebsiteTemplates.tsx`
-- `src/lib/coachWebsiteTemplates.ts` (template seed metadata helpers)
-
-**Edited**
-- `src/pages/CoachWebsite.tsx` — swap Navbar for CoachWebsiteHeader, pass variants
-- `src/components/coach-website/CoachWebsiteHero.tsx` — premium hero variants + 3D CTA
-- All `CoachWebsite*` section components — accept optional `variant` prop, add Framer Motion entrance animations
-- `src/index.css` — glassmorphism, neon glow, 3D button utilities
-- The existing `/coach/website` builder page — add "Templates" + "Header & Menu" tabs
-
----
-
-### What I will NOT do in Phase 1 (and why)
-- **Full GrapesJS / drag-drop free-form builder** — replacing the structured builder breaks SEO, RLS-validated content, and the existing approval workflow. We keep the section-based model and add variants instead.
-- **Three.js / WebGL hero** — heavy bundle, hurts mobile performance budget (90+ score requirement in your memory).
-- **Custom domains, AMP, n8n/Zapier** — separate infra work, scheduled for Phase 3/4.
-- **Next.js migration** — project is Vite + React 18; switching frameworks would break everything.
-
----
-
-### Confirm to proceed
-Reply **"Approved"** and I'll ship Phase 1 in this thread (migration + ~12 files). If you want any Phase 2/3/4 item pulled into Phase 1, name it and I'll re-scope.
+Approve to proceed.

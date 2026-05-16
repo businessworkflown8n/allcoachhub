@@ -230,12 +230,19 @@ const CoursePlayer = () => {
             {activeMedia.length > 0 && (
               <div className="space-y-4">
                 <h3 className="text-sm font-semibold text-foreground">Lesson Media</h3>
-                {activeMedia.filter((m) => m.media_type === "video_upload" || m.media_type === "recording").map((m) => (
-                  <div key={m.id} className="space-y-1">
-                    {m.title && <p className="text-xs text-muted-foreground">{m.title}</p>}
-                    <video src={m.video_url} controls className="aspect-video w-full rounded-xl bg-black" />
-                  </div>
-                ))}
+                {activeMedia.filter((m) => m.media_type === "video_upload" || m.media_type === "recording").map((m) => {
+                  const isDrive = typeof m.video_url === "string" && m.video_url.includes("drive.google.com");
+                  return (
+                    <div key={m.id} className="space-y-1">
+                      {m.title && <p className="text-xs text-muted-foreground">{m.title}</p>}
+                      {isDrive ? (
+                        <iframe src={m.video_url} className="aspect-video w-full rounded-xl bg-black" allow="autoplay; encrypted-media" allowFullScreen title={m.title || "Drive video"} />
+                      ) : (
+                        <video src={m.video_url} controls className="aspect-video w-full rounded-xl bg-black" />
+                      )}
+                    </div>
+                  );
+                })}
                 {activeMedia.filter((m) => m.media_type === "youtube").map((m) => (
                   <div key={m.id} className="space-y-1">
                     {m.title && <p className="text-xs text-muted-foreground">{m.title}</p>}

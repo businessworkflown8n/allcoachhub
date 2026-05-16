@@ -170,6 +170,7 @@ const AdminDashboard = () => {
         <Route path="settings" element={<AdminSettings />} />
         <Route path="locale" element={<AdminLocaleSettings />} />
         <Route path="external-links" element={<AdminExternalLinkControl />} />
+        <Route path="drive-storage" element={<AdminDriveStorage />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     </DashboardLayout>

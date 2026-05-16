@@ -1,103 +1,110 @@
-# WhatsApp Dashboard Module — Full Build Plan
+# Google Drive Storage Integration — Build Plan
 
-## Goal
-Production-grade multi-tenant WhatsApp module: each coach gets a dedicated branded portal at `/wa/:coachSlug`, admin controls access + credits, Meta WhatsApp Cloud API powers real sending, Razorpay + Stripe top up credits, and a premium dark-mode WhatsApp-style UI handles bulk send, scheduling, CRM inbox, automation, templates, and analytics.
+Parallel track alongside the in-progress WhatsApp module. Reuses your existing Google OAuth client (you'll add Drive scopes in Google Cloud Console).
 
-## Architecture decision
-- **Auth:** reuse Supabase auth (RLS, roles, password reset already work). Each coach gets a branded sub-portal `/wa/:coachSlug` with its own login screen — same auth backend, isolated UX. This is what "separate login per coach" means in practice without duplicating password storage.
-- **Tenancy:** all WhatsApp data scoped by `coach_id` via RLS. Already partially in place.
-- **Sending:** all Meta Cloud API calls go through edge functions — never from the browser.
+## Prerequisite (you do this once, manually)
 
-## Phase A — Data + access control (DB + admin)
-New / extended tables:
-- `whatsapp_access` — extend with `meta_phone_number_id`, `meta_waba_id`, `meta_display_name`, `is_approved`, `approved_at`
-- `whatsapp_credits` — `coach_id`, `balance`, `monthly_quota`, `reset_at`, `last_reset_at`
-- `whatsapp_credit_transactions` — `coach_id`, `delta`, `reason` (`topup|send|refund|admin_grant|monthly_reset`), `campaign_id?`, `payment_id?`, `balance_after`
-- `whatsapp_subscription_plans` — `name`, `monthly_messages`, `price_inr`, `price_usd`, `features jsonb`, `is_active`
-- `whatsapp_coach_subscriptions` — `coach_id`, `plan_id`, `status`, `current_period_end`, `provider` (`razorpay|stripe`), `provider_subscription_id`
-- Extend `whatsapp_campaigns` — add `scheduled_at`, `template_variables jsonb`, `status` enum widening
-- `whatsapp_conversations` — `coach_id`, `contact_id`, `wa_phone`, `last_message_at`, `unread_count`, `assigned_to`
-- `whatsapp_messages` — `conversation_id`, `direction` (`inbound|outbound`), `wa_message_id`, `content`, `media_url`, `template_id`, `status`, `error`
-- `whatsapp_automations` — `coach_id`, `trigger_type` (`keyword|new_contact|enrollment|inactivity`), `trigger_config jsonb`, `actions jsonb`, `is_active`
-- `whatsapp_automation_runs` — execution log
-- DB function `wa_consume_credit(coach_id, count)` — atomic deduction with row lock
-- DB function `wa_admin_grant_credits(coach_id, amount, reason)` — admin only via `has_role`
-- All tables: RLS = coach owns own rows + admin sees all via `has_role(auth.uid(),'admin')`
+In Google Cloud Console for the project that owns `GOOGLE_CLIENT_ID`:
+1. **Enable Drive API** (APIs & Services → Library → Google Drive API → Enable)
+2. **OAuth consent screen → Scopes → Add**:
+   - `https://www.googleapis.com/auth/drive.file` (per-file access, lightest scope)
+   - `https://www.googleapis.com/auth/drive.metadata.readonly` (for storage stats)
+3. **Credentials → OAuth Client → Authorized redirect URIs → Add**:
+   - `https://www.aicoachportal.com/oauth/google-drive/callback`
+   - `https://aicoachportal.com/oauth/google-drive/callback`
+   - `https://allcoachhub.lovable.app/oauth/google-drive/callback`
 
-## Phase B — Edge functions (Meta Cloud API)
-Secrets needed: `META_WHATSAPP_ACCESS_TOKEN`, `META_WHATSAPP_APP_SECRET` (webhook verify), `META_WHATSAPP_VERIFY_TOKEN`
-Per-coach values stored in `whatsapp_access` row (phone number id, WABA id).
+If consent screen is in "Testing" mode, add the connecting coaches as test users until you publish it.
 
-Functions:
-- `wa-send-message` — single send, deducts credit, writes to `whatsapp_messages`
-- `wa-send-bulk` — campaign runner, batches, schedules via pg_cron
-- `wa-webhook` — receives delivery + read + inbound from Meta, updates `whatsapp_messages`/`whatsapp_conversations`, triggers automations
-- `wa-template-sync` — pulls coach's approved templates from Meta
-- `wa-automation-engine` — evaluates triggers, executes action chain (with optional Lovable AI reply via google/gemini-2.5-flash)
-- `wa-credits-topup-razorpay` — order create + verify
-- `wa-credits-topup-stripe` — checkout session + webhook
-- `wa-subscribe-razorpay` / `wa-subscribe-stripe` — recurring plan
-- `wa-monthly-reset` — pg_cron, resets monthly quota credits
+## Phase 1 — Database (1 migration)
 
-All use Deno std 0.190.0, manual `corsHeaders`, JWT verify in code.
+Tables (all RLS = coach owns own rows + admin sees all):
+- `drive_connections` — `coach_id` (unique), `google_account_email`, `access_token` (encrypted via pgsodium? — store plain in DB protected by RLS), `refresh_token`, `expires_at`, `scope`, `root_folder_id`, `subfolder_ids` jsonb, `status` (connected/expired/revoked), `connected_at`, `last_sync_at`, `quota_total`, `quota_used`
+- `drive_files` — `coach_id`, `drive_file_id`, `name`, `mime_type`, `size_bytes`, `parent_folder_id`, `web_view_link`, `web_content_link`, `thumbnail_link`, `course_id` nullable, `lesson_id` nullable, `category` (course/recording/pdf/assignment/student_upload/archived), `visibility` (private/students/public/restricted), `ai_tags` text[], `ai_summary` text, `transcript` text, `uploaded_at`, `last_synced_at`
+- `drive_access_settings` — global admin flags: `is_enabled`, `max_upload_size_mb`, `allowed_mime_types` text[], `require_admin_approval`
+- `drive_coach_overrides` — `coach_id`, `is_suspended`, `is_approved`, `approved_at`, `approved_by`, `notes`
+- `drive_activity_log` — `coach_id`, `learner_id`, `file_id`, `action` (upload/download/stream/share/delete), `metadata` jsonb, `created_at`
+- Helper RPC: `drive_get_or_create_folder_structure(_coach_id)` (server-side after OAuth)
 
-## Phase C — Coach UI at `/wa/:coachSlug`
-New layout `WhatsAppPortalLayout` — dark, sidebar-driven, WhatsApp green accents over neon lime base.
-Pages:
-- `/wa/:slug/login` — branded login, shows coach's institute name + logo
-- `/wa/:slug` — dashboard (credits widget, today's sends, delivery rate, active campaigns)
-- `/wa/:slug/inbox` — split-pane WhatsApp-style CRM: conversations list + chat thread + contact panel; realtime via Supabase channel on `whatsapp_messages`
-- `/wa/:slug/campaigns` — list + builder (audience picker, template + variables, schedule, preview)
-- `/wa/:slug/templates` — gallery + Meta sync + create-template form
-- `/wa/:slug/contacts` — table, CSV import, tags
-- `/wa/:slug/automations` — visual trigger→action builder, AI reply toggle
-- `/wa/:slug/analytics` — chart.js cards: sent/delivered/read/clicked/replied + top templates + cost
-- `/wa/:slug/billing` — current plan, credit balance, top-up (Razorpay/Stripe), invoice history
+Seed: 1 row in `drive_access_settings` with defaults (enabled, 500MB max, common mime allowlist).
 
-Animations: framer-motion already in deps; subtle fade/slide on cards, message bubbles slide-in.
+## Phase 2 — Edge Functions
 
-## Phase D — Admin panel additions
-New tab in `AdminDashboard` → "WhatsApp Control":
-- Coach list with toggle `whatsapp_access.is_active` and `is_approved`
-- Credit allocator (grant N credits, set monthly quota, reason field)
-- Subscription plan CRUD
-- Campaign monitor (all coaches, status filter)
-- Usage report (per coach: sent/delivered/cost/credits used in date range — uses GlobalDateRangePicker)
-- Approval queue for new WhatsApp connections (Meta WABA verification)
-- Billing controls (refund credits, comp plan)
+- `drive-oauth-start` → builds Google OAuth URL with state=coach_id, returns to client
+- `drive-oauth-callback` → exchanges code for tokens, stores in `drive_connections`, triggers folder bootstrap
+- `drive-refresh-token` → called by other functions when access token expired
+- `drive-create-folders` → creates "AI Coach Portal" root + 6 subfolders, saves IDs
+- `drive-list-files` → proxied folder listing with pagination
+- `drive-upload-init` → returns resumable upload session URL so browser uploads directly to Drive (no server bandwidth)
+- `drive-file-register` → after browser upload completes, registers file in `drive_files`, runs AI tagging
+- `drive-file-delete` → deletes from Drive + DB
+- `drive-storage-stats` → about.get → quota numbers
+- `drive-ai-process` → Lovable AI (gemini-2.5-flash) — auto-tag + PDF summary + (Phase 2.5) video transcript via Gemini multimodal
+- `drive-share-toggle` → flips file permission (private ↔ anyone-with-link)
+- `drive-disconnect` → revokes token, marks status=revoked
 
-## Phase E — Payments
-Razorpay (existing infra reused) + Stripe BYOK.
-- New Razorpay edge function for credit packs + plan subscription
-- New Stripe edge function (`wa-credits-topup-stripe`, webhook handler)
-- Will request `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` when ready
+All Deno std 0.190.0, manual corsHeaders, JWT verify on protected ones.
 
-## Phase F — AI automation
-- Use Lovable AI Gateway (`google/gemini-2.5-flash`) via existing `LOVABLE_API_KEY`
-- Automation action `ai_reply` — passes inbound message + last 10 turns + coach's persona
-- Chatbot-style auto-responder when coach offline, with handoff trigger
+## Phase 3 — Coach Dashboard UI (`/coach/drive`)
 
-## Files (~45)
-**Migrations (1):** one mega-migration for all tables + RLS + functions
-**Edge functions (10):** as listed in Phase B
-**Coach portal (15):** layout + 9 pages + 5 shared components (CreditWidget, MessageBubble, ConversationListItem, TemplatePicker, AutomationNode)
-**Admin (6):** WhatsAppControl tab + 5 sub-components
-**Hooks (4):** useWhatsAppCredits, useWhatsAppRealtime, useCoachWaConfig, useWaSubscription
-**Routing (2):** App.tsx routes + a coach slug resolver
-**Types update:** auto-regen after migration
+- `DriveConnectionCard` — Connect / Reconnect / Disconnect, status pill, account email
+- `StorageDashboard` — animated radial usage card, total/used/remaining, file-type breakdown bar chart, recent uploads list, largest-files list, last sync time
+- `FolderBrowser` — left tree (6 standard folders), right grid with thumbnails, breadcrumbs
+- `FileCard` — thumbnail, name, size, AI tags, visibility chip, kebab menu (rename/share/delete/AI-summary)
+- `UploadDropzone` — drag & drop + bulk, chunked resumable upload to Drive directly, per-file progress bars, mime/size validation against admin settings
+- `DrivePickerModal` — reused inside course lesson editor: "Upload from Google Drive" source option
+- `FilePreviewModal` — Drive embed iframe for video/PDF/image, AI summary tab, transcript tab
+- `PermissionsPanel` — private / student-only / stream-only / public-link / restricted-by-course
+- `AISearchBar` — semantic search across `ai_tags` + `ai_summary` + name (Postgres ILIKE first, AI rerank optional)
 
-## Risk callouts
-1. Meta requires pre-approved message templates for outbound to non-opted-in users. Coaches must register templates via Meta Business Manager first; we sync them.
-2. Webhook URL must be HTTPS + reachable — uses Supabase edge function URL, registered in Meta app dashboard manually after first deploy.
-3. Stripe webhook signing secret — needed before live Stripe top-ups work.
-4. ~45 files in one go is heavy; if anything breaks during build I'll fix forward, not rebuild.
+## Phase 4 — Admin Panel (new "Drive Storage" tab in `AdminDashboard`)
 
-## Sequencing within "all at once"
-1. Migration (request approval)
-2. Secrets request (Meta credentials)
-3. Edge functions
-4. Coach portal UI
-5. Admin panel additions
-6. Stripe wiring (when key provided)
+- Global toggle, max upload size, allowed mime types
+- Connected coaches table with quota usage, suspend, approve, view files
+- Storage analytics chart (total usage across all coaches)
+- Activity log viewer
 
-Approve to proceed.
+## Phase 5 — Learner Experience
+
+- Course lesson player reads `drive_file_id` → embeds `https://drive.google.com/file/d/{id}/preview` (streaming, resume supported by Drive)
+- Download button only if file `visibility` allows
+- File preview cards in course resources tab
+
+## Phase 6 — Notifications
+
+Reuse existing notification system to push:
+- Storage > 90% used
+- Upload complete
+- Sync failed / Drive disconnected (token revoked)
+- AI processing complete (transcript/summary ready)
+
+## What I'm NOT building (and why)
+
+- **Virus scanning** — needs ClamAV server or VirusTotal API (paid). Out of stack. Drive already scans uploads server-side.
+- **FFmpeg transcoding / CDN** — Drive's `/preview` endpoint handles adaptive streaming natively. No need.
+- **Elasticsearch** — overkill; Postgres FTS + AI tags is sufficient at this scale.
+- **OneDrive / Dropbox / S3** — schema is provider-agnostic (`drive_connections.provider` defaulting to 'google_drive') so adding later is a new edge function + UI tab, not a rewrite.
+- **Firebase/Auth0/BullMQ/NestJS** — not your stack. Using Supabase auth + Edge Functions + Postgres.
+
+## File count estimate
+
+- 1 migration
+- 12 edge functions
+- ~18 React files (pages, components, hooks)
+- 2 small admin tab additions
+
+**Total: ~33 files.** I'll batch them in parallel writes.
+
+## Risks
+
+- Google OAuth consent screen verification: if you have >100 users connecting, Google requires verification for sensitive Drive scopes. `drive.file` is **non-sensitive** so this is avoided as long as we stick to that scope. We'll create files in coach's Drive but won't read files we didn't create.
+- Token refresh: refresh tokens can be invalidated if user revokes from Google account. We handle 401 → mark `status=expired` → prompt reconnect.
+- Per-coach quota limits are the **coach's own Drive** (15GB free) — we just display it, can't expand it.
+
+## Build order
+
+1. You confirm prerequisite Google Cloud setup is done (or accept "I'll do it after").
+2. Migration (Phase 1).
+3. Edge functions (Phase 2) — batched.
+4. Coach UI (Phase 3) — batched.
+5. Admin UI (Phase 4) + Learner playback (Phase 5) + Notifications (Phase 6).

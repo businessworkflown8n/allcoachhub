@@ -264,6 +264,23 @@ const LessonMediaManager = ({ open, onOpenChange, lessonId, lessonTitle }: Props
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Done</Button>
         </DialogFooter>
+
+        <DrivePicker
+          open={drivePickerOpen !== null}
+          onOpenChange={(v) => !v && setDrivePickerOpen(null)}
+          accept={drivePickerOpen === "image" ? "image" : drivePickerOpen === "video" ? "video" : "any"}
+          onSelect={async (f) => {
+            const isImage = f.mime_type.startsWith("image/");
+            const previewUrl = `https://drive.google.com/file/d/${f.drive_file_id}/preview`;
+            const directUrl = `https://drive.google.com/uc?export=view&id=${f.drive_file_id}`;
+            await insert({
+              media_type: isImage ? "image" : "video_upload",
+              title: f.name,
+              [isImage ? "image_url" : "video_url"]: isImage ? directUrl : previewUrl,
+            } as any);
+            setDrivePickerOpen(null);
+          }}
+        />
       </DialogContent>
     </Dialog>
   );

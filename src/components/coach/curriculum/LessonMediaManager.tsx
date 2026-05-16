@@ -46,6 +46,7 @@ const LessonMediaManager = ({ open, onOpenChange, lessonId, lessonTitle }: Props
   const [items, setItems] = useState<Media[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [drivePickerOpen, setDrivePickerOpen] = useState<null | "video" | "image">(null);
 
   const [ytUrl, setYtUrl] = useState("");
   const [ytTitle, setYtTitle] = useState("");

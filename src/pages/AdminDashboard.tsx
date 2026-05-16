@@ -105,6 +105,7 @@ const navItems = [
   { label: "Settings", path: "/admin/settings", icon: <Settings className="h-4 w-4" /> },
   { label: "Locale & Currency", path: "/admin/locale", icon: <Globe className="h-4 w-4" /> },
   { label: "External Link Control", path: "/admin/external-links", icon: <LinkIcon className="h-4 w-4" /> },
+  { label: "Drive Storage", path: "/admin/drive-storage", icon: <FolderOpen className="h-4 w-4" /> },
 ];
 
 const AdminDashboard = () => {

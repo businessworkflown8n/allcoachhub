@@ -23,29 +23,38 @@ export default function DriveUploadDropzone({
   const uploadOne = useCallback(async (file: File) => {
     const id = crypto.randomUUID();
     setItems((p) => [...p, { id, name: file.name, size: file.size, progress: 0, status: "uploading" }]);
-    
     try {
-      const { data: init } = await supabase.functions.invoke("drive-upload-init", {
+      const { data: init, error } = await supabase.functions.invoke("drive-upload-init", {
         body: { name: file.name, mime_type: file.type || "application/octet-stream", size_bytes: file.size, category },
       });
-      
-      if (!init?.upload_url) throw new Error("Upload init failed");
+      if (error || !init?.upload_url) throw new Error(error?.message || "Upload init failed");
 
-      const putResp = await fetch(init.upload_url, {
-        method: "PUT",
-        headers: { "Content-Type": file.type || "application/octet-stream" },
-        body: file,
+      // Use XHR for progress, parse responseText for drive file metadata
+      const driveFile = await new Promise<any>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", init.upload_url, true);
+        xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            setItems((p) => p.map((it) => (it.id === id ? { ...it, progress: pct } : it)));
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try { resolve(JSON.parse(xhr.responseText)); }
+            catch { reject(new Error("Bad Drive response")); }
+          } else reject(new Error(`Upload ${xhr.status}`));
+        };
+        xhr.onerror = () => reject(new Error("Network error"));
+        xhr.send(file);
       });
-      
-      if (!putResp.ok) throw new Error(`Drive upload failed: ${putResp.status}`);
-      
-      const driveFile = await putResp.json();
+
       setItems((p) => p.map((it) => (it.id === id ? { ...it, progress: 100 } : it)));
 
       const { error: regErr } = await supabase.functions.invoke("drive-file-register", {
         body: { drive_file_id: driveFile.id, category, course_id: courseId, lesson_id: lessonId },
       });
-      
       if (regErr) throw regErr;
 
       setItems((p) => p.map((it) => (it.id === id ? { ...it, status: "done" } : it)));

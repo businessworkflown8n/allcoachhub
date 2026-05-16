@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSEO } from "@/hooks/useSEO";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { User, BookOpen, BarChart3, DollarSign, Plus, Video, Share2, Megaphone, LayoutDashboard, FileText, TrendingUp, FileBarChart, Sparkles, Globe, MessageCircle, Bell, Gamepad2, UserPlus, Rocket, Users, Calendar, Target, Package, Zap, Bot, Search, Link as LinkIcon } from "lucide-react";
+import { User, BookOpen, BarChart3, DollarSign, Plus, Video, Share2, Megaphone, LayoutDashboard, FileText, TrendingUp, FileBarChart, Sparkles, Globe, MessageCircle, Bell, Gamepad2, UserPlus, Rocket, Users, Calendar, Target, Package, Zap, Bot, Search, Link as LinkIcon, HardDrive } from "lucide-react";
 import CoachClients from "@/components/coach/CoachClients";
 import CoachLeads from "@/components/coach/CoachLeads";
 import CoachSessions from "@/components/coach/CoachSessions";
@@ -29,6 +29,7 @@ import CoachReportBuilder from "@/components/coach/CoachReportBuilder";
 import PromptGeneratorForm from "@/components/prompt/PromptGeneratorForm";
 import CoachWebsiteManager from "@/components/coach/CoachWebsiteManager";
 import CoachWhatsApp from "@/components/coach/CoachWhatsApp";
+import CoachDrive from "@/components/coach/CoachDrive";
 import { useEmailMarketingAccess } from "@/hooks/useEmailMarketingAccess";
 import { useWhatsAppAccess } from "@/hooks/useWhatsAppAccess";
 import { useWorkshopAccess } from "@/hooks/useWorkshopAccess";
@@ -97,6 +98,7 @@ const CoachDashboard = () => {
     { label: "Daily Zip", path: "/coach/daily-zip", icon: <Gamepad2 className="h-4 w-4" /> },
     { label: "Prompt Generator", path: "/coach/prompt-generator", icon: <Sparkles className="h-4 w-4" /> },
     { label: "My Website", path: "/coach/website", icon: <Globe className="h-4 w-4" /> },
+    { label: "Google Drive", path: "/coach/drive", icon: <HardDrive className="h-4 w-4" /> },
     ...(linkedinEnabled ? [{ label: "LinkedIn Post", path: "/coach/linkedin-post", icon: <Share2 className="h-4 w-4" /> }] : []),
     ...(aiJobsLinkedInEnabled ? [{ label: "AI Jobs & News – LinkedIn Post", path: "/ai-jobs-news/linkedin-post", icon: <Share2 className="h-4 w-4" /> }] : []),
     { label: "SEO & Indexing", path: "/coach/seo", icon: <Search className="h-4 w-4" /> },
@@ -136,6 +138,7 @@ const CoachDashboard = () => {
         <Route path="profile" element={<CoachProfile />} />
         <Route path="prompt-generator" element={<div className="space-y-4"><h2 className="text-xl font-bold text-foreground">Prompt Generator</h2><div className="rounded-xl border border-border bg-card p-6"><PromptGeneratorForm showSave userRole="coach" /></div></div>} />
         <Route path="website" element={<CoachWebsiteManager />} />
+        <Route path="drive" element={<CoachDrive />} />
         <Route path="seo" element={<CoachSEOPanel />} />
         <Route path="blueprint" element={<CoachBlueprintWorkspace />} />
         <Route path="linkedin-post" element={linkedinEnabled ? <CoachLinkedInPost /> : <Navigate to="overview" replace />} />

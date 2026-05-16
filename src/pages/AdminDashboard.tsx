@@ -52,6 +52,7 @@ import AdminKnowledgeHub from "@/components/admin/AdminKnowledgeHub";
 import AdminFeatureControlSystem from "@/components/admin/AdminFeatureControlSystem";
 import AdminDigitalProductsControl from "@/components/admin/AdminDigitalProductsControl";
 import AdminExternalLinkControl from "@/components/admin/AdminExternalLinkControl";
+import AdminDriveStorage from "@/components/admin/AdminDriveStorage";
 
 const navItems = [
   { label: "Analytics", path: "/admin", icon: <BarChart3 className="h-4 w-4" /> },

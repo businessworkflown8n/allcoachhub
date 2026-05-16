@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
-import { Upload, Loader2, Trash2, Video, Youtube, Image as ImageIcon, Mic, Lock, Play, Square } from "lucide-react";
+import { Upload, Loader2, Trash2, Video, Youtube, Image as ImageIcon, Mic, Lock, Play, Square, HardDrive } from "lucide-react";
+import DrivePicker from "@/components/coach/drive/DrivePicker";
 
 type Media = {
   id: string;

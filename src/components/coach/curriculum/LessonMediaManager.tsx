@@ -216,12 +216,21 @@ const LessonMediaManager = ({ open, onOpenChange, lessonId, lessonTitle }: Props
 
           <TabsContent value="image" className="space-y-3 pt-4">
             {fImage.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : !fImage.data?.enabled ? renderLocked("Image Upload", fImage.data?.reason) : (
-              <div>
-                <Label>Upload images (you can add multiple, one at a time)</Label>
-                <Input type="file" accept="image/*" disabled={uploading} onChange={async (e) => {
-                  const files = Array.from(e.target.files || []);
-                  for (const f of files) await uploadFile(f, "image");
-                }} multiple />
+              <div className="space-y-3">
+                <div>
+                  <Label>Upload images (you can add multiple, one at a time)</Label>
+                  <Input type="file" accept="image/*" disabled={uploading} onChange={async (e) => {
+                    const files = Array.from(e.target.files || []);
+                    for (const f of files) await uploadFile(f, "image");
+                  }} multiple />
+                </div>
+                <div className="rounded-lg border border-dashed border-border p-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium flex items-center gap-2"><HardDrive className="h-4 w-4" /> From Google Drive</p>
+                    <p className="text-xs text-muted-foreground">Pick an image from your connected Drive.</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setDrivePickerOpen("image")}>Choose</Button>
+                </div>
               </div>
             )}
           </TabsContent>

@@ -209,15 +209,26 @@ const CoachEnrollments = () => {
 
   const countries = [...new Set(combinedRows.map((e) => e.country))];
 
+  const maskName = (name?: string) => {
+    if (!name) return "—";
+    return name.split(/\s+/).filter(Boolean).map((p) => (p[0]?.toUpperCase() || "") + "***").join(" ");
+  };
+
+  const canSee = (e: any) => isAdmin || hasAccess(e.learner_id);
+
   const exportCSV = () => {
     const headers = ["Type", "Name", "Course/Webinar", "Fee", "Amount Paid", "Country", "City", "Industry", "Job Title", "Experience", "Education", "Payment", "Locked", "Date"];
     const rows = filtered.map((e) => {
       const course = e.courses as any;
       const fee = e.currency === "USD" ? `$${course?.price_usd || 0}` : `₹${course?.price_inr || 0}`;
       const paid = e.amount_paid ? (e.currency === "USD" ? `$${e.amount_paid}` : `₹${e.amount_paid}`) : "—";
+      const ok = canSee(e);
       return [
-        e.row_type, e.full_name, course?.title, fee, paid, e.country, e.city, e.industry,
-        e.current_job_title, e.experience_level, e.education_qualification,
+        e.row_type,
+        ok ? e.full_name : maskName(e.full_name),
+        course?.title, fee, paid,
+        ok ? e.country : "Locked", ok ? e.city : "Locked", ok ? e.industry : "Locked",
+        ok ? e.current_job_title : "Locked", ok ? e.experience_level : "Locked", ok ? e.education_qualification : "Locked",
         e.payment_status, e.payment_locked ? "Yes" : "No", new Date(e.enrolled_at).toLocaleDateString()
       ];
     });

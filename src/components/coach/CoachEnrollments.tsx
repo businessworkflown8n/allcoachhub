@@ -242,7 +242,7 @@ const CoachEnrollments = () => {
 
   const ContactCell = ({ enrollment }: { enrollment: any }) => {
     const learnerId = enrollment.learner_id;
-    if (hasAccess(learnerId)) {
+    if (isAdmin || hasAccess(learnerId)) {
       return (
         <>
           <TableCell className="text-foreground whitespace-nowrap">{enrollment.email}</TableCell>
@@ -252,23 +252,27 @@ const CoachEnrollments = () => {
       );
     }
     return (
-      <>
-        <TableCell colSpan={3} className="text-center">
-          <div className="flex items-center gap-2 justify-center">
-            <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Contact info hidden</span>
-            {isPending(learnerId) ? (
-              <Badge variant="outline" className="text-yellow-400 border-yellow-500/30 text-xs">Pending</Badge>
-            ) : (
-              <Button size="sm" variant="outline" className="gap-1 text-xs h-7" onClick={() => handleRequestAccess(learnerId)}>
-                <KeyRound className="h-3 w-3" /> Request Access
-              </Button>
-            )}
-          </div>
-        </TableCell>
-      </>
+      <TableCell colSpan={3} className="text-center">
+        <div className="flex items-center gap-2 justify-center">
+          <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">Contact info hidden</span>
+          {isPending(learnerId) ? (
+            <Badge variant="outline" className="text-yellow-400 border-yellow-500/30 text-xs">Pending admin approval</Badge>
+          ) : (
+            <Button size="sm" variant="outline" className="gap-1 text-xs h-7" onClick={() => handleRequestAccess(learnerId)}>
+              <KeyRound className="h-3 w-3" /> Request Access
+            </Button>
+          )}
+        </div>
+      </TableCell>
     );
   };
+
+  const LockedCell = () => (
+    <TableCell className="text-muted-foreground">
+      <span className="inline-flex items-center gap-1 text-xs"><Lock className="h-3 w-3" /> Locked</span>
+    </TableCell>
+  );
 
   const isPaymentEditable = (enrollment: any) => {
     if (isAdmin) return true;

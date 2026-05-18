@@ -528,7 +528,8 @@ const CoachWebinars = () => {
                       <TableCell className="text-foreground">{r.amount_paid ? `₹${r.amount_paid}` : "Free"}</TableCell>
                       <TableCell className="text-muted-foreground whitespace-nowrap">{format(new Date(r.registered_at), "MMM d, yyyy")}</TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

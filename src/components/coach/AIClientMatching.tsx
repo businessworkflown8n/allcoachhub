@@ -58,7 +58,9 @@ const AIClientMatching = () => {
         score += 10 + Math.random() * 10;
 
         return {
-          name: l.full_name || "Learner",
+          name: l.full_name
+            ? l.full_name.split(" ").filter(Boolean).map((p) => (p[0] || "").toUpperCase() + "***").join(" ")
+            : "Learner",
           matchScore: Math.min(Math.round(score), 98),
           interests: l.category || "AI & Technology",
           level: l.experience_level || "Beginner",

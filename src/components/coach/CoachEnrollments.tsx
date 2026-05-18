@@ -370,7 +370,9 @@ const CoachEnrollments = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((e) => (
+              {filtered.map((e) => {
+                const ok = canSee(e);
+                return (
                 <TableRow key={e.id}>
                   <TableCell>
                     <Badge variant="outline" className={`text-[10px] gap-1 ${e.row_type === "Course" ? "text-primary border-primary/30" : "text-blue-400 border-blue-500/30"}`}>
@@ -378,7 +380,7 @@ const CoachEnrollments = () => {
                       {e.row_type}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-foreground font-medium whitespace-nowrap">{e.full_name}</TableCell>
+                  <TableCell className="text-foreground font-medium whitespace-nowrap">{ok ? e.full_name : maskName(e.full_name)}</TableCell>
                   <ContactCell enrollment={e} />
                   <TableCell className="text-foreground whitespace-nowrap">{(e.courses as any)?.title}</TableCell>
                   <TableCell className="text-foreground whitespace-nowrap">
@@ -391,14 +393,14 @@ const CoachEnrollments = () => {
                       ? (e.currency === "USD" ? `$${e.amount_paid}` : `₹${e.amount_paid}`)
                       : "—"}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{e.country}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.city}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.industry}</TableCell>
-                  <TableCell className="text-muted-foreground whitespace-nowrap">{e.current_job_title}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.experience_level}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.education_qualification}</TableCell>
+                  {ok ? <TableCell className="text-muted-foreground">{e.country}</TableCell> : <LockedCell />}
+                  {ok ? <TableCell className="text-muted-foreground">{e.city}</TableCell> : <LockedCell />}
+                  {ok ? <TableCell className="text-muted-foreground">{e.industry}</TableCell> : <LockedCell />}
+                  {ok ? <TableCell className="text-muted-foreground whitespace-nowrap">{e.current_job_title}</TableCell> : <LockedCell />}
+                  {ok ? <TableCell className="text-muted-foreground">{e.experience_level}</TableCell> : <LockedCell />}
+                  {ok ? <TableCell className="text-muted-foreground">{e.education_qualification}</TableCell> : <LockedCell />}
                   <TableCell className="text-muted-foreground">
-                    {e.linkedin_profile ? <a href={e.linkedin_profile} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View</a> : "—"}
+                    {ok ? (e.linkedin_profile ? <a href={e.linkedin_profile} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View</a> : "—") : <span className="inline-flex items-center gap-1 text-xs"><Lock className="h-3 w-3" /> Locked</span>}
                   </TableCell>
                   <TableCell>
                     {isPaymentEditable(e) ? (

@@ -268,13 +268,10 @@ const CoachCourses = () => {
                 </div>
               )}
 
-              <button
-                onClick={() => viewStudents(c.id, c.title)}
-                className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
-              >
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <Users className="h-3.5 w-3.5" />
                 {enrollCounts[c.id] || 0} Students Enrolled
-              </button>
+              </div>
               <div className="flex gap-2 pt-2 border-t border-border">
                 <Link to={`/coach/courses/${c.id}/edit`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
                   <Edit className="h-3 w-3" /> Edit

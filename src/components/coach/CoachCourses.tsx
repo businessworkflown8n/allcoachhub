@@ -1,46 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useContactAccess } from "@/hooks/useContactAccess";
-import { useUserRole } from "@/hooks/useUserRole";
 import { Link } from "react-router-dom";
-import { BookOpen, Plus, Edit, Trash2, Eye, EyeOff, Users, Download, Clock, CheckCircle, AlertTriangle, ListTree, Lock, KeyRound } from "lucide-react";
+import { BookOpen, Plus, Edit, Trash2, Eye, EyeOff, Users, Clock, CheckCircle, AlertTriangle, ListTree } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-interface EnrolledStudent {
-  id: string;
-  learner_id: string | null;
-  full_name: string;
-  email: string;
-  contact_number: string;
-  enrolled_at: string;
-}
-
-const maskName = (name?: string) => {
-  if (!name) return "—";
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .map((p) => p[0]?.toUpperCase() + "***")
-    .join(" ");
-};
 
 const CoachCourses = () => {
   const { user } = useAuth();
-  const { isAdmin } = useUserRole();
-  const { hasAccess, isPending, requestAccess } = useContactAccess();
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [enrollCounts, setEnrollCounts] = useState<Record<string, number>>({});
-  const [showStudents, setShowStudents] = useState<string | null>(null);
-  const [students, setStudents] = useState<EnrolledStudent[]>([]);
-  const [studentsCourseTitle, setStudentsCourseTitle] = useState("");
-
-  const canSee = (s: EnrolledStudent) => isAdmin || (s.learner_id ? hasAccess(s.learner_id) : false);
 
   const fetchCourses = async () => {
     if (!user) return;
@@ -88,45 +57,6 @@ const CoachCourses = () => {
     toast({ title: current ? "Course unpublished" : "Course published" });
   };
 
-  const viewStudents = async (courseId: string, courseTitle: string) => {
-    setStudentsCourseTitle(courseTitle);
-    setShowStudents(courseId);
-    const { data } = await supabase
-      .from("enrollments")
-      .select("id, learner_id, full_name, email, contact_number, enrolled_at")
-      .eq("course_id", courseId)
-      .order("enrolled_at", { ascending: false });
-    setStudents((data || []) as any);
-  };
-
-  const handleRequest = async (learnerId: string | null) => {
-    if (!learnerId) return;
-    const { error } = await requestAccess(learnerId, "learner") || {};
-    if (error) toast({ title: "Request failed", description: error.message, variant: "destructive" });
-    else toast({ title: "Access requested", description: "Admin will review your request." });
-  };
-
-  const downloadStudentsCSV = () => {
-    const rows = [["Name", "Email", "Phone", "Enrollment Date"]];
-    students.forEach((s) => {
-      const ok = canSee(s);
-      rows.push([
-        ok ? s.full_name : maskName(s.full_name),
-        ok ? s.email : "Locked",
-        ok ? (s.contact_number || "—") : "Locked",
-        format(new Date(s.enrolled_at), "yyyy-MM-dd HH:mm"),
-      ]);
-    });
-    const csv = rows.map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${studentsCourseTitle}-students.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   const getStatusBadge = (course: any) => {
     if (course.requires_category_approval) {
       return (
@@ -158,66 +88,6 @@ const CoachCourses = () => {
           <Plus className="h-4 w-4" /> Add Course
         </Link>
       </div>
-
-      {/* Students Dialog */}
-      <Dialog open={!!showStudents} onOpenChange={(o) => { if (!o) setShowStudents(null); }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle>Enrolled Students ({students.length})</DialogTitle>
-              {students.length > 0 && (
-                <Button size="sm" variant="outline" onClick={downloadStudentsCSV} className="gap-1.5">
-                  <Download className="h-3.5 w-3.5" /> Download CSV
-                </Button>
-              )}
-            </div>
-          </DialogHeader>
-          <p className="text-xs text-muted-foreground">{studentsCourseTitle}</p>
-          {!isAdmin && (
-            <div className="flex items-start gap-2 rounded-lg bg-muted/40 border border-border p-2.5">
-              <Lock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
-              <p className="text-xs text-muted-foreground">
-                Learner contact details are hidden by default. Request admin approval to view them.
-              </p>
-            </div>
-          )}
-          {students.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">No enrollments yet</p>
-          ) : (
-            <div className="space-y-2 max-h-80 overflow-y-auto">
-              {students.map((s) => {
-                const ok = canSee(s);
-                return (
-                  <div key={s.id} className="flex items-start justify-between gap-2 rounded-lg border border-border p-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-foreground">{ok ? s.full_name : maskName(s.full_name)}</p>
-                      {ok ? (
-                        <>
-                          <p className="text-xs text-muted-foreground truncate">{s.email}</p>
-                          {s.contact_number && <p className="text-xs text-muted-foreground">{s.contact_number}</p>}
-                        </>
-                      ) : (
-                        <div className="flex items-center gap-2 mt-1">
-                          <Lock className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">Contact hidden</span>
-                          {s.learner_id && (isPending(s.learner_id) ? (
-                            <Badge variant="outline" className="text-yellow-400 border-yellow-500/30 text-[10px]">Pending</Badge>
-                          ) : (
-                            <Button size="sm" variant="outline" className="gap-1 text-xs h-6" onClick={() => handleRequest(s.learner_id)}>
-                              <KeyRound className="h-3 w-3" /> Request
-                            </Button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">{format(new Date(s.enrolled_at), "MMM d, yyyy")}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
       {courses.length === 0 ? (
         <div className="text-center py-16">

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useContactAccess } from "@/hooks/useContactAccess";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,8 +12,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, Users, Search, Mail, Phone } from "lucide-react";
+import { Plus, Users, Search, Mail, Phone, Lock, KeyRound } from "lucide-react";
 import { toast } from "sonner";
+
+const maskName = (name?: string) =>
+  !name ? "—" : name.split(" ").filter(Boolean).map((p) => p[0]?.toUpperCase() + "***").join(" ");
 
 interface Client {
   id: string;
@@ -29,6 +34,7 @@ interface Client {
 
 interface EnrolledLearner {
   id: string;
+  learner_id: string | null;
   full_name: string;
   email: string;
   course_title: string;
@@ -39,6 +45,8 @@ const STATUSES = ["active", "paused", "churned", "prospect"];
 
 export default function CoachClients() {
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
+  const { hasAccess, isPending, requestAccess } = useContactAccess();
   const [clients, setClients] = useState<Client[]>([]);
   const [enrolled, setEnrolled] = useState<EnrolledLearner[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +54,8 @@ export default function CoachClients() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Client | null>(null);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", status: "active", goals: "", notes: "" });
+
+  const canSeeEnrolled = (e: EnrolledLearner) => isAdmin || (e.learner_id ? hasAccess(e.learner_id) : false);
 
   const load = async () => {
     if (!user) return;
@@ -57,6 +67,7 @@ export default function CoachClients() {
     setClients((clientsRes.data || []) as any);
     setEnrolled(((enrollRes.data || []) as any[]).map((e) => ({
       id: e.id,
+      learner_id: e.learner_id,
       full_name: e.profiles?.full_name || "Learner",
       email: e.profiles?.email || "",
       course_title: e.courses?.title || "",
@@ -66,6 +77,13 @@ export default function CoachClients() {
   };
 
   useEffect(() => { load(); }, [user]);
+
+  const handleRequest = async (learnerId: string | null) => {
+    if (!learnerId) return;
+    const res = await requestAccess(learnerId, "learner");
+    if (res?.error) toast.error(res.error.message);
+    else toast.success("Access requested");
+  };
 
   const openNew = () => {
     setEditing(null);
@@ -191,17 +209,34 @@ export default function CoachClients() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredEnrolled.map((e) => (
-                  <TableRow key={e.id}>
-                    <TableCell className="font-medium">{e.full_name}</TableCell>
-                    <TableCell className="text-xs">{e.email}</TableCell>
-                    <TableCell className="text-xs">{e.course_title}</TableCell>
-                    <TableCell className="text-xs">{new Date(e.enrolled_at).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right">
-                      <Button size="sm" variant="outline" onClick={() => promoteEnrolled(e)}>Add to CRM</Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filteredEnrolled.map((e) => {
+                  const ok = canSeeEnrolled(e);
+                  return (
+                    <TableRow key={e.id}>
+                      <TableCell className="font-medium">{ok ? e.full_name : maskName(e.full_name)}</TableCell>
+                      <TableCell className="text-xs">
+                        {ok ? e.email : (
+                          <div className="flex items-center gap-1.5">
+                            <Lock className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-muted-foreground">Hidden</span>
+                            {e.learner_id && (isPending(e.learner_id) ? (
+                              <Badge variant="outline" className="text-yellow-400 border-yellow-500/30 text-[10px]">Pending</Badge>
+                            ) : (
+                              <Button size="sm" variant="outline" className="gap-1 text-xs h-6" onClick={() => handleRequest(e.learner_id)}>
+                                <KeyRound className="h-3 w-3" /> Request
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs">{e.course_title}</TableCell>
+                      <TableCell className="text-xs">{new Date(e.enrolled_at).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-right">
+                        <Button size="sm" variant="outline" disabled={!ok} onClick={() => promoteEnrolled(e)}>Add to CRM</Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}

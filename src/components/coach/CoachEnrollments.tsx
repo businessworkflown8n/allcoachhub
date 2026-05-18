@@ -209,15 +209,26 @@ const CoachEnrollments = () => {
 
   const countries = [...new Set(combinedRows.map((e) => e.country))];
 
+  const maskName = (name?: string) => {
+    if (!name) return "—";
+    return name.split(/\s+/).filter(Boolean).map((p) => (p[0]?.toUpperCase() || "") + "***").join(" ");
+  };
+
+  const canSee = (e: any) => isAdmin || hasAccess(e.learner_id);
+
   const exportCSV = () => {
     const headers = ["Type", "Name", "Course/Webinar", "Fee", "Amount Paid", "Country", "City", "Industry", "Job Title", "Experience", "Education", "Payment", "Locked", "Date"];
     const rows = filtered.map((e) => {
       const course = e.courses as any;
       const fee = e.currency === "USD" ? `$${course?.price_usd || 0}` : `₹${course?.price_inr || 0}`;
       const paid = e.amount_paid ? (e.currency === "USD" ? `$${e.amount_paid}` : `₹${e.amount_paid}`) : "—";
+      const ok = canSee(e);
       return [
-        e.row_type, e.full_name, course?.title, fee, paid, e.country, e.city, e.industry,
-        e.current_job_title, e.experience_level, e.education_qualification,
+        e.row_type,
+        ok ? e.full_name : maskName(e.full_name),
+        course?.title, fee, paid,
+        ok ? e.country : "Locked", ok ? e.city : "Locked", ok ? e.industry : "Locked",
+        ok ? e.current_job_title : "Locked", ok ? e.experience_level : "Locked", ok ? e.education_qualification : "Locked",
         e.payment_status, e.payment_locked ? "Yes" : "No", new Date(e.enrolled_at).toLocaleDateString()
       ];
     });
@@ -231,7 +242,7 @@ const CoachEnrollments = () => {
 
   const ContactCell = ({ enrollment }: { enrollment: any }) => {
     const learnerId = enrollment.learner_id;
-    if (hasAccess(learnerId)) {
+    if (isAdmin || hasAccess(learnerId)) {
       return (
         <>
           <TableCell className="text-foreground whitespace-nowrap">{enrollment.email}</TableCell>
@@ -241,23 +252,27 @@ const CoachEnrollments = () => {
       );
     }
     return (
-      <>
-        <TableCell colSpan={3} className="text-center">
-          <div className="flex items-center gap-2 justify-center">
-            <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Contact info hidden</span>
-            {isPending(learnerId) ? (
-              <Badge variant="outline" className="text-yellow-400 border-yellow-500/30 text-xs">Pending</Badge>
-            ) : (
-              <Button size="sm" variant="outline" className="gap-1 text-xs h-7" onClick={() => handleRequestAccess(learnerId)}>
-                <KeyRound className="h-3 w-3" /> Request Access
-              </Button>
-            )}
-          </div>
-        </TableCell>
-      </>
+      <TableCell colSpan={3} className="text-center">
+        <div className="flex items-center gap-2 justify-center">
+          <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">Contact info hidden</span>
+          {isPending(learnerId) ? (
+            <Badge variant="outline" className="text-yellow-400 border-yellow-500/30 text-xs">Pending admin approval</Badge>
+          ) : (
+            <Button size="sm" variant="outline" className="gap-1 text-xs h-7" onClick={() => handleRequestAccess(learnerId)}>
+              <KeyRound className="h-3 w-3" /> Request Access
+            </Button>
+          )}
+        </div>
+      </TableCell>
     );
   };
+
+  const LockedCell = () => (
+    <TableCell className="text-muted-foreground">
+      <span className="inline-flex items-center gap-1 text-xs"><Lock className="h-3 w-3" /> Locked</span>
+    </TableCell>
+  );
 
   const isPaymentEditable = (enrollment: any) => {
     if (isAdmin) return true;
@@ -355,7 +370,9 @@ const CoachEnrollments = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((e) => (
+              {filtered.map((e) => {
+                const ok = canSee(e);
+                return (
                 <TableRow key={e.id}>
                   <TableCell>
                     <Badge variant="outline" className={`text-[10px] gap-1 ${e.row_type === "Course" ? "text-primary border-primary/30" : "text-blue-400 border-blue-500/30"}`}>
@@ -363,7 +380,7 @@ const CoachEnrollments = () => {
                       {e.row_type}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-foreground font-medium whitespace-nowrap">{e.full_name}</TableCell>
+                  <TableCell className="text-foreground font-medium whitespace-nowrap">{ok ? e.full_name : maskName(e.full_name)}</TableCell>
                   <ContactCell enrollment={e} />
                   <TableCell className="text-foreground whitespace-nowrap">{(e.courses as any)?.title}</TableCell>
                   <TableCell className="text-foreground whitespace-nowrap">
@@ -376,14 +393,14 @@ const CoachEnrollments = () => {
                       ? (e.currency === "USD" ? `$${e.amount_paid}` : `₹${e.amount_paid}`)
                       : "—"}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{e.country}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.city}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.industry}</TableCell>
-                  <TableCell className="text-muted-foreground whitespace-nowrap">{e.current_job_title}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.experience_level}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.education_qualification}</TableCell>
+                  {ok ? <TableCell className="text-muted-foreground">{e.country}</TableCell> : <LockedCell />}
+                  {ok ? <TableCell className="text-muted-foreground">{e.city}</TableCell> : <LockedCell />}
+                  {ok ? <TableCell className="text-muted-foreground">{e.industry}</TableCell> : <LockedCell />}
+                  {ok ? <TableCell className="text-muted-foreground whitespace-nowrap">{e.current_job_title}</TableCell> : <LockedCell />}
+                  {ok ? <TableCell className="text-muted-foreground">{e.experience_level}</TableCell> : <LockedCell />}
+                  {ok ? <TableCell className="text-muted-foreground">{e.education_qualification}</TableCell> : <LockedCell />}
                   <TableCell className="text-muted-foreground">
-                    {e.linkedin_profile ? <a href={e.linkedin_profile} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View</a> : "—"}
+                    {ok ? (e.linkedin_profile ? <a href={e.linkedin_profile} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View</a> : "—") : <span className="inline-flex items-center gap-1 text-xs"><Lock className="h-3 w-3" /> Locked</span>}
                   </TableCell>
                   <TableCell>
                     {isPaymentEditable(e) ? (
@@ -430,7 +447,8 @@ const CoachEnrollments = () => {
                   </TableCell>
                   <TableCell className="text-muted-foreground whitespace-nowrap">{new Date(e.enrolled_at).toLocaleDateString()}</TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         </div>

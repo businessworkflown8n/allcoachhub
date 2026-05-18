@@ -447,7 +447,6 @@ const CoachEnrollments = () => {
                   </TableCell>
                   <TableCell className="text-muted-foreground whitespace-nowrap">{new Date(e.enrolled_at).toLocaleDateString()}</TableCell>
                 </TableRow>
-                </TableRow>
                 );
               })}
             </TableBody>

@@ -126,7 +126,14 @@ const CategoryCourseGrid = ({
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {Number(course.duration_hours)}h</span>
                       {enrollCount > 0 && (
-                        <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {enrollCount} enrolled</span>
+                        <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {enrollCount}</span>
+                      )}
+                      {ratings[course.id] && (
+                        <span className="flex items-center gap-1 text-amber-400">
+                          <Star className="h-3 w-3 fill-current" />
+                          {ratings[course.id].avg.toFixed(1)}
+                          <span className="text-muted-foreground">({ratings[course.id].count})</span>
+                        </span>
                       )}
                     </div>
 

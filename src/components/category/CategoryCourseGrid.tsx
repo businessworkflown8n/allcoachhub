@@ -22,7 +22,7 @@ const isNewCourse = (createdAt: string) => {
 };
 
 const CategoryCourseGrid = ({
-  courses, coaches, enrollCounts, loading,
+  courses, coaches, enrollCounts, ratings = {}, loading,
   symbol, priceKey, originalPriceKey, categoryName, trendingCourses, isOthers,
 }: Props) => {
   const trendingIds = new Set(trendingCourses.filter((c) => (enrollCounts[c.id] || 0) > 0).map((c) => c.id));

@@ -96,7 +96,7 @@ const CategoryPage = () => {
     (async () => {
       const { data } = await supabase
         .from("coach_categories")
-        .select("name, slug, icon, description")
+        .select("name, slug, icon")
         .eq("slug", slug)
         .eq("is_active", true)
         .maybeSingle();

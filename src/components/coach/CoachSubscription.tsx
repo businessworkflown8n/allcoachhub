@@ -74,7 +74,7 @@ const CoachSubscription = () => {
       const [{ count: cCount }, { count: eCount }, { count: lCount }, { count: wCount }] = await Promise.all([
         supabase.from("courses").select("id", { count: "exact", head: true }).eq("coach_id", user.id),
         supabase.from("enrollments").select("id", { count: "exact", head: true }).eq("coach_id", user.id),
-        supabase.from("leads").select("id", { count: "exact", head: true }).eq("coach_id", user.id),
+        supabase.from("coach_leads").select("id", { count: "exact", head: true }).eq("coach_id", user.id),
         supabase.from("webinars").select("id", { count: "exact", head: true }).eq("coach_id", user.id),
       ]);
 

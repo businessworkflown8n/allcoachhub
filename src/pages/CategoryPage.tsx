@@ -65,12 +65,15 @@ const CategoryPage = () => {
   const { slug: paramSlug } = useParams<{ slug: string }>();
   const location = useLocation();
   const slug = paramSlug || location.pathname.replace("/", "");
-  const cat = categoryMap[slug || ""];
+  const staticCat = categoryMap[slug || ""];
   const { symbol, priceKey, originalPriceKey } = useCurrency();
 
+  const [cat, setCat] = useState<any>(staticCat || null);
+  const [catChecked, setCatChecked] = useState<boolean>(!!staticCat);
   const [courses, setCourses] = useState<any[]>([]);
   const [coaches, setCoaches] = useState<Record<string, any>>({});
   const [enrollCounts, setEnrollCounts] = useState<Record<string, number>>({});
+  const [ratings, setRatings] = useState<Record<string, { avg: number; count: number }>>({});
   const [loading, setLoading] = useState(true);
 
   const [levelFilter, setLevelFilter] = useState("All");
@@ -81,12 +84,39 @@ const CategoryPage = () => {
   useSEO({
     title: cat ? `${cat.name} Courses | AI Coach Portal` : "Category – AI Coach Portal",
     description: cat ? `Explore ${cat.name} courses created by expert coaches. Learn and master skills with real-world applications.` : "Browse AI courses by category.",
-    canonical: `https://www.aicoachportal.com/courses/${slug}`,
+    canonical: `https://www.aicoachportal.com/categories/${slug}`,
     ogTitle: cat ? `${cat.name} Courses | AI Coach Portal` : undefined,
     ogDescription: cat ? `Explore ${cat.name} courses created by expert coaches.` : undefined,
   });
 
+  // Resolve category dynamically from DB if not in static map
   useEffect(() => {
+    if (staticCat) { setCat(staticCat); setCatChecked(true); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("coach_categories")
+        .select("name, slug, icon")
+        .eq("slug", slug)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data) {
+        setCat({
+          name: data.name,
+          slug: data.slug,
+          emoji: data.icon || "📂",
+          description: `Explore ${data.name} courses by expert coaches.`,
+          seoText: `Discover top-rated ${data.name} courses on AI Coach Portal — created by verified expert coaches.`,
+        });
+      }
+      setCatChecked(true);
+    })();
+    return () => { cancelled = true; };
+  }, [slug, staticCat]);
+
+  useEffect(() => {
+    if (!catChecked) return;
     if (!cat) { setLoading(false); return; }
     trackEvent("category_page_view", { category: cat.name });
 
@@ -94,23 +124,17 @@ const CategoryPage = () => {
       setLoading(true);
 
       let list: any[] = [];
-
       if (slug === "others") {
-        // Fetch courses NOT in any predefined category
         const predefinedNames = PREDEFINED_CATEGORIES.filter((c) => c.name !== "Others").map((c) => c.name);
         const { data } = await supabase
-          .from("courses")
-          .select("*")
-          .eq("is_published", true)
-          .eq("approval_status", "approved")
+          .from("courses").select("*")
+          .eq("is_published", true).eq("approval_status", "approved")
           .order("created_at", { ascending: false });
         list = (data || []).filter((c) => !predefinedNames.includes(c.category));
       } else {
         const { data } = await supabase
-          .from("courses")
-          .select("*")
-          .eq("is_published", true)
-          .eq("approval_status", "approved")
+          .from("courses").select("*")
+          .eq("is_published", true).eq("approval_status", "approved")
           .eq("category", cat.name)
           .order("created_at", { ascending: false });
         list = data || [];
@@ -121,8 +145,7 @@ const CategoryPage = () => {
       const coachIds = [...new Set(list.map((c) => c.coach_id))];
       if (coachIds.length > 0) {
         const { data: profiles } = await supabase
-          .from("profiles")
-          .select("user_id, full_name, slug, avatar_url")
+          .from("profiles").select("user_id, full_name, slug, avatar_url")
           .in("user_id", coachIds);
         const map: Record<string, any> = {};
         (profiles || []).forEach((p) => { map[p.user_id] = p; });
@@ -130,21 +153,37 @@ const CategoryPage = () => {
       }
 
       if (list.length > 0) {
-        const counts: Record<string, number> = {};
-        for (const course of list.slice(0, 30)) {
-          const { count } = await supabase
-            .from("enrollments")
-            .select("id", { count: "exact", head: true })
-            .eq("course_id", course.id);
-          counts[course.id] = count || 0;
-        }
-        setEnrollCounts(counts);
+        const ids = list.slice(0, 60).map((c) => c.id);
+        const [enrollsRes, revsRes] = await Promise.all([
+          supabase.from("enrollments").select("course_id").in("course_id", ids),
+          supabase.from("reviews").select("course_id, rating").in("course_id", ids).eq("status", "approved"),
+        ]);
+        const ec: Record<string, number> = {};
+        (enrollsRes.data || []).forEach((e: any) => { ec[e.course_id] = (ec[e.course_id] || 0) + 1; });
+        setEnrollCounts(ec);
+        const rmap: Record<string, { sum: number; count: number }> = {};
+        (revsRes.data || []).forEach((r: any) => {
+          if (!rmap[r.course_id]) rmap[r.course_id] = { sum: 0, count: 0 };
+          rmap[r.course_id].sum += Number(r.rating); rmap[r.course_id].count += 1;
+        });
+        const out: Record<string, { avg: number; count: number }> = {};
+        Object.entries(rmap).forEach(([k, v]) => { out[k] = { avg: v.sum / v.count, count: v.count }; });
+        setRatings(out);
+      } else {
+        setEnrollCounts({}); setRatings({});
       }
 
       setLoading(false);
     };
     fetchData();
-  }, [slug]);
+
+    // Realtime sync — refetch on course changes
+    const channel = supabase
+      .channel(`category-${slug}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "courses" }, () => fetchData())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [cat, catChecked, slug]);
 
   const availableLanguages = useMemo(() => {
     const langs = new Set(courses.map((c) => c.language));
@@ -169,6 +208,17 @@ const CategoryPage = () => {
   }, [courses, enrollCounts]);
 
   if (!cat) {
+    if (!catChecked) {
+      return (
+        <>
+          <Navbar />
+          <div className="flex min-h-[60vh] items-center justify-center bg-background">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          </div>
+          <Footer />
+        </>
+      );
+    }
     return (
       <>
         <Navbar />
@@ -225,7 +275,7 @@ const CategoryPage = () => {
           availableLanguages={availableLanguages} resultCount={displayCourses.length}
         />
         <CategoryCourseGrid
-          courses={displayCourses} coaches={coaches} enrollCounts={enrollCounts}
+          courses={displayCourses} coaches={coaches} enrollCounts={enrollCounts} ratings={ratings}
           loading={loading} symbol={symbol} priceKey={priceKey} originalPriceKey={originalPriceKey}
           categoryName={cat.name} trendingCourses={trendingCourses} isOthers={slug === "others"}
         />

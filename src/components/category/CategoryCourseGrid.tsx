@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { Clock, Users, TrendingUp, Sparkles } from "lucide-react";
+import { Clock, Users, TrendingUp, Sparkles, Star } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
 interface Props {
   courses: any[];
   coaches: Record<string, any>;
   enrollCounts: Record<string, number>;
+  ratings?: Record<string, { avg: number; count: number }>;
   loading: boolean;
   symbol: string;
   priceKey: string;
@@ -21,7 +22,7 @@ const isNewCourse = (createdAt: string) => {
 };
 
 const CategoryCourseGrid = ({
-  courses, coaches, enrollCounts, loading,
+  courses, coaches, enrollCounts, ratings = {}, loading,
   symbol, priceKey, originalPriceKey, categoryName, trendingCourses, isOthers,
 }: Props) => {
   const trendingIds = new Set(trendingCourses.filter((c) => (enrollCounts[c.id] || 0) > 0).map((c) => c.id));
@@ -125,7 +126,14 @@ const CategoryCourseGrid = ({
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {Number(course.duration_hours)}h</span>
                       {enrollCount > 0 && (
-                        <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {enrollCount} enrolled</span>
+                        <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {enrollCount}</span>
+                      )}
+                      {ratings[course.id] && (
+                        <span className="flex items-center gap-1 text-amber-400">
+                          <Star className="h-3 w-3 fill-current" />
+                          {ratings[course.id].avg.toFixed(1)}
+                          <span className="text-muted-foreground">({ratings[course.id].count})</span>
+                        </span>
                       )}
                     </div>
 

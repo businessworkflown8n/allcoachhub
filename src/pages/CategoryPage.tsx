@@ -207,7 +207,7 @@ const CategoryPage = () => {
     return [...courses].sort((a, b) => (enrollCounts[b.id] || 0) - (enrollCounts[a.id] || 0)).slice(0, 4);
   }, [courses, enrollCounts]);
 
-  if (!cat) {
+  if (!cat && catChecked) {
     return (
       <>
         <Navbar />

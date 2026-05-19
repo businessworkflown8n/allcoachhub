@@ -98,7 +98,7 @@ const CategoriesSection = () => {
                     {cat.name}
                   </h3>
                   <p className="text-[11px] text-muted-foreground">
-                    {cat.coachCount} {cat.coachCount === 1 ? "coach" : "coaches"}
+                    {cat.coachCount} {cat.coachCount === 1 ? "course" : "courses"}
                   </p>
                 </Link>
               ))}

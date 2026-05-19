@@ -88,7 +88,7 @@ const Categories = () => {
                     {cat.name}
                   </h3>
                   <p className="text-xs text-muted-foreground">
-                    {cat.coachCount} {cat.coachCount === 1 ? "coach" : "coaches"}
+                    {cat.coachCount} {cat.coachCount === 1 ? "course" : "courses"}
                   </p>
                 </Link>
               ))}

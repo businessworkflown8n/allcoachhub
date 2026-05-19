@@ -66,7 +66,11 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(180deg, hsl(220 20% 7%) 0%, hsl(220 22% 9%) 100%);
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 0%, hsl(72 100% 50% / 0.05), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 100% 100%, hsl(220 40% 20% / 0.4), transparent 60%),
+      linear-gradient(180deg, hsl(220 20% 6%) 0%, hsl(220 22% 8%) 100%);
+    background-attachment: fixed;
     min-height: 100vh;
   }
 }

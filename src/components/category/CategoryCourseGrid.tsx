@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { Clock, Users, TrendingUp, Sparkles } from "lucide-react";
+import { Clock, Users, TrendingUp, Sparkles, Star } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
 interface Props {
   courses: any[];
   coaches: Record<string, any>;
   enrollCounts: Record<string, number>;
+  ratings?: Record<string, { avg: number; count: number }>;
   loading: boolean;
   symbol: string;
   priceKey: string;

@@ -44,6 +44,8 @@ import { useDigitalProductAccess } from "@/hooks/useDigitalProductAccess";
 import CoachLinkedInPost from "@/components/coach/CoachLinkedInPost";
 import { useFeatureControl } from "@/hooks/useFeatureControl";
 import { useExternalLinkControl } from "@/hooks/useExternalLinkControl";
+import CoachSubscription from "@/components/coach/CoachSubscription";
+import { Crown, Gem, Gauge as GaugeIcon, Receipt, ListChecks } from "lucide-react";
 
 const CoachDashboard = () => {
   useSEO({

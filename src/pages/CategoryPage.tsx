@@ -264,7 +264,7 @@ const CategoryPage = () => {
           availableLanguages={availableLanguages} resultCount={displayCourses.length}
         />
         <CategoryCourseGrid
-          courses={displayCourses} coaches={coaches} enrollCounts={enrollCounts}
+          courses={displayCourses} coaches={coaches} enrollCounts={enrollCounts} ratings={ratings}
           loading={loading} symbol={symbol} priceKey={priceKey} originalPriceKey={originalPriceKey}
           categoryName={cat.name} trendingCourses={trendingCourses} isOthers={slug === "others"}
         />

@@ -150,6 +150,11 @@ const CoachDashboard = () => {
         <Route path="blueprint" element={<CoachBlueprintWorkspace />} />
         <Route path="linkedin-post" element={linkedinEnabled ? <CoachLinkedInPost /> : <Navigate to="overview" replace />} />
         <Route path="digital-products/*" element={<CoachDigitalProducts />} />
+        <Route path="subscription" element={<CoachSubscription />} />
+        <Route path="plan-features" element={<CoachSubscription />} />
+        <Route path="upgrade-plan" element={<CoachSubscription />} />
+        <Route path="usage-limits" element={<CoachSubscription />} />
+        <Route path="billing-history" element={<CoachSubscription />} />
         <Route path="overview" element={<CoachOverview />} />
         <Route path="*" element={<Navigate to="overview" replace />} />
       </Routes>

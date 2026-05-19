@@ -44,6 +44,8 @@ import { useDigitalProductAccess } from "@/hooks/useDigitalProductAccess";
 import CoachLinkedInPost from "@/components/coach/CoachLinkedInPost";
 import { useFeatureControl } from "@/hooks/useFeatureControl";
 import { useExternalLinkControl } from "@/hooks/useExternalLinkControl";
+import CoachSubscription from "@/components/coach/CoachSubscription";
+import { Crown, Gem, Gauge as GaugeIcon, Receipt, ListChecks } from "lucide-react";
 
 const CoachDashboard = () => {
   useSEO({
@@ -103,6 +105,11 @@ const CoachDashboard = () => {
     ...(aiJobsLinkedInEnabled ? [{ label: "AI Jobs & News – LinkedIn Post", path: "/ai-jobs-news/linkedin-post", icon: <Share2 className="h-4 w-4" /> }] : []),
     { label: "SEO & Indexing", path: "/coach/seo", icon: <Search className="h-4 w-4" /> },
     { label: "Profile", path: "/coach/profile", icon: <User className="h-4 w-4" /> },
+    { label: "My Subscription", path: "/coach/subscription", icon: <Crown className="h-4 w-4" /> },
+    { label: "Plan Features", path: "/coach/plan-features", icon: <ListChecks className="h-4 w-4" /> },
+    { label: "Upgrade Plan", path: "/coach/upgrade-plan", icon: <Gem className="h-4 w-4" /> },
+    { label: "Usage & Limits", path: "/coach/usage-limits", icon: <GaugeIcon className="h-4 w-4" /> },
+    { label: "Billing History", path: "/coach/billing-history", icon: <Receipt className="h-4 w-4" /> },
   ];
 
   return (
@@ -143,6 +150,11 @@ const CoachDashboard = () => {
         <Route path="blueprint" element={<CoachBlueprintWorkspace />} />
         <Route path="linkedin-post" element={linkedinEnabled ? <CoachLinkedInPost /> : <Navigate to="overview" replace />} />
         <Route path="digital-products/*" element={<CoachDigitalProducts />} />
+        <Route path="subscription" element={<CoachSubscription />} />
+        <Route path="plan-features" element={<CoachSubscription />} />
+        <Route path="upgrade-plan" element={<CoachSubscription />} />
+        <Route path="usage-limits" element={<CoachSubscription />} />
+        <Route path="billing-history" element={<CoachSubscription />} />
         <Route path="overview" element={<CoachOverview />} />
         <Route path="*" element={<Navigate to="overview" replace />} />
       </Routes>

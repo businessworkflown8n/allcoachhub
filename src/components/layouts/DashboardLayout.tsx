@@ -123,7 +123,7 @@ const DashboardLayout = ({ children, navItems, title, marqueeSegment }: Dashboar
 
       {/* Main content */}
       <div className="flex flex-1 flex-col min-w-0">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/30 bg-background/80 backdrop-blur-xl px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/30 glass-surface px-6">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-muted-foreground hover:text-foreground transition-colors">
             <Menu className="h-5 w-5" />
           </button>

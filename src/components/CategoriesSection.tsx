@@ -34,26 +34,34 @@ const CategoriesSection = () => {
         return;
       }
 
-      // Get coach counts per category_id
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("category_id")
-        .not("category_id", "is", null);
+      // Count published+approved courses per category name
+      const { data: courses } = await supabase
+        .from("courses")
+        .select("category")
+        .eq("is_published", true)
+        .eq("approval_status", "approved");
 
       const counts: Record<string, number> = {};
-      (profiles || []).forEach((p: any) => {
-        counts[p.category_id] = (counts[p.category_id] || 0) + 1;
+      (courses || []).forEach((c: any) => {
+        const key = (c.category || "Others").toLowerCase();
+        counts[key] = (counts[key] || 0) + 1;
       });
 
       setCategories(
         cats.map((c) => ({
           ...c,
-          coachCount: counts[c.id] || 0,
+          coachCount: counts[c.name.toLowerCase()] || 0,
         }))
       );
       setLoading(false);
     };
     fetchData();
+
+    const channel = supabase
+      .channel("home-categories-courses")
+      .on("postgres_changes", { event: "*", schema: "public", table: "courses" }, () => fetchData())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   return (

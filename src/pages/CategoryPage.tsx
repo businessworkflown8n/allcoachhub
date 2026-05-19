@@ -106,8 +106,8 @@ const CategoryPage = () => {
           name: data.name,
           slug: data.slug,
           emoji: data.icon || "📂",
-          description: data.description || `Explore ${data.name} courses by expert coaches.`,
-          seoText: data.description || `Discover top-rated ${data.name} courses on AI Coach Portal.`,
+          description: `Explore ${data.name} courses by expert coaches.`,
+          seoText: `Discover top-rated ${data.name} courses on AI Coach Portal — created by verified expert coaches.`,
         });
       }
       setCatChecked(true);

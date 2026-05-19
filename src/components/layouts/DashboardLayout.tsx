@@ -83,23 +83,29 @@ const DashboardLayout = ({ children, navItems, title, marqueeSegment }: Dashboar
             {filteredNavItems.length === 0 ? (
               <p className="px-3 py-4 text-center text-xs text-muted-foreground">No matches found</p>
             ) : (
-              filteredNavItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ${
-                    location.pathname === item.path
-                      ? "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_hsl(72_100%_50%/0.15)]"
-                      : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
-                  }`}
-                >
-                  <span className={location.pathname === item.path ? "icon-glow" : "opacity-70 group-hover:opacity-100 transition-opacity"}>
-                    {item.icon}
-                  </span>
-                  {item.label}
-                </Link>
-              ))
+              filteredNavItems.map((item) => {
+                const active = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ${
+                      active
+                        ? "bg-primary/10 text-primary nav-active-glow"
+                        : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground hover:translate-x-0.5"
+                    }`}
+                  >
+                    {active && (
+                      <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary shadow-[0_0_10px_hsl(72_100%_50%/0.6)]" />
+                    )}
+                    <span className={active ? "icon-glow" : "opacity-70 group-hover:opacity-100 transition-opacity"}>
+                      {item.icon}
+                    </span>
+                    {item.label}
+                  </Link>
+                );
+              })
             )}
           </div>
         </nav>

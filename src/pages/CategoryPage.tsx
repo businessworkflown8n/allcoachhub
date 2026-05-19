@@ -207,7 +207,18 @@ const CategoryPage = () => {
     return [...courses].sort((a, b) => (enrollCounts[b.id] || 0) - (enrollCounts[a.id] || 0)).slice(0, 4);
   }, [courses, enrollCounts]);
 
-  if (!cat && catChecked) {
+  if (!cat) {
+    if (!catChecked) {
+      return (
+        <>
+          <Navbar />
+          <div className="flex min-h-[60vh] items-center justify-center bg-background">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          </div>
+          <Footer />
+        </>
+      );
+    }
     return (
       <>
         <Navbar />

@@ -45,12 +45,12 @@ const DashboardLayout = ({ children, navItems, title, marqueeSegment }: Dashboar
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col border-r border-border/50 bg-card transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shrink-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
-        style={{ boxShadow: '4px 0 24px rgba(0,0,0,0.3)' }}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col border-r border-border/40 glass-surface transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shrink-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        style={{ boxShadow: '8px 0 32px rgba(0,0,0,0.45)' }}
       >
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-border/30 px-5">
-          <Link to="/" className="flex items-center gap-2.5">
-            <img src={logo} alt="AI Coach Portal" className="h-8 w-8 rounded-lg" />
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <img src={logo} alt="AI Coach Portal" className="h-8 w-8 rounded-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3" />
             <span className="text-sm font-bold text-foreground tracking-tight">{title}</span>
           </Link>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-muted-foreground hover:text-foreground transition-colors">

@@ -12,7 +12,6 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/hooks/useAuth";
 import { LocaleProvider } from "@/hooks/useLocale";
 import { TranslationProvider } from "@/i18n/TranslationProvider";
-import WebsitePopup from "./components/WebsitePopup";
 const Index = lazy(() => import("./pages/Index"));
 
 // Lazy-loaded routes
@@ -64,6 +63,7 @@ const AiJobsNewsLinkedInPost = lazy(() => import("./pages/AiJobsNewsLinkedInPost
 // Lazy-loaded global widgets (non-critical)
 
 const ChatbotWidget = lazy(() => import("./components/ChatbotWidget"));
+const WebsitePopup = lazy(() => import("./components/WebsitePopup"));
 const FloatingPromptButton = lazy(() => import("./components/prompt/FloatingPromptButton"));
 const AnalyticsTracker = lazy(() => import("./components/AnalyticsTracker"));
 

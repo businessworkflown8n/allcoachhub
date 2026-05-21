@@ -28,11 +28,6 @@ export const useCommunicationSettings = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (/^\/(auth|login|signup|admin\/login|admin\/otp-login|reset-password)/.test(window.location.pathname)) {
-      setLoading(false);
-      return;
-    }
-
     const fetch = async () => {
       const [commRes, platformRes] = await Promise.all([
         supabase.from("communication_settings" as any).select("key, value"),

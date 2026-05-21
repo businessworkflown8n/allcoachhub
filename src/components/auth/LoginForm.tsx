@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { trackLogin, trackPasswordReset, trackFormError } from "@/lib/analytics";
 import { getAuthFallbackMessage, isNetworkAuthError, resolvePrimaryRole, retryOnce, withTimeout } from "@/lib/authNetwork";
+import { instrumentAuthCall, recordAuthEvent } from "@/lib/authDiagnostics";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");

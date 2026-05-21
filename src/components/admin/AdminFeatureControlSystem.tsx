@@ -110,19 +110,70 @@ export default function AdminFeatureControlSystem() {
   const isDependencyLocked = (f: FeatureMaster) =>
     (f.depends_on ?? []).some((dep) => controls[dep] && controls[dep].global_enabled === false);
 
+  // Group features by category
+  const groupedFeatures = features.reduce<Record<string, FeatureMaster[]>>((acc, f) => {
+    const cat = f.category || "Other";
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(f);
+    return acc;
+  }, {});
+
+  const totalFeatures = features.length;
+  const globalEnabled = features.filter((f) => controls[f.feature_key]?.global_enabled).length;
+  const totalOverrides = overrides.length;
+
+  // Bulk actions
+  const bulkSetAllGlobal = async (enabled: boolean) => {
+    if (!confirm(`${enabled ? "Enable" : "Disable"} ALL features globally?`)) return;
+    const { error } = await supabase.from("feature_controls").update({ global_enabled: enabled }).neq("feature_key", "");
+    if (error) {
+      toast({ title: "Bulk update failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: `All features ${enabled ? "enabled" : "disabled"}` });
+    load();
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Settings2 className="h-6 w-6" /> Feature Control System
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          Global toggles, plan-based access, per-coach overrides, usage limits, and audit log.
-        </p>
+    <div className="space-y-8">
+      {/* Premium Header */}
+      <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-emerald-500/5 p-6 sm:p-8">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+        <div className="relative flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex items-start gap-4">
+            <div className="rounded-2xl bg-primary/20 p-3"><Settings2 className="h-6 w-6 text-primary" /></div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-primary/80 font-semibold mb-2">Admin Control</p>
+              <h1 className="text-3xl sm:text-4xl font-bold text-foreground font-display tracking-tight">Feature Approval Control</h1>
+              <p className="text-sm text-muted-foreground mt-2 max-w-xl">Global toggles, plan-based access, per-coach overrides, usage limits, and audit log.</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" className="border-primary/30 hover:bg-primary/10" onClick={() => bulkSetAllGlobal(true)}>Enable All</Button>
+            <Button size="sm" variant="outline" className="border-destructive/30 hover:bg-destructive/10 text-destructive" onClick={() => bulkSetAllGlobal(false)}>Disable All</Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stat cards */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        {[
+          { label: "Total Features", value: totalFeatures, color: "text-primary" },
+          { label: "Globally Enabled", value: globalEnabled, color: "text-emerald-400" },
+          { label: "Active Overrides", value: totalOverrides, color: "text-amber-400" },
+        ].map((s) => (
+          <div key={s.label} className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_10px_40px_-15px_hsl(var(--primary)/0.4)]">
+            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">{s.label}</p>
+              <p className={`text-3xl font-bold font-display tracking-tight mt-2 ${s.color}`}>{s.value}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
       <Tabs defaultValue="global">
-        <TabsList>
+        <TabsList className="bg-card/60 backdrop-blur-xl border border-border/50">
           <TabsTrigger value="global">Global & Plans</TabsTrigger>
           <TabsTrigger value="overrides">Coach Overrides</TabsTrigger>
           <TabsTrigger value="audit">
@@ -130,96 +181,105 @@ export default function AdminFeatureControlSystem() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="global" className="space-y-4 mt-4">
+        <TabsContent value="global" className="space-y-6 mt-4">
           {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-          {features.map((f) => {
-            const c = controls[f.feature_key];
-            if (!c) return null;
-            const locked = isDependencyLocked(f);
-            return (
-              <Card key={f.feature_key} className={locked ? "opacity-70 border-dashed" : ""}>
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        {f.name}
-                        <Badge variant="outline">{f.category}</Badge>
-                        {locked && (
-                          <Badge variant="destructive" className="gap-1">
-                            <Lock className="h-3 w-3" /> Dependency off
-                          </Badge>
-                        )}
-                      </CardTitle>
-                      <CardDescription>{f.description}</CardDescription>
-                      {(f.depends_on?.length ?? 0) > 0 && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Requires: {f.depends_on!.join(", ")}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Label className="text-xs">Global</Label>
-                      <Switch
-                        checked={c.global_enabled}
-                        onCheckedChange={(v) => updateControl(f.feature_key, { global_enabled: v })}
-                      />
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {locked ? (
-                    <div className="flex items-center justify-between bg-muted p-3 rounded">
-                      <span className="text-sm flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4" />
-                        Locked by dependency. Enable required features to unlock.
-                      </span>
-                      <Button size="sm" variant="outline" disabled>
-                        Upgrade
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {(["free", "pro", "premium"] as const).map((tier) => (
-                        <div key={tier} className="border rounded p-3 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <Label className="capitalize font-semibold">{tier}</Label>
-                            <Switch
-                              checked={c[`${tier}_enabled`]}
-                              onCheckedChange={(v) =>
-                                updateControl(f.feature_key, { [`${tier}_enabled`]: v } as Partial<FeatureControl>)
-                              }
-                            />
-                          </div>
-                          {f.supports_usage_limit && (
-                            <div>
-                              <Label className="text-xs">Usage limit</Label>
-                              <Input
-                                type="number"
-                                placeholder="Unlimited"
-                                value={c[`${tier}_usage_limit`] ?? ""}
-                                onChange={(e) => {
-                                  const val = e.target.value === "" ? null : Number(e.target.value);
-                                  setControls({
-                                    ...controls,
-                                    [f.feature_key]: { ...c, [`${tier}_usage_limit`]: val },
-                                  });
-                                }}
-                                onBlur={(e) => {
-                                  const val = e.target.value === "" ? null : Number(e.target.value);
-                                  updateControl(f.feature_key, { [`${tier}_usage_limit`]: val } as Partial<FeatureControl>);
-                                }}
-                              />
-                            </div>
+          {Object.entries(groupedFeatures).map(([category, list]) => (
+            <div key={category} className="space-y-3">
+              <div className="flex items-center gap-3">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.15em] text-primary/80 font-display">{category}</h3>
+                <div className="h-px flex-1 bg-gradient-to-r from-primary/30 to-transparent" />
+                <Badge variant="outline" className="border-primary/30 text-primary">{list.length}</Badge>
+              </div>
+              {list.map((f) => {
+                const c = controls[f.feature_key];
+                if (!c) return null;
+                const locked = isDependencyLocked(f);
+                return (
+                  <Card key={f.feature_key} className={`bg-card/60 backdrop-blur-xl border-border/50 transition-all hover:border-primary/30 ${locked ? "opacity-70 border-dashed" : ""}`}>
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <CardTitle className="flex items-center gap-2 font-display">
+                            {f.name}
+                            {locked && (
+                              <Badge variant="destructive" className="gap-1">
+                                <Lock className="h-3 w-3" /> Dependency off
+                              </Badge>
+                            )}
+                          </CardTitle>
+                          <CardDescription>{f.description}</CardDescription>
+                          {(f.depends_on?.length ?? 0) > 0 && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Requires: {f.depends_on!.join(", ")}
+                            </p>
                           )}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
+                        <div className="flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5">
+                          <Label className="text-xs font-semibold text-primary">Global</Label>
+                          <Switch
+                            checked={c.global_enabled}
+                            onCheckedChange={(v) => updateControl(f.feature_key, { global_enabled: v })}
+                          />
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {locked ? (
+                        <div className="flex items-center justify-between bg-muted/50 p-3 rounded-lg">
+                          <span className="text-sm flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4" />
+                            Locked by dependency. Enable required features to unlock.
+                          </span>
+                          <Button size="sm" variant="outline" disabled>
+                            Upgrade
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          {(["free", "pro", "premium"] as const).map((tier) => (
+                            <div key={tier} className="rounded-xl border border-border/50 bg-secondary/30 p-3 space-y-2 hover:border-primary/30 transition-colors">
+                              <div className="flex items-center justify-between">
+                                <Label className="capitalize font-semibold font-display">{tier}</Label>
+                                <Switch
+                                  checked={c[`${tier}_enabled`]}
+                                  onCheckedChange={(v) =>
+                                    updateControl(f.feature_key, { [`${tier}_enabled`]: v } as Partial<FeatureControl>)
+                                  }
+                                />
+                              </div>
+                              {f.supports_usage_limit && (
+                                <div>
+                                  <Label className="text-xs">Usage limit</Label>
+                                  <Input
+                                    type="number"
+                                    placeholder="Unlimited"
+                                    value={c[`${tier}_usage_limit`] ?? ""}
+                                    onChange={(e) => {
+                                      const val = e.target.value === "" ? null : Number(e.target.value);
+                                      setControls({
+                                        ...controls,
+                                        [f.feature_key]: { ...c, [`${tier}_usage_limit`]: val },
+                                      });
+                                    }}
+                                    onBlur={(e) => {
+                                      const val = e.target.value === "" ? null : Number(e.target.value);
+                                      updateControl(f.feature_key, { [`${tier}_usage_limit`]: val } as Partial<FeatureControl>);
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          ))}
         </TabsContent>
+
 
         <TabsContent value="overrides" className="mt-4">
           <CoachOverridesPanel

@@ -48,7 +48,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
+        recordAuthEvent({
+          phase: "authStateChange",
+          durationMs: 0,
+          ok: true,
+          meta: { event, hasSession: !!session, user_id: session?.user?.id },
+        });
         setSession(session);
         setUser(session?.user ?? null);
         setBackendReachable(true);

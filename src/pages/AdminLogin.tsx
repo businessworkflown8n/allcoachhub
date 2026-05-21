@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, ArrowRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { instrumentAuthCall, recordAuthEvent } from "@/lib/authDiagnostics";
+import { withTimeout, retryOnce, getAuthFallbackMessage, isNetworkAuthError } from "@/lib/authNetwork";
 
 const AdminLogin = () => {
   useSEO({
@@ -38,31 +40,59 @@ const AdminLogin = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const start = performance.now();
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const { data, error } = await instrumentAuthCall(
+        "admin.signInWithPassword",
+        async () => withTimeout(
+          retryOnce(async () => await supabase.auth.signInWithPassword({ email, password })),
+          12000,
+        ),
+        { email },
+      );
 
-    if (error) {
+      if (error) {
+        setLoading(false);
+        toast({ title: "Login failed", description: error.message, variant: "destructive" });
+        return;
+      }
+
+      // Verify admin role
+      const { data: roleData } = await instrumentAuthCall(
+        "admin.roleLookup",
+        async () => withTimeout(
+          retryOnce(async () =>
+            await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", data.user.id)
+              .single(),
+          ),
+          8000,
+        ),
+        { user_id: data.user.id },
+      );
+
+      if (roleData?.role !== "admin") {
+        await supabase.auth.signOut();
+        setLoading(false);
+        recordAuthEvent({ phase: "admin.accessDenied", durationMs: Math.round(performance.now() - start), ok: false, errorMessage: "Non-admin role", meta: { role: roleData?.role } });
+        toast({ title: "Access denied", description: "This login is for administrators only.", variant: "destructive" });
+        return;
+      }
+
+      recordAuthEvent({ phase: "admin.loginComplete", durationMs: Math.round(performance.now() - start), ok: true, meta: { user_id: data.user.id } });
       setLoading(false);
-      toast({ title: "Login failed", description: error.message, variant: "destructive" });
-      return;
-    }
-
-    // Verify admin role
-    const { data: roleData } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", data.user.id)
-      .single();
-
-    if (roleData?.role !== "admin") {
-      await supabase.auth.signOut();
+      window.location.href = "/admin";
+    } catch (err) {
       setLoading(false);
-      toast({ title: "Access denied", description: "This login is for administrators only.", variant: "destructive" });
-      return;
+      const fallback = getAuthFallbackMessage(err);
+      const description = isNetworkAuthError(err)
+        ? "The login service is temporarily unavailable. Please retry shortly."
+        : fallback.description;
+      toast({ title: fallback.title, description, variant: "destructive" });
     }
-
-    setLoading(false);
-    window.location.href = "/admin";
   };
 
   return (

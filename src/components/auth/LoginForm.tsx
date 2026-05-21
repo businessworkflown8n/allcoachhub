@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { trackLogin, trackPasswordReset, trackFormError } from "@/lib/analytics";
 import { getAuthFallbackMessage, isNetworkAuthError, resolvePrimaryRole, retryOnce, withTimeout } from "@/lib/authNetwork";
+import { instrumentAuthCall, recordAuthEvent } from "@/lib/authDiagnostics";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -34,13 +35,15 @@ const LoginForm = () => {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: getOAuthRedirectUri(),
-    });
+    const result = await instrumentAuthCall(
+      "oauth.google",
+      async () => lovable.auth.signInWithOAuth("google", { redirect_uri: getOAuthRedirectUri() }),
+      { redirect_uri: getOAuthRedirectUri() },
+    );
     setGoogleLoading(false);
-    if (error) {
-      console.error("Google OAuth error:", error);
-      toast({ title: "Google Sign-In failed", description: String(error), variant: "destructive" });
+    if (result.error) {
+      console.error("Google OAuth error:", result.error);
+      toast({ title: "Google Sign-In failed", description: String(result.error), variant: "destructive" });
     }
   };
 
@@ -69,11 +72,16 @@ const LoginForm = () => {
     e.preventDefault();
     setLoading(true);
     setAuthError(null);
+    const submitStart = performance.now();
 
     try {
-      const { data: authData, error } = await withTimeout(
-        retryOnce(async () => await supabase.auth.signInWithPassword({ email, password })),
-        12000,
+      const { data: authData, error } = await instrumentAuthCall(
+        "signInWithPassword",
+        async () => withTimeout(
+          retryOnce(async () => await supabase.auth.signInWithPassword({ email, password })),
+          12000,
+        ),
+        { email },
       );
 
       if (error) {
@@ -97,16 +105,21 @@ const LoginForm = () => {
       await refreshSession();
 
       if (authData?.user) {
-        const roleResponse = await withTimeout(
-          retryOnce(async () =>
-            await supabase
-              .from("user_roles")
-              .select("role")
-              .eq("user_id", authData.user.id),
+        const roleResponse = await instrumentAuthCall(
+          "roleLookup",
+          async () => withTimeout(
+            retryOnce(async () =>
+              await supabase
+                .from("user_roles")
+                .select("role")
+                .eq("user_id", authData.user.id),
+            ),
+            8000,
           ),
-          8000,
+          { user_id: authData.user.id },
         );
         const role = resolvePrimaryRole(((roleResponse.data as Array<{ role: string }> | null) ?? []).map((item) => item.role));
+        recordAuthEvent({ phase: "loginComplete", durationMs: Math.round(performance.now() - submitStart), ok: true, meta: { role, user_id: authData.user.id } });
 
         if (role === "coach") {
           navigate("/coach");
@@ -126,6 +139,13 @@ const LoginForm = () => {
         ? "The login service is temporarily unavailable. Please retry in a few moments."
         : fallback.description;
       setAuthError(message);
+      recordAuthEvent({
+        phase: "loginFailed",
+        durationMs: Math.round(performance.now() - submitStart),
+        ok: false,
+        errorName: (error as Error)?.name,
+        errorMessage: (error as Error)?.message,
+      });
       toast({ title: fallback.title, description: message, variant: "destructive" });
     } finally {
       setLoading(false);

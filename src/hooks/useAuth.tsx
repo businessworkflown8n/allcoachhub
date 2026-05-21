@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, createContext, useContext, ReactNode 
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { isNetworkAuthError, retryOnce, withTimeout } from "@/lib/authNetwork";
+import { instrumentAuthCall, recordAuthEvent } from "@/lib/authDiagnostics";
 
 interface AuthContextType {
   user: User | null;
@@ -29,7 +30,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshSession = useCallback(async () => {
     try {
-      const { data } = await withTimeout(retryOnce(() => supabase.auth.getSession()), 8000);
+      const { data } = await instrumentAuthCall(
+        "getSession",
+        async () => withTimeout(retryOnce(() => supabase.auth.getSession()), 8000),
+      );
       setSession(data.session);
       setUser(data.session?.user ?? null);
       setBackendReachable(true);
@@ -44,7 +48,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
+        recordAuthEvent({
+          phase: "authStateChange",
+          durationMs: 0,
+          ok: true,
+          meta: { event, hasSession: !!session, user_id: session?.user?.id },
+        });
         setSession(session);
         setUser(session?.user ?? null);
         setBackendReachable(true);

@@ -334,13 +334,14 @@ const CoachCourses = () => {
                   </div>
                 )}
 
-                <button
-                  onClick={() => viewStudents(c.id, c.title)}
-                  className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+                <div
+                  className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+                  title="Learner identities are private. Only counts are shown."
                 >
                   <Users className="h-3.5 w-3.5" />
                   {enrollCounts[c.id] || 0} enrolled
-                </button>
+                  <Lock className="h-3 w-3 opacity-60" />
+                </div>
 
                 <div className="mt-auto flex items-center gap-1 border-t border-border/60 pt-3 text-xs">
                   <Link

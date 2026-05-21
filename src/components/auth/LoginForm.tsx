@@ -1,16 +1,12 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { trackLogin, trackPasswordReset, trackFormError } from "@/lib/analytics";
-import { getAuthFallbackMessage, isNetworkAuthError, resolvePrimaryRole, retryOnce, withTimeout } from "@/lib/authNetwork";
-import { instrumentAuthCall, recordAuthEvent } from "@/lib/authDiagnostics";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -20,9 +16,7 @@ const LoginForm = () => {
   const [appleLoading, setAppleLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [showReset, setShowReset] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { backendReachable, refreshSession } = useAuth();
 
   // Use production domain for OAuth on the live site; fall back to current origin in preview/dev
   const getOAuthRedirectUri = () => {
@@ -35,15 +29,13 @@ const LoginForm = () => {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    const result = await instrumentAuthCall(
-      "oauth.google",
-      async () => lovable.auth.signInWithOAuth("google", { redirect_uri: getOAuthRedirectUri() }),
-      { redirect_uri: getOAuthRedirectUri() },
-    );
+    const { error } = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: getOAuthRedirectUri(),
+    });
     setGoogleLoading(false);
-    if (result.error) {
-      console.error("Google OAuth error:", result.error);
-      toast({ title: "Google Sign-In failed", description: String(result.error), variant: "destructive" });
+    if (error) {
+      console.error("Google OAuth error:", error);
+      toast({ title: "Google Sign-In failed", description: String(error), variant: "destructive" });
     }
   };
 
@@ -71,84 +63,46 @@ const LoginForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setAuthError(null);
-    const submitStart = performance.now();
 
-    try {
-      const { data: authData, error } = await instrumentAuthCall(
-        "signInWithPassword",
-        async () => withTimeout(
-          retryOnce(async () => await supabase.auth.signInWithPassword({ email, password })),
-          12000,
-        ),
-        { email },
-      );
+    const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (error) {
-        trackFormError("login", "credentials");
-        const isInvalidCredentials = error.message.toLowerCase().includes("invalid login credentials") || 
-                                      error.message.toLowerCase().includes("invalid email or password");
-        const fallback = getAuthFallbackMessage(error);
-        const message = isInvalidCredentials
+    setLoading(false);
+
+    if (error) {
+      trackFormError("login", "credentials");
+      const isInvalidCredentials = error.message.toLowerCase().includes("invalid login credentials") || 
+                                    error.message.toLowerCase().includes("invalid email or password");
+      toast({
+        title: isInvalidCredentials ? "Email not registered" : "Login failed",
+        description: isInvalidCredentials 
           ? "This email is not registered yet. Please complete the signup process first."
-          : fallback.description;
-        setAuthError(message);
-        toast({
-          title: isInvalidCredentials ? "Email not registered" : fallback.title,
-          description: message,
-          variant: "destructive",
-        });
-        return;
-      }
+          : error.message,
+        variant: "destructive",
+      });
+      return;
+    }
 
-      trackLogin("email");
-      await refreshSession();
+    trackLogin("email");
 
-      if (authData?.user) {
-        const roleResponse = await instrumentAuthCall(
-          "roleLookup",
-          async () => withTimeout(
-            retryOnce(async () =>
-              await supabase
-                .from("user_roles")
-                .select("role")
-                .eq("user_id", authData.user.id),
-            ),
-            8000,
-          ),
-          { user_id: authData.user.id },
-        );
-        const role = resolvePrimaryRole(((roleResponse.data as Array<{ role: string }> | null) ?? []).map((item) => item.role));
-        recordAuthEvent({ phase: "loginComplete", durationMs: Math.round(performance.now() - submitStart), ok: true, meta: { role, user_id: authData.user.id } });
+    // Redirect based on user role
+    if (authData?.user) {
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", authData.user.id)
+        .single();
 
-        if (role === "coach") {
-          navigate("/coach");
-        } else if (role === "learner") {
-          navigate("/learner");
-        } else if (role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/");
-        }
+      if (roleData?.role === "coach") {
+        navigate("/coach");
+      } else if (roleData?.role === "learner") {
+        navigate("/learner");
+      } else if (roleData?.role === "admin") {
+        navigate("/admin");
       } else {
         navigate("/");
       }
-    } catch (error) {
-      const fallback = getAuthFallbackMessage(error);
-      const message = isNetworkAuthError(error)
-        ? "The login service is temporarily unavailable. Please retry in a few moments."
-        : fallback.description;
-      setAuthError(message);
-      recordAuthEvent({
-        phase: "loginFailed",
-        durationMs: Math.round(performance.now() - submitStart),
-        ok: false,
-        errorName: (error as Error)?.name,
-        errorMessage: (error as Error)?.message,
-      });
-      toast({ title: fallback.title, description: message, variant: "destructive" });
-    } finally {
-      setLoading(false);
+    } else {
+      navigate("/");
     }
   };
 
@@ -204,14 +158,6 @@ const LoginForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {(!backendReachable || authError) && (
-        <Alert variant="destructive">
-          <AlertTitle>Login service issue</AlertTitle>
-          <AlertDescription>
-            {authError || "We can’t reach the authentication service right now. Please try again shortly."}
-          </AlertDescription>
-        </Alert>
-      )}
       <div className="space-y-2">
         <Label htmlFor="login-email" className="text-foreground">Email</Label>
         <Input

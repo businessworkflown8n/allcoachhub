@@ -34,34 +34,26 @@ const CategoriesSection = () => {
         return;
       }
 
-      // Count published+approved courses per category name
-      const { data: courses } = await supabase
-        .from("courses")
-        .select("category")
-        .eq("is_published", true)
-        .eq("approval_status", "approved");
+      // Get coach counts per category_id
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("category_id")
+        .not("category_id", "is", null);
 
       const counts: Record<string, number> = {};
-      (courses || []).forEach((c: any) => {
-        const key = (c.category || "Others").toLowerCase();
-        counts[key] = (counts[key] || 0) + 1;
+      (profiles || []).forEach((p: any) => {
+        counts[p.category_id] = (counts[p.category_id] || 0) + 1;
       });
 
       setCategories(
         cats.map((c) => ({
           ...c,
-          coachCount: counts[c.name.toLowerCase()] || 0,
+          coachCount: counts[c.id] || 0,
         }))
       );
       setLoading(false);
     };
     fetchData();
-
-    const channel = supabase
-      .channel("home-categories-courses")
-      .on("postgres_changes", { event: "*", schema: "public", table: "courses" }, () => fetchData())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
   }, []);
 
   return (
@@ -98,7 +90,7 @@ const CategoriesSection = () => {
                     {cat.name}
                   </h3>
                   <p className="text-[11px] text-muted-foreground">
-                    {cat.coachCount} {cat.coachCount === 1 ? "course" : "courses"}
+                    {cat.coachCount} {cat.coachCount === 1 ? "coach" : "coaches"}
                   </p>
                 </Link>
               ))}

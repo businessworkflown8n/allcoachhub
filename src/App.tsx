@@ -58,7 +58,6 @@ const KnowledgeHub = lazy(() => import("./pages/KnowledgeHub"));
 const KnowledgeTopic = lazy(() => import("./pages/KnowledgeTopic"));
 const KnowledgeQuestion = lazy(() => import("./pages/KnowledgeQuestion"));
 const AiMastermindLearning = lazy(() => import("./pages/AiMastermindLearning"));
-const PlanUpgradeModal = lazy(() => import("./components/shared/PlanUpgradeModal"));
 const AiJobsNewsLinkedInPost = lazy(() => import("./pages/AiJobsNewsLinkedInPost"));
 
 // Lazy-loaded global widgets (non-critical)
@@ -228,9 +227,6 @@ const App = () => (
           </Suspense>
           <Suspense fallback={null}>
             <WebsitePopup />
-          </Suspense>
-          <Suspense fallback={null}>
-            <PlanUpgradeModal />
           </Suspense>
         </BrowserRouter>
       </AuthProvider>

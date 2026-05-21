@@ -31,6 +31,7 @@ interface Client {
 
 interface EnrolledLearner {
   id: string;
+  learner_id: string;
   full_name: string;
   email: string;
   course_title: string;
@@ -41,6 +42,7 @@ const STATUSES = ["active", "paused", "churned", "prospect"];
 
 export default function CoachClients() {
   const { user } = useAuth();
+  const { hasAccess } = useContactAccess();
   const [clients, setClients] = useState<Client[]>([]);
   const [enrolled, setEnrolled] = useState<EnrolledLearner[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,6 +61,7 @@ export default function CoachClients() {
     setClients((clientsRes.data || []) as any);
     setEnrolled(((enrollRes.data || []) as any[]).map((e) => ({
       id: e.id,
+      learner_id: e.learner_id,
       full_name: e.profiles?.full_name || "Learner",
       email: e.profiles?.email || "",
       course_title: e.courses?.title || "",

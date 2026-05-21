@@ -35,13 +35,15 @@ const LoginForm = () => {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: getOAuthRedirectUri(),
-    });
+    const result = await instrumentAuthCall(
+      "oauth.google",
+      async () => lovable.auth.signInWithOAuth("google", { redirect_uri: getOAuthRedirectUri() }),
+      { redirect_uri: getOAuthRedirectUri() },
+    );
     setGoogleLoading(false);
-    if (error) {
-      console.error("Google OAuth error:", error);
-      toast({ title: "Google Sign-In failed", description: String(error), variant: "destructive" });
+    if (result.error) {
+      console.error("Google OAuth error:", result.error);
+      toast({ title: "Google Sign-In failed", description: String(result.error), variant: "destructive" });
     }
   };
 

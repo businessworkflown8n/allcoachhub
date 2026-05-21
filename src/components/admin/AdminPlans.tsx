@@ -98,9 +98,11 @@ const AdminPlans = () => {
             <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={save}>Save</Button></DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
         {plans.map((p) => (
           <Card key={p.id} className={p.highlight ? "border-primary" : ""}>
             <CardHeader>

@@ -117,19 +117,30 @@ export default function CoachClients() {
   const filteredEnrolled = enrolled.filter((c) => c.full_name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-xl font-bold text-foreground flex items-center gap-2"><Users className="h-5 w-5" /> Client CRM</h2>
-          <p className="text-sm text-muted-foreground">Unified view of manual clients and enrolled learners</p>
+    <div className="space-y-8">
+      {/* Premium Header */}
+      <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-emerald-500/5 p-6 sm:p-8">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+        <div className="relative flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-start gap-4">
+            <div className="rounded-2xl bg-primary/20 p-3"><Users className="h-6 w-6 text-primary" /></div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-primary/80 font-semibold mb-2">CRM</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground font-display tracking-tight">Client Pipeline</h2>
+              <p className="text-sm text-muted-foreground mt-2 max-w-xl">Unified view of manual clients and enrolled learners.</p>
+            </div>
+          </div>
+          <Button onClick={openNew} className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_8px_30px_-10px_hsl(var(--primary)/0.6)] hover:shadow-[0_12px_40px_-10px_hsl(var(--primary)/0.8)] transition-all hover:-translate-y-0.5">
+            <Plus className="h-4 w-4 mr-1" /> Add Client
+          </Button>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> Add Client</Button>
       </div>
 
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input className="pl-9" placeholder="Search clients..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        <Input className="pl-9 bg-card/60 backdrop-blur-xl border-border/50 focus:border-primary/40" placeholder="Search clients..." value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
+
 
       <Tabs defaultValue="manual">
         <TabsList>

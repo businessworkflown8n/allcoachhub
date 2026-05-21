@@ -122,39 +122,67 @@ const CoachOverview = () => {
   if (loading) return <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent mx-auto mt-8" />;
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold text-foreground">Dashboard Overview</h2>
+    <div className="space-y-8">
+      {/* Premium Header */}
+      <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-emerald-500/5 p-6 sm:p-8">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -left-10 -bottom-10 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
+        <div className="relative flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-primary/80 font-semibold mb-2">Coach Workspace</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground font-display tracking-tight">Dashboard Overview</h2>
+            <p className="text-sm text-muted-foreground mt-2 max-w-xl">Your business at a glance — students, content, earnings, and AI-powered growth tools.</p>
+          </div>
+          <div className="flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+            </span>
+            <span className="text-xs font-semibold text-primary">Live</span>
+          </div>
+        </div>
+      </div>
 
       {features.blueprint_access !== false && (
-        <Link to="/coach/blueprint" className="block rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-emerald-500/5 p-6 hover:border-primary/60 transition-all">
+        <Link to="/coach/blueprint" className="group block rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-emerald-500/5 p-6 hover:border-primary/60 transition-all hover:shadow-[0_0_40px_-10px_hsl(var(--primary)/0.5)]">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-start gap-4">
-              <div className="rounded-xl bg-primary/20 p-3"><Rocket className="h-6 w-6 text-primary" /></div>
+              <div className="rounded-xl bg-primary/20 p-3 group-hover:scale-110 transition-transform"><Rocket className="h-6 w-6 text-primary" /></div>
               <div>
-                <h3 className="text-lg font-bold text-foreground">Coach Blueprint Super App ✨</h3>
+                <h3 className="text-lg font-bold text-foreground font-display">Coach Blueprint Super App ✨</h3>
                 <p className="text-sm text-muted-foreground mt-1">From idea → validated, revenue-generating coaching business in 10 AI-powered steps.</p>
               </div>
             </div>
-            <ArrowRight className="h-5 w-5 text-primary flex-shrink-0" />
+            <ArrowRight className="h-5 w-5 text-primary flex-shrink-0 group-hover:translate-x-1 transition-transform" />
           </div>
         </Link>
       )}
+
+      {/* Premium Stat Cards with hover-lift */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
-          <div key={c.label} className="rounded-xl border border-border bg-card p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{c.label}</span>
-              <c.icon className={`h-5 w-5 ${c.color}`} />
+          <div
+            key={c.label}
+            className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_10px_40px_-15px_hsl(var(--primary)/0.4)]"
+          >
+            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">{c.label}</span>
+                <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
+                  <c.icon className={`h-4 w-4 ${c.color}`} />
+                </div>
+              </div>
+              <p className="text-3xl font-bold text-foreground font-display tracking-tight">{c.value}</p>
             </div>
-            <p className="text-3xl font-bold text-foreground">{c.value}</p>
           </div>
         ))}
       </div>
 
       {/* Total Payable to Admin */}
-      <div className="rounded-xl border border-border bg-card p-6 space-y-4">
+      <div className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-foreground">Total Payable to Admin (AiCoach Portal)</h3>
+          <h3 className="font-semibold text-foreground font-display text-lg">Total Payable to Admin (AiCoach Portal)</h3>
           <button
             onClick={() => setShowBreakdown(!showBreakdown)}
             className="flex items-center gap-1 text-xs text-primary hover:underline"
@@ -165,19 +193,19 @@ const CoachOverview = () => {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border border-border bg-secondary/50 p-4">
+          <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 to-transparent p-4">
             <div className="flex items-center gap-2 mb-1">
-              <DollarSign className="h-4 w-4 text-green-400" />
-              <span className="text-xs text-muted-foreground">Grand Total (USD)</span>
+              <DollarSign className="h-4 w-4 text-primary" />
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Grand Total (USD)</span>
             </div>
-            <p className="text-2xl font-bold text-foreground">${totalPayableUSD.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-foreground font-display">${totalPayableUSD.toFixed(2)}</p>
           </div>
-          <div className="rounded-lg border border-border bg-secondary/50 p-4">
+          <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 to-transparent p-4">
             <div className="flex items-center gap-2 mb-1">
-              <IndianRupee className="h-4 w-4 text-green-400" />
-              <span className="text-xs text-muted-foreground">Grand Total (INR)</span>
+              <IndianRupee className="h-4 w-4 text-primary" />
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Grand Total (INR)</span>
             </div>
-            <p className="text-2xl font-bold text-foreground">₹{totalPayableINR.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-foreground font-display">₹{totalPayableINR.toFixed(2)}</p>
           </div>
         </div>
 

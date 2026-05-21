@@ -55,17 +55,22 @@ const AdminPlans = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <CreditCard className="h-6 w-6 text-primary" />
-          <div>
-            <h2 className="text-xl font-bold text-foreground">Subscription Plans</h2>
-            <p className="text-sm text-muted-foreground">Define pricing tiers that map to feature bundles</p>
+    <div className="space-y-8">
+      {/* Premium Header */}
+      <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-emerald-500/5 p-6 sm:p-8">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+        <div className="relative flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-start gap-4">
+            <div className="rounded-2xl bg-primary/20 p-3"><CreditCard className="h-6 w-6 text-primary" /></div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-primary/80 font-semibold mb-2">Billing</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground font-display tracking-tight">Subscription Plans</h2>
+              <p className="text-sm text-muted-foreground mt-2 max-w-xl">Define pricing tiers that map to feature bundles.</p>
+            </div>
           </div>
-        </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(empty); }}>
-          <DialogTrigger asChild><Button onClick={() => setEditing(empty)}><Plus className="h-4 w-4 mr-2" />New Plan</Button></DialogTrigger>
+          <DialogTrigger asChild><Button onClick={() => setEditing(empty)} className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_8px_30px_-10px_hsl(var(--primary)/0.6)] hover:shadow-[0_12px_40px_-10px_hsl(var(--primary)/0.8)] transition-all hover:-translate-y-0.5"><Plus className="h-4 w-4 mr-2" />New Plan</Button></DialogTrigger>
+
           <DialogContent>
             <DialogHeader><DialogTitle>{editing.id ? "Edit" : "Create"} Plan</DialogTitle></DialogHeader>
             <div className="space-y-3">
@@ -93,9 +98,11 @@ const AdminPlans = () => {
             <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={save}>Save</Button></DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
         {plans.map((p) => (
           <Card key={p.id} className={p.highlight ? "border-primary" : ""}>
             <CardHeader>

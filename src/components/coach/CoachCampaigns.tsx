@@ -194,22 +194,43 @@ const CoachCampaigns = () => {
   if (loading) return <div className="flex justify-center p-8"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground flex items-center gap-2"><Megaphone className="h-6 w-6 text-primary" /> My Campaigns</h2>
-          <p className="text-muted-foreground text-sm mt-1">Manage your campaigns and admin-assigned campaigns</p>
+    <div className="space-y-8">
+      {/* Premium Header */}
+      <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-emerald-500/5 p-6 sm:p-8">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+        <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="rounded-2xl bg-primary/20 p-3"><Megaphone className="h-6 w-6 text-primary" /></div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-primary/80 font-semibold mb-2">Marketing</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground font-display tracking-tight">My Campaigns</h2>
+              <p className="text-sm text-muted-foreground mt-2 max-w-xl">Manage your campaigns and admin-assigned campaigns across every channel.</p>
+            </div>
+          </div>
+          <Button onClick={() => openCreate()} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_8px_30px_-10px_hsl(var(--primary)/0.6)] hover:shadow-[0_12px_40px_-10px_hsl(var(--primary)/0.8)] transition-all hover:-translate-y-0.5">
+            <Plus className="h-4 w-4" /> Create Campaign
+          </Button>
         </div>
-        <Button onClick={() => openCreate()} className="gap-2"><Plus className="h-4 w-4" /> Create Campaign</Button>
       </div>
 
-      {/* Stats */}
+      {/* Premium Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold text-primary">{campaigns.length}</p><p className="text-xs text-muted-foreground">Total</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold text-green-500">{campaigns.filter(c => c.status === "sent").length}</p><p className="text-xs text-muted-foreground">Sent</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold text-yellow-500">{assignedCampaigns.length}</p><p className="text-xs text-muted-foreground">Drafts / Assigned</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold text-blue-500">{campaigns.filter(c => c.status === "ready").length}</p><p className="text-xs text-muted-foreground">Ready</p></CardContent></Card>
+        {[
+          { label: "Total", value: campaigns.length, color: "text-primary" },
+          { label: "Sent", value: campaigns.filter(c => c.status === "sent").length, color: "text-emerald-400" },
+          { label: "Drafts / Assigned", value: assignedCampaigns.length, color: "text-amber-400" },
+          { label: "Ready", value: campaigns.filter(c => c.status === "ready").length, color: "text-blue-400" },
+        ].map((s) => (
+          <div key={s.label} className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_10px_40px_-15px_hsl(var(--primary)/0.4)]">
+            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative text-center">
+              <p className={`text-3xl font-bold font-display tracking-tight ${s.color}`}>{s.value}</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mt-1">{s.label}</p>
+            </div>
+          </div>
+        ))}
       </div>
+
 
       {/* Quick Create */}
       <Card>

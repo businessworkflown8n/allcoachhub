@@ -71,31 +71,6 @@ const CoachCourses = () => {
     toast({ title: current ? "Course unpublished" : "Course published" });
   };
 
-  const viewStudents = async (courseId: string, courseTitle: string) => {
-    setStudentsCourseTitle(courseTitle);
-    setShowStudents(courseId);
-    const { data } = await supabase
-      .from("enrollments")
-      .select("id, full_name, email, contact_number, enrolled_at")
-      .eq("course_id", courseId)
-      .order("enrolled_at", { ascending: false });
-    setStudents(data || []);
-  };
-
-  const downloadStudentsCSV = () => {
-    const rows = [["Name", "Email", "Phone", "Enrollment Date"]];
-    students.forEach((s) => {
-      rows.push([s.full_name, s.email, s.contact_number || "—", format(new Date(s.enrolled_at), "yyyy-MM-dd HH:mm")]);
-    });
-    const csv = rows.map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${studentsCourseTitle}-students.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   const stats = useMemo(() => {
     const total = courses.length;

@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { trackLogin, trackPasswordReset, trackFormError } from "@/lib/analytics";
+import { getAuthFallbackMessage, isNetworkAuthError, resolvePrimaryRole, retryOnce, withTimeout } from "@/lib/authNetwork";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -16,7 +19,9 @@ const LoginForm = () => {
   const [appleLoading, setAppleLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [showReset, setShowReset] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { backendReachable, refreshSession } = useAuth();
 
   // Use production domain for OAuth on the live site; fall back to current origin in preview/dev
   const getOAuthRedirectUri = () => {
@@ -63,46 +68,67 @@ const LoginForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setAuthError(null);
 
-    const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const { data: authData, error } = await withTimeout(
+        retryOnce(async () => await supabase.auth.signInWithPassword({ email, password })),
+        12000,
+      );
 
-    setLoading(false);
-
-    if (error) {
-      trackFormError("login", "credentials");
-      const isInvalidCredentials = error.message.toLowerCase().includes("invalid login credentials") || 
-                                    error.message.toLowerCase().includes("invalid email or password");
-      toast({
-        title: isInvalidCredentials ? "Email not registered" : "Login failed",
-        description: isInvalidCredentials 
+      if (error) {
+        trackFormError("login", "credentials");
+        const isInvalidCredentials = error.message.toLowerCase().includes("invalid login credentials") || 
+                                      error.message.toLowerCase().includes("invalid email or password");
+        const fallback = getAuthFallbackMessage(error);
+        const message = isInvalidCredentials
           ? "This email is not registered yet. Please complete the signup process first."
-          : error.message,
-        variant: "destructive",
-      });
-      return;
-    }
+          : fallback.description;
+        setAuthError(message);
+        toast({
+          title: isInvalidCredentials ? "Email not registered" : fallback.title,
+          description: message,
+          variant: "destructive",
+        });
+        return;
+      }
 
-    trackLogin("email");
+      trackLogin("email");
+      await refreshSession();
 
-    // Redirect based on user role
-    if (authData?.user) {
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", authData.user.id)
-        .single();
+      if (authData?.user) {
+        const roleResponse = await withTimeout(
+          retryOnce(async () =>
+            await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", authData.user.id),
+          ),
+          8000,
+        );
+        const role = resolvePrimaryRole(((roleResponse.data as Array<{ role: string }> | null) ?? []).map((item) => item.role));
 
-      if (roleData?.role === "coach") {
-        navigate("/coach");
-      } else if (roleData?.role === "learner") {
-        navigate("/learner");
-      } else if (roleData?.role === "admin") {
-        navigate("/admin");
+        if (role === "coach") {
+          navigate("/coach");
+        } else if (role === "learner") {
+          navigate("/learner");
+        } else if (role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       } else {
         navigate("/");
       }
-    } else {
-      navigate("/");
+    } catch (error) {
+      const fallback = getAuthFallbackMessage(error);
+      const message = isNetworkAuthError(error)
+        ? "The login service is temporarily unavailable. Please retry in a few moments."
+        : fallback.description;
+      setAuthError(message);
+      toast({ title: fallback.title, description: message, variant: "destructive" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -158,6 +184,14 @@ const LoginForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {(!backendReachable || authError) && (
+        <Alert variant="destructive">
+          <AlertTitle>Login service issue</AlertTitle>
+          <AlertDescription>
+            {authError || "We can’t reach the authentication service right now. Please try again shortly."}
+          </AlertDescription>
+        </Alert>
+      )}
       <div className="space-y-2">
         <Label htmlFor="login-email" className="text-foreground">Email</Label>
         <Input

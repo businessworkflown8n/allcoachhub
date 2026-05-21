@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck, Lock, Clock, Send, Users, Download } from "lucide-react";
+import { maskName } from "@/lib/learnerPrivacy";
 
 interface Lead {
   id: string;
@@ -191,7 +192,7 @@ const CoachWebsiteLeads = () => {
                           />
                         ) : null}
                       </TableCell>
-                      <TableCell className="font-medium text-foreground whitespace-nowrap">{lead.name}</TableCell>
+                      <TableCell className="font-medium text-foreground whitespace-nowrap">{maskName(lead.name, lead.id, status === "approved")}</TableCell>
                       <TableCell className="text-muted-foreground whitespace-nowrap">{new Date(lead.created_at).toLocaleDateString()}</TableCell>
                       <TableCell>{statusBadge(status)}</TableCell>
                       <TableCell className="text-muted-foreground">
@@ -240,7 +241,7 @@ const CoachWebsiteLeads = () => {
                 {[...selectedIds].map((id) => {
                   const lead = leads.find((l) => l.id === id);
                   return lead ? (
-                    <Badge key={id} variant="secondary" className="text-xs">{lead.name}</Badge>
+                    <Badge key={id} variant="secondary" className="text-xs">{maskName(lead.name, lead.id, getStatus(lead.id) === "approved")}</Badge>
                   ) : null;
                 })}
               </div>

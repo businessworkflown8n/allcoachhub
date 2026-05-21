@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, createContext, useContext, ReactNode 
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { isNetworkAuthError, retryOnce, withTimeout } from "@/lib/authNetwork";
+import { instrumentAuthCall, recordAuthEvent } from "@/lib/authDiagnostics";
 
 interface AuthContextType {
   user: User | null;

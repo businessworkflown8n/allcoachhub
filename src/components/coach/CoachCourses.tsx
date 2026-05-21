@@ -236,38 +236,8 @@ const CoachCourses = () => {
         </div>
       </div>
 
-      {/* Students Dialog */}
-      <Dialog open={!!showStudents} onOpenChange={(o) => { if (!o) setShowStudents(null); }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle>Enrolled Students ({students.length})</DialogTitle>
-              {students.length > 0 && (
-                <Button size="sm" variant="outline" onClick={downloadStudentsCSV} className="gap-1.5">
-                  <Download className="h-3.5 w-3.5" /> Download CSV
-                </Button>
-              )}
-            </div>
-          </DialogHeader>
-          <p className="text-xs text-muted-foreground">{studentsCourseTitle}</p>
-          {students.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">No enrollments yet</p>
-          ) : (
-            <div className="space-y-2 max-h-80 overflow-y-auto">
-              {students.map((s) => (
-                <div key={s.id} className="flex items-center justify-between rounded-lg border border-border p-3">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{s.full_name}</p>
-                    <p className="text-xs text-muted-foreground">{s.email}</p>
-                    {s.contact_number && <p className="text-xs text-muted-foreground">{s.contact_number}</p>}
-                  </div>
-                  <span className="text-xs text-muted-foreground">{format(new Date(s.enrolled_at), "MMM d, yyyy")}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+
+
 
       {/* Empty state */}
       {filtered.length === 0 ? (

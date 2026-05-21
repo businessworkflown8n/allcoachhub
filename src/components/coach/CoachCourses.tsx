@@ -413,12 +413,13 @@ const CoachCourses = () => {
                   ${Number(c.price_usd)} · ₹{Number(c.price_inr)}
                 </div>
                 <div className="col-span-1">
-                  <button
-                    onClick={() => viewStudents(c.id, c.title)}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                  <span
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary"
+                    title="Learner identities are private. Only counts are shown."
                   >
                     <Users className="h-3 w-3" /> {enrollCounts[c.id] || 0}
-                  </button>
+                    <Lock className="h-2.5 w-2.5 opacity-60" />
+                  </span>
                 </div>
                 <div className="col-span-2 flex items-center justify-end gap-1 text-xs">
                   <Link to={`/coach/courses/${c.id}/edit`} className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground" title="Edit">

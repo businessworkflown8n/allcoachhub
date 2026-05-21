@@ -15,14 +15,19 @@ export const useUserRole = () => {
     }
 
     const fetchRole = async () => {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .single();
+      try {
+        const { data } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-      setRole(data?.role || null);
-      setLoading(false);
+        setRole(data?.role || null);
+      } catch {
+        setRole(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchRole();

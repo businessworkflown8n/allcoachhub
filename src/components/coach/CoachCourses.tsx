@@ -3,21 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import {
-  BookOpen, Plus, Edit, Trash2, Eye, EyeOff, Users, Download,
-  Clock, CheckCircle, AlertTriangle, ListTree, Search, LayoutGrid, List, Sparkles,
+  BookOpen, Plus, Edit, Trash2, Eye, EyeOff, Users,
+  Clock, CheckCircle, AlertTriangle, ListTree, Search, LayoutGrid, List, Sparkles, Lock,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-interface EnrolledStudent {
-  id: string;
-  full_name: string;
-  email: string;
-  contact_number: string;
-  enrolled_at: string;
-}
 
 type FilterKey = "all" | "published" | "drafts" | "pending";
 type ViewMode = "grid" | "list";
@@ -27,9 +17,6 @@ const CoachCourses = () => {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [enrollCounts, setEnrollCounts] = useState<Record<string, number>>({});
-  const [showStudents, setShowStudents] = useState<string | null>(null);
-  const [students, setStudents] = useState<EnrolledStudent[]>([]);
-  const [studentsCourseTitle, setStudentsCourseTitle] = useState("");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [view, setView] = useState<ViewMode>("grid");
@@ -84,31 +71,6 @@ const CoachCourses = () => {
     toast({ title: current ? "Course unpublished" : "Course published" });
   };
 
-  const viewStudents = async (courseId: string, courseTitle: string) => {
-    setStudentsCourseTitle(courseTitle);
-    setShowStudents(courseId);
-    const { data } = await supabase
-      .from("enrollments")
-      .select("id, full_name, email, contact_number, enrolled_at")
-      .eq("course_id", courseId)
-      .order("enrolled_at", { ascending: false });
-    setStudents(data || []);
-  };
-
-  const downloadStudentsCSV = () => {
-    const rows = [["Name", "Email", "Phone", "Enrollment Date"]];
-    students.forEach((s) => {
-      rows.push([s.full_name, s.email, s.contact_number || "—", format(new Date(s.enrolled_at), "yyyy-MM-dd HH:mm")]);
-    });
-    const csv = rows.map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${studentsCourseTitle}-students.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   const stats = useMemo(() => {
     const total = courses.length;
@@ -274,38 +236,8 @@ const CoachCourses = () => {
         </div>
       </div>
 
-      {/* Students Dialog */}
-      <Dialog open={!!showStudents} onOpenChange={(o) => { if (!o) setShowStudents(null); }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle>Enrolled Students ({students.length})</DialogTitle>
-              {students.length > 0 && (
-                <Button size="sm" variant="outline" onClick={downloadStudentsCSV} className="gap-1.5">
-                  <Download className="h-3.5 w-3.5" /> Download CSV
-                </Button>
-              )}
-            </div>
-          </DialogHeader>
-          <p className="text-xs text-muted-foreground">{studentsCourseTitle}</p>
-          {students.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">No enrollments yet</p>
-          ) : (
-            <div className="space-y-2 max-h-80 overflow-y-auto">
-              {students.map((s) => (
-                <div key={s.id} className="flex items-center justify-between rounded-lg border border-border p-3">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{s.full_name}</p>
-                    <p className="text-xs text-muted-foreground">{s.email}</p>
-                    {s.contact_number && <p className="text-xs text-muted-foreground">{s.contact_number}</p>}
-                  </div>
-                  <span className="text-xs text-muted-foreground">{format(new Date(s.enrolled_at), "MMM d, yyyy")}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+
+
 
       {/* Empty state */}
       {filtered.length === 0 ? (
@@ -402,13 +334,14 @@ const CoachCourses = () => {
                   </div>
                 )}
 
-                <button
-                  onClick={() => viewStudents(c.id, c.title)}
-                  className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+                <div
+                  className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+                  title="Learner identities are private. Only counts are shown."
                 >
                   <Users className="h-3.5 w-3.5" />
                   {enrollCounts[c.id] || 0} enrolled
-                </button>
+                  <Lock className="h-3 w-3 opacity-60" />
+                </div>
 
                 <div className="mt-auto flex items-center gap-1 border-t border-border/60 pt-3 text-xs">
                   <Link
@@ -480,12 +413,13 @@ const CoachCourses = () => {
                   ${Number(c.price_usd)} · ₹{Number(c.price_inr)}
                 </div>
                 <div className="col-span-1">
-                  <button
-                    onClick={() => viewStudents(c.id, c.title)}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                  <span
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary"
+                    title="Learner identities are private. Only counts are shown."
                   >
                     <Users className="h-3 w-3" /> {enrollCounts[c.id] || 0}
-                  </button>
+                    <Lock className="h-2.5 w-2.5 opacity-60" />
+                  </span>
                 </div>
                 <div className="col-span-2 flex items-center justify-end gap-1 text-xs">
                   <Link to={`/coach/courses/${c.id}/edit`} className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground" title="Edit">

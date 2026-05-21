@@ -148,72 +148,95 @@ const CoachWorkshops = () => {
   const totalAttended = workshops.reduce((s, w) => s + (w.attended || 0), 0);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Video className="h-6 w-6 text-primary" />
-          <div>
-            <h2 className="text-xl font-bold text-foreground">Workshops & Live Sessions</h2>
-            <p className="text-sm text-muted-foreground">Create and manage your live sessions</p>
+    <div className="space-y-8">
+      {/* Premium Header */}
+      <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-emerald-500/5 p-6 sm:p-8">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+        <div className="relative flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-start gap-4">
+            <div className="rounded-2xl bg-primary/20 p-3"><Video className="h-6 w-6 text-primary" /></div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-primary/80 font-semibold mb-2">Live Sessions</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground font-display tracking-tight">Workshops</h2>
+              <p className="text-sm text-muted-foreground mt-2 max-w-xl">Create, schedule, and manage your live workshops with built-in attendance tracking.</p>
+            </div>
           </div>
-        </div>
-        {meetingCreation && (
-          <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
-            <DialogTrigger asChild>
-              <Button><Plus className="h-4 w-4 mr-2" />Create Workshop</Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-              <DialogHeader><DialogTitle>{editingId ? "Edit Workshop" : "Create Workshop"}</DialogTitle></DialogHeader>
-              <div className="space-y-4">
-                <div><Label>Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Workshop title" /></div>
-                <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Workshop description" /></div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div><Label>Date & Time *</Label><Input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} /></div>
-                  <div><Label>Duration (min)</Label><Input type="number" value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: parseInt(e.target.value) || 60 })} /></div>
-                </div>
-                <div><Label>Meeting Provider</Label>
-                  <Select value={form.meeting_provider} onValueChange={(v) => setForm({ ...form, meeting_provider: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="manual">Manual Link</SelectItem>
-                      <SelectItem value="zoom">Zoom</SelectItem>
-                      <SelectItem value="google_meet">Google Meet</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div><Label>Meeting URL</Label><Input value={form.meeting_url} onChange={(e) => setForm({ ...form, meeting_url: e.target.value })} placeholder="https://..." /></div>
-                <div><Label>Max Attendees</Label><Input type="number" value={form.max_attendees} onChange={(e) => setForm({ ...form, max_attendees: e.target.value })} placeholder="Unlimited" /></div>
-                <div className="flex items-center gap-3">
-                  <Switch checked={form.is_recurring} onCheckedChange={(v) => setForm({ ...form, is_recurring: v })} />
-                  <Label>Recurring Session</Label>
-                </div>
-                {form.is_recurring && (
-                  <div><Label>Recurrence Pattern</Label>
-                    <Select value={form.recurrence_pattern} onValueChange={(v) => setForm({ ...form, recurrence_pattern: v })}>
-                      <SelectTrigger><SelectValue placeholder="Select pattern" /></SelectTrigger>
+          {meetingCreation && (
+            <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
+              <DialogTrigger asChild>
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_8px_30px_-10px_hsl(var(--primary)/0.6)] hover:shadow-[0_12px_40px_-10px_hsl(var(--primary)/0.8)] transition-all hover:-translate-y-0.5">
+                  <Plus className="h-4 w-4 mr-2" />Create Workshop
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+                <DialogHeader><DialogTitle>{editingId ? "Edit Workshop" : "Create Workshop"}</DialogTitle></DialogHeader>
+                <div className="space-y-4">
+                  <div><Label>Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Workshop title" /></div>
+                  <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Workshop description" /></div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div><Label>Date & Time *</Label><Input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} /></div>
+                    <div><Label>Duration (min)</Label><Input type="number" value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: parseInt(e.target.value) || 60 })} /></div>
+                  </div>
+                  <div><Label>Meeting Provider</Label>
+                    <Select value={form.meeting_provider} onValueChange={(v) => setForm({ ...form, meeting_provider: v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="biweekly">Bi-weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="manual">Manual Link</SelectItem>
+                        <SelectItem value="zoom">Zoom</SelectItem>
+                        <SelectItem value="google_meet">Google Meet</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                )}
-                <Button className="w-full" onClick={handleSubmit}>{editingId ? "Update" : "Create"} Workshop</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
+                  <div><Label>Meeting URL</Label><Input value={form.meeting_url} onChange={(e) => setForm({ ...form, meeting_url: e.target.value })} placeholder="https://..." /></div>
+                  <div><Label>Max Attendees</Label><Input type="number" value={form.max_attendees} onChange={(e) => setForm({ ...form, max_attendees: e.target.value })} placeholder="Unlimited" /></div>
+                  <div className="flex items-center gap-3">
+                    <Switch checked={form.is_recurring} onCheckedChange={(v) => setForm({ ...form, is_recurring: v })} />
+                    <Label>Recurring Session</Label>
+                  </div>
+                  {form.is_recurring && (
+                    <div><Label>Recurrence Pattern</Label>
+                      <Select value={form.recurrence_pattern} onValueChange={(v) => setForm({ ...form, recurrence_pattern: v })}>
+                        <SelectTrigger><SelectValue placeholder="Select pattern" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="biweekly">Bi-weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  <Button className="w-full" onClick={handleSubmit}>{editingId ? "Update" : "Create"} Workshop</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </div>
 
       {analyticsAccess && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><Calendar className="h-5 w-5 text-primary" /><div><p className="text-2xl font-bold text-foreground">{workshops.length}</p><p className="text-sm text-muted-foreground">Total Workshops</p></div></div></CardContent></Card>
-          <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><Users className="h-5 w-5 text-primary" /><div><p className="text-2xl font-bold text-foreground">{totalRegs}</p><p className="text-sm text-muted-foreground">Total Registrations</p></div></div></CardContent></Card>
-          <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><BarChart3 className="h-5 w-5 text-primary" /><div><p className="text-2xl font-bold text-foreground">{totalRegs > 0 ? Math.round((totalAttended / totalRegs) * 100) : 0}%</p><p className="text-sm text-muted-foreground">Attendance Rate</p></div></div></CardContent></Card>
+          {[
+            { label: "Total Workshops", value: workshops.length, icon: Calendar },
+            { label: "Total Registrations", value: totalRegs, icon: Users },
+            { label: "Attendance Rate", value: `${totalRegs > 0 ? Math.round((totalAttended / totalRegs) * 100) : 0}%`, icon: BarChart3 },
+          ].map((s) => (
+            <div key={s.label} className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_10px_40px_-15px_hsl(var(--primary)/0.4)]">
+              <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">{s.label}</p>
+                  <p className="text-3xl font-bold text-foreground font-display tracking-tight mt-2">{s.value}</p>
+                </div>
+                <div className="rounded-lg bg-primary/10 p-2.5 group-hover:bg-primary/20 transition-colors">
+                  <s.icon className="h-5 w-5 text-primary" />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
+
 
       <Card>
         <CardHeader><CardTitle className="text-foreground">Your Workshops</CardTitle></CardHeader>

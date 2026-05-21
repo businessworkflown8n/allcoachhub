@@ -17,17 +17,18 @@ export const useUserRole = () => {
 
     const fetchRole = async () => {
       try {
-        const { data } = await withTimeout(
-          retryOnce(() =>
-            supabase
+        const response = await withTimeout(
+          retryOnce(async () =>
+            await supabase
               .from("user_roles")
               .select("role")
-              .eq("user_id", user.id)
+              .eq("user_id", user.id),
           ),
           8000,
         );
 
-        setRole(resolvePrimaryRole((data ?? []).map((item) => item.role)));
+        const roles = ((response as { data?: Array<{ role: string }> }).data ?? []).map((item) => item.role);
+        setRole(resolvePrimaryRole(roles));
       } catch {
         setRole(null);
       } finally {

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useContactAccess } from "@/hooks/useContactAccess";
-import { useUserRole } from "@/hooks/useUserRole";
 import { Video, Plus, Edit, Trash2, Users, Calendar, Clock, Download, Lock, KeyRound, DollarSign, BarChart3, Globe } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
@@ -65,11 +64,7 @@ const TIMEZONES = [
 
 const CoachWebinars = () => {
   const { user } = useAuth();
-  const { isAdmin } = useUserRole();
-  const { hasAccess: rawHasAccess, isPending, requestAccess } = useContactAccess();
-  const hasAccess = (id: string) => isAdmin || rawHasAccess(id);
-  const maskName = (name?: string | null) =>
-    !name ? "Unknown" : name.split(" ").filter(Boolean).map((p) => p[0]?.toUpperCase() + "***").join(" ");
+  const { hasAccess, isPending, requestAccess } = useContactAccess();
   const [webinars, setWebinars] = useState<Webinar[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -487,13 +482,10 @@ const CoachWebinars = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {registrants.map((r) => {
-                    const ok = hasAccess(r.learner_id);
-                    const rawName = r.profiles?.full_name || r.registrant_name;
-                    return (
+                  {registrants.map((r) => (
                     <TableRow key={r.id}>
-                      <TableCell className="text-foreground font-medium whitespace-nowrap">{ok ? (rawName || "Unknown") : maskName(rawName)}</TableCell>
-                      {ok ? (
+                      <TableCell className="text-foreground font-medium whitespace-nowrap">{r.profiles?.full_name || r.registrant_name || "Unknown"}</TableCell>
+                      {hasAccess(r.learner_id) ? (
                         <>
                           <TableCell className="text-foreground whitespace-nowrap">{r.profiles?.email || r.registrant_email || "—"}</TableCell>
                           <TableCell className="text-foreground whitespace-nowrap">{r.profiles?.contact_number || r.registrant_phone || "—"}</TableCell>
@@ -514,10 +506,10 @@ const CoachWebinars = () => {
                           </div>
                         </TableCell>
                       )}
-                      <TableCell className="text-muted-foreground">{ok ? (r.profiles?.country || "—") : "🔒"}</TableCell>
-                      <TableCell className="text-muted-foreground">{ok ? (r.profiles?.city || "—") : "🔒"}</TableCell>
-                      <TableCell className="text-muted-foreground">{ok ? (r.profiles?.industry || "—") : "🔒"}</TableCell>
-                      <TableCell className="text-muted-foreground whitespace-nowrap">{ok ? (r.profiles?.current_job_title || "—") : "🔒"}</TableCell>
+                      <TableCell className="text-muted-foreground">{r.profiles?.country || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{r.profiles?.city || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{r.profiles?.industry || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground whitespace-nowrap">{r.profiles?.current_job_title || "—"}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">
                           {r.attended && <Badge variant="outline" className="text-green-400 border-green-500/30 text-[10px]">Attended</Badge>}
@@ -528,8 +520,7 @@ const CoachWebinars = () => {
                       <TableCell className="text-foreground">{r.amount_paid ? `₹${r.amount_paid}` : "Free"}</TableCell>
                       <TableCell className="text-muted-foreground whitespace-nowrap">{format(new Date(r.registered_at), "MMM d, yyyy")}</TableCell>
                     </TableRow>
-                    );
-                  })}
+                  ))}
                 </TableBody>
               </Table>
             </div>

@@ -45,12 +45,12 @@ const DashboardLayout = ({ children, navItems, title, marqueeSegment }: Dashboar
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col border-r border-border/40 glass-surface transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shrink-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
-        style={{ boxShadow: '8px 0 32px rgba(0,0,0,0.45)' }}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col border-r border-border/50 bg-card transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shrink-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        style={{ boxShadow: '4px 0 24px rgba(0,0,0,0.3)' }}
       >
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-border/30 px-5">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <img src={logo} alt="AI Coach Portal" className="h-8 w-8 rounded-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3" />
+          <Link to="/" className="flex items-center gap-2.5">
+            <img src={logo} alt="AI Coach Portal" className="h-8 w-8 rounded-lg" />
             <span className="text-sm font-bold text-foreground tracking-tight">{title}</span>
           </Link>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-muted-foreground hover:text-foreground transition-colors">
@@ -83,29 +83,23 @@ const DashboardLayout = ({ children, navItems, title, marqueeSegment }: Dashboar
             {filteredNavItems.length === 0 ? (
               <p className="px-3 py-4 text-center text-xs text-muted-foreground">No matches found</p>
             ) : (
-              filteredNavItems.map((item) => {
-                const active = location.pathname === item.path;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setSidebarOpen(false)}
-                    className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ${
-                      active
-                        ? "bg-primary/10 text-primary nav-active-glow"
-                        : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground hover:translate-x-0.5"
-                    }`}
-                  >
-                    {active && (
-                      <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary shadow-[0_0_10px_hsl(72_100%_50%/0.6)]" />
-                    )}
-                    <span className={active ? "icon-glow" : "opacity-70 group-hover:opacity-100 transition-opacity"}>
-                      {item.icon}
-                    </span>
-                    {item.label}
-                  </Link>
-                );
-              })
+              filteredNavItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ${
+                    location.pathname === item.path
+                      ? "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_hsl(72_100%_50%/0.15)]"
+                      : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                  }`}
+                >
+                  <span className={location.pathname === item.path ? "icon-glow" : "opacity-70 group-hover:opacity-100 transition-opacity"}>
+                    {item.icon}
+                  </span>
+                  {item.label}
+                </Link>
+              ))
             )}
           </div>
         </nav>
@@ -123,7 +117,7 @@ const DashboardLayout = ({ children, navItems, title, marqueeSegment }: Dashboar
 
       {/* Main content */}
       <div className="flex flex-1 flex-col min-w-0">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/30 glass-surface px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/30 bg-background/80 backdrop-blur-xl px-6">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-muted-foreground hover:text-foreground transition-colors">
             <Menu className="h-5 w-5" />
           </button>

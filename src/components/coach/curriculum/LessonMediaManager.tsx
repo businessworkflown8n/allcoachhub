@@ -11,8 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
-import { Upload, Loader2, Trash2, Video, Youtube, Image as ImageIcon, Mic, Lock, Play, Square, HardDrive } from "lucide-react";
-import DrivePicker from "@/components/coach/drive/DrivePicker";
+import { Upload, Loader2, Trash2, Video, Youtube, Image as ImageIcon, Mic, Lock, Play, Square } from "lucide-react";
 
 type Media = {
   id: string;
@@ -46,7 +45,6 @@ const LessonMediaManager = ({ open, onOpenChange, lessonId, lessonTitle }: Props
   const [items, setItems] = useState<Media[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [drivePickerOpen, setDrivePickerOpen] = useState<null | "video" | "image">(null);
 
   const [ytUrl, setYtUrl] = useState("");
   const [ytTitle, setYtTitle] = useState("");
@@ -152,19 +150,10 @@ const LessonMediaManager = ({ open, onOpenChange, lessonId, lessonTitle }: Props
 
           <TabsContent value="video" className="space-y-3 pt-4">
             {fUpload.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : !fUpload.data?.enabled ? renderLocked("Video Upload", fUpload.data?.reason) : (
-              <div className="space-y-3">
-                <div>
-                  <Label>Upload video file</Label>
-                  <Input type="file" accept="video/*" disabled={uploading} onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0], "video_upload")} />
-                  {uploading && <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Uploading...</p>}
-                </div>
-                <div className="rounded-lg border border-dashed border-border p-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium flex items-center gap-2"><HardDrive className="h-4 w-4" /> From Google Drive</p>
-                    <p className="text-xs text-muted-foreground">Pick a video from your connected Drive (streams directly).</p>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => setDrivePickerOpen("video")}>Choose</Button>
-                </div>
+              <div>
+                <Label>Upload video file</Label>
+                <Input type="file" accept="video/*" disabled={uploading} onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0], "video_upload")} />
+                {uploading && <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Uploading...</p>}
               </div>
             )}
           </TabsContent>
@@ -216,21 +205,12 @@ const LessonMediaManager = ({ open, onOpenChange, lessonId, lessonTitle }: Props
 
           <TabsContent value="image" className="space-y-3 pt-4">
             {fImage.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : !fImage.data?.enabled ? renderLocked("Image Upload", fImage.data?.reason) : (
-              <div className="space-y-3">
-                <div>
-                  <Label>Upload images (you can add multiple, one at a time)</Label>
-                  <Input type="file" accept="image/*" disabled={uploading} onChange={async (e) => {
-                    const files = Array.from(e.target.files || []);
-                    for (const f of files) await uploadFile(f, "image");
-                  }} multiple />
-                </div>
-                <div className="rounded-lg border border-dashed border-border p-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium flex items-center gap-2"><HardDrive className="h-4 w-4" /> From Google Drive</p>
-                    <p className="text-xs text-muted-foreground">Pick an image from your connected Drive.</p>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => setDrivePickerOpen("image")}>Choose</Button>
-                </div>
+              <div>
+                <Label>Upload images (you can add multiple, one at a time)</Label>
+                <Input type="file" accept="image/*" disabled={uploading} onChange={async (e) => {
+                  const files = Array.from(e.target.files || []);
+                  for (const f of files) await uploadFile(f, "image");
+                }} multiple />
               </div>
             )}
           </TabsContent>
@@ -264,23 +244,6 @@ const LessonMediaManager = ({ open, onOpenChange, lessonId, lessonTitle }: Props
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Done</Button>
         </DialogFooter>
-
-        <DrivePicker
-          open={drivePickerOpen !== null}
-          onOpenChange={(v) => !v && setDrivePickerOpen(null)}
-          accept={drivePickerOpen === "image" ? "image" : drivePickerOpen === "video" ? "video" : "any"}
-          onSelect={async (f) => {
-            const isImage = f.mime_type.startsWith("image/");
-            const previewUrl = `https://drive.google.com/file/d/${f.drive_file_id}/preview`;
-            const directUrl = `https://drive.google.com/uc?export=view&id=${f.drive_file_id}`;
-            await insert({
-              media_type: isImage ? "image" : "video_upload",
-              title: f.name,
-              [isImage ? "image_url" : "video_url"]: isImage ? directUrl : previewUrl,
-            } as any);
-            setDrivePickerOpen(null);
-          }}
-        />
       </DialogContent>
     </Dialog>
   );

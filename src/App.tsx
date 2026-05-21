@@ -51,7 +51,6 @@ const CoachWebsite = lazy(() => import("./pages/CoachWebsite"));
 const CoachWebsiteThankYou = lazy(() => import("./pages/CoachWebsiteThankYou"));
 const BrowseCoaches = lazy(() => import("./pages/BrowseCoaches"));
 const OAuthCallback = lazy(() => import("./pages/OAuthCallback"));
-const DriveOAuthCallback = lazy(() => import("./pages/DriveOAuthCallback"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const LandingPageThankYou = lazy(() => import("./pages/LandingPageThankYou"));
 const KnowledgeHub = lazy(() => import("./pages/KnowledgeHub"));
@@ -213,7 +212,6 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/oauth-callback" element={<Suspense fallback={<PageFallback />}><OAuthCallback /></Suspense>} />
-            <Route path="/oauth/google-drive/callback" element={<Suspense fallback={<PageFallback />}><DriveOAuthCallback /></Suspense>} />
             <Route path="/lp/:slug" element={<Suspense fallback={<PageFallback />}><LandingPage /></Suspense>} />
             <Route path="/lp/:slug/thank-you" element={<Suspense fallback={<PageFallback />}><LandingPageThankYou /></Suspense>} />
             <Route path="/Ai-mastermind-learning/:coachSlug" element={<Suspense fallback={<PageFallback />}><AiMastermindLearning /></Suspense>} />

@@ -39,15 +39,11 @@ const AdminLogin = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { withAuthRetry, friendlyAuthError } = await import("@/lib/authRetry");
-    const { data, error } = await withAuthRetry(() =>
-      supabase.auth.signInWithPassword({ email, password })
-    );
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       setLoading(false);
-      const f = friendlyAuthError(error);
-      toast({ title: f.title, description: f.description, variant: "destructive" });
+      toast({ title: "Login failed", description: error.message, variant: "destructive" });
       return;
     }
 

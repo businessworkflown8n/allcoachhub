@@ -142,7 +142,7 @@ const LoginForm = () => {
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
-        trackPasswordReset();
+        trackPasswordReset("request");
         toast({ title: "Check your email", description: "A password reset link has been sent to your email." });
         setShowReset(false);
       }

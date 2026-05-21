@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { resolvePrimaryRole, retryOnce, withTimeout } from "@/lib/authNetwork";
 
 export const useUserRole = () => {
   const { user } = useAuth();
@@ -15,14 +16,23 @@ export const useUserRole = () => {
     }
 
     const fetchRole = async () => {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .single();
+      try {
+        const { data } = await withTimeout(
+          retryOnce(() =>
+            supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", user.id)
+          ),
+          8000,
+        );
 
-      setRole(data?.role || null);
-      setLoading(false);
+        setRole(resolvePrimaryRole((data ?? []).map((item) => item.role)));
+      } catch {
+        setRole(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchRole();

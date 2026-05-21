@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { maskName, maskField } from "@/lib/learnerPrivacy";
 
 interface Webinar {
   id: string;
@@ -246,16 +247,17 @@ const CoachWebinars = () => {
     const headers = ["Name", "Email", "Phone", "WhatsApp", "Country", "City", "Industry", "Job Title", "Attended", "Watch Time (min)", "Converted", "Amount Paid", "Registered At"];
     const rows: string[][] = [headers];
     registrants.forEach((r) => {
-      const name = r.profiles?.full_name || r.registrant_name || "Unknown";
-      const email = hasAccess(r.learner_id) ? (r.profiles?.email || r.registrant_email || "—") : "Hidden";
-      const phone = hasAccess(r.learner_id) ? (r.profiles?.contact_number || r.registrant_phone || "—") : "Hidden";
-      const whatsapp = hasAccess(r.learner_id) ? (r.profiles?.whatsapp_number || "—") : "Hidden";
+      const access = hasAccess(r.learner_id);
+      const name = maskName(r.profiles?.full_name || r.registrant_name, r.learner_id, access);
+      const email = access ? (r.profiles?.email || r.registrant_email || "—") : "Hidden";
+      const phone = access ? (r.profiles?.contact_number || r.registrant_phone || "—") : "Hidden";
+      const whatsapp = access ? (r.profiles?.whatsapp_number || "—") : "Hidden";
       rows.push([
         name, email, phone, whatsapp,
-        r.profiles?.country || "—",
-        r.profiles?.city || "—",
-        r.profiles?.industry || "—",
-        r.profiles?.current_job_title || "—",
+        maskField(r.profiles?.country, access),
+        maskField(r.profiles?.city, access),
+        maskField(r.profiles?.industry, access),
+        maskField(r.profiles?.current_job_title, access),
         r.attended ? "Yes" : "No",
         String(r.watch_duration_minutes || 0),
         r.converted ? "Yes" : "No",
@@ -482,10 +484,12 @@ const CoachWebinars = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {registrants.map((r) => (
+                  {registrants.map((r) => {
+                    const access = hasAccess(r.learner_id);
+                    return (
                     <TableRow key={r.id}>
-                      <TableCell className="text-foreground font-medium whitespace-nowrap">{r.profiles?.full_name || r.registrant_name || "Unknown"}</TableCell>
-                      {hasAccess(r.learner_id) ? (
+                      <TableCell className="text-foreground font-medium whitespace-nowrap">{maskName(r.profiles?.full_name || r.registrant_name, r.learner_id, access)}</TableCell>
+                      {access ? (
                         <>
                           <TableCell className="text-foreground whitespace-nowrap">{r.profiles?.email || r.registrant_email || "—"}</TableCell>
                           <TableCell className="text-foreground whitespace-nowrap">{r.profiles?.contact_number || r.registrant_phone || "—"}</TableCell>
@@ -506,10 +510,10 @@ const CoachWebinars = () => {
                           </div>
                         </TableCell>
                       )}
-                      <TableCell className="text-muted-foreground">{r.profiles?.country || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{r.profiles?.city || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{r.profiles?.industry || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground whitespace-nowrap">{r.profiles?.current_job_title || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{maskField(r.profiles?.country, access)}</TableCell>
+                      <TableCell className="text-muted-foreground">{maskField(r.profiles?.city, access)}</TableCell>
+                      <TableCell className="text-muted-foreground">{maskField(r.profiles?.industry, access)}</TableCell>
+                      <TableCell className="text-muted-foreground whitespace-nowrap">{maskField(r.profiles?.current_job_title, access)}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">
                           {r.attended && <Badge variant="outline" className="text-green-400 border-green-500/30 text-[10px]">Attended</Badge>}

@@ -8,6 +8,23 @@ import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { trackLogin, trackPasswordReset, trackFormError } from "@/lib/analytics";
 
+const getReadableAuthError = (error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error);
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("failed to fetch") || normalized.includes("networkerror")) {
+    return {
+      title: "Login service issue",
+      description: "The login service is temporarily unavailable. Please retry in a few moments.",
+    };
+  }
+
+  return {
+    title: "Login failed",
+    description: message,
+  };
+};
+
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,45 +81,50 @@ const LoginForm = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    setLoading(false);
+      if (error) {
+        trackFormError("login", "credentials");
+        const isInvalidCredentials = error.message.toLowerCase().includes("invalid login credentials") || 
+                                      error.message.toLowerCase().includes("invalid email or password");
+        toast({
+          title: isInvalidCredentials ? "Email not registered" : "Login failed",
+          description: isInvalidCredentials 
+            ? "This email is not registered yet. Please complete the signup process first."
+            : error.message,
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (error) {
-      trackFormError("login", "credentials");
-      const isInvalidCredentials = error.message.toLowerCase().includes("invalid login credentials") || 
-                                    error.message.toLowerCase().includes("invalid email or password");
-      toast({
-        title: isInvalidCredentials ? "Email not registered" : "Login failed",
-        description: isInvalidCredentials 
-          ? "This email is not registered yet. Please complete the signup process first."
-          : error.message,
-        variant: "destructive",
-      });
-      return;
-    }
+      trackLogin("email");
 
-    trackLogin("email");
+      if (authData?.user) {
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", authData.user.id)
+          .maybeSingle();
 
-    // Redirect based on user role
-    if (authData?.user) {
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", authData.user.id)
-        .single();
-
-      if (roleData?.role === "coach") {
-        navigate("/coach");
-      } else if (roleData?.role === "learner") {
-        navigate("/learner");
-      } else if (roleData?.role === "admin") {
-        navigate("/admin");
+        if (roleData?.role === "coach") {
+          navigate("/coach");
+        } else if (roleData?.role === "learner") {
+          navigate("/learner");
+        } else if (roleData?.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       } else {
         navigate("/");
       }
-    } else {
-      navigate("/");
+    } catch (error) {
+      trackFormError("login", "network");
+      const authError = getReadableAuthError(error);
+      toast({ title: authError.title, description: authError.description, variant: "destructive" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,15 +135,22 @@ const LoginForm = () => {
       return;
     }
     setResetLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    setResetLoading(false);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Check your email", description: "A password reset link has been sent to your email." });
-      setShowReset(false);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        trackPasswordReset("request");
+        toast({ title: "Check your email", description: "A password reset link has been sent to your email." });
+        setShowReset(false);
+      }
+    } catch (error) {
+      const authError = getReadableAuthError(error);
+      toast({ title: authError.title, description: authError.description, variant: "destructive" });
+    } finally {
+      setResetLoading(false);
     }
   };
 

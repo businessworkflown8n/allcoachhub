@@ -19,9 +19,10 @@ const WebsitePopup = () => {
 
   // Don't show popups on admin/coach/learner dashboard routes
   const isDashboard = /^\/(admin|coach|learner)/.test(location.pathname);
+  const isAuthRoute = /^\/(auth|login|signup|reset-password)/.test(location.pathname);
 
   useEffect(() => {
-    if (isDashboard) return;
+    if (isDashboard || isAuthRoute) return;
 
     const fetchPopup = async () => {
       // Get dismissed popup IDs from sessionStorage
@@ -43,7 +44,7 @@ const WebsitePopup = () => {
     };
 
     fetchPopup();
-  }, [isDashboard, location.pathname]);
+  }, [isDashboard, isAuthRoute, location.pathname]);
 
   const dismiss = () => {
     setVisible(false);
@@ -57,7 +58,7 @@ const WebsitePopup = () => {
     }, 300);
   };
 
-  if (!popup || isDashboard) return null;
+  if (!popup || isDashboard || isAuthRoute) return null;
 
   return (
     <>

@@ -14,7 +14,7 @@ const LocaleContext = createContext<LocaleContextValue | null>(null);
 
 const STORAGE_KEY = "user_locale_country";
 
-export const LocaleProvider = ({ children }: { children: ReactNode }) => {
+export const LocaleProvider = ({ children, disableRemoteBootstrap = false }: { children: ReactNode; disableRemoteBootstrap?: boolean }) => {
   const [locale, setLocaleState] = useState<CountryLocale>(DEFAULT_LOCALE);
 
   useEffect(() => {
@@ -26,6 +26,12 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
     }
 
     // 2. Fetch the admin-configured default country from DB and use it
+    if (disableRemoteBootstrap) {
+      setLocaleState(DEFAULT_LOCALE);
+      sessionStorage.setItem(STORAGE_KEY, DEFAULT_LOCALE.code);
+      return;
+    }
+
     const init = async () => {
       let dbDefault: CountryLocale | undefined;
       try {
@@ -46,7 +52,7 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
     };
 
     init();
-  }, []);
+  }, [disableRemoteBootstrap]);
 
   const setLocale = useCallback((country: CountryLocale) => {
     setLocaleState(country);

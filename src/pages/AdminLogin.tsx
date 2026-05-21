@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, ArrowRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { instrumentAuthCall, recordAuthEvent } from "@/lib/authDiagnostics";
+import { withTimeout, retryOnce, getAuthFallbackMessage, isNetworkAuthError } from "@/lib/authNetwork";
 
 const AdminLogin = () => {
   useSEO({

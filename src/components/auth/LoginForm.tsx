@@ -139,6 +139,13 @@ const LoginForm = () => {
         ? "The login service is temporarily unavailable. Please retry in a few moments."
         : fallback.description;
       setAuthError(message);
+      recordAuthEvent({
+        phase: "loginFailed",
+        durationMs: Math.round(performance.now() - submitStart),
+        ok: false,
+        errorName: (error as Error)?.name,
+        errorMessage: (error as Error)?.message,
+      });
       toast({ title: fallback.title, description: message, variant: "destructive" });
     } finally {
       setLoading(false);

@@ -105,16 +105,21 @@ const LoginForm = () => {
       await refreshSession();
 
       if (authData?.user) {
-        const roleResponse = await withTimeout(
-          retryOnce(async () =>
-            await supabase
-              .from("user_roles")
-              .select("role")
-              .eq("user_id", authData.user.id),
+        const roleResponse = await instrumentAuthCall(
+          "roleLookup",
+          async () => withTimeout(
+            retryOnce(async () =>
+              await supabase
+                .from("user_roles")
+                .select("role")
+                .eq("user_id", authData.user.id),
+            ),
+            8000,
           ),
-          8000,
+          { user_id: authData.user.id },
         );
         const role = resolvePrimaryRole(((roleResponse.data as Array<{ role: string }> | null) ?? []).map((item) => item.role));
+        recordAuthEvent({ phase: "loginComplete", durationMs: Math.round(performance.now() - submitStart), ok: true, meta: { role, user_id: authData.user.id } });
 
         if (role === "coach") {
           navigate("/coach");

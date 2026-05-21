@@ -72,11 +72,16 @@ const LoginForm = () => {
     e.preventDefault();
     setLoading(true);
     setAuthError(null);
+    const submitStart = performance.now();
 
     try {
-      const { data: authData, error } = await withTimeout(
-        retryOnce(async () => await supabase.auth.signInWithPassword({ email, password })),
-        12000,
+      const { data: authData, error } = await instrumentAuthCall(
+        "signInWithPassword",
+        async () => withTimeout(
+          retryOnce(async () => await supabase.auth.signInWithPassword({ email, password })),
+          12000,
+        ),
+        { email },
       );
 
       if (error) {

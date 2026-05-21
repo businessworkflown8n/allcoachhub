@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Plus, Users, Search, Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
+import { useContactAccess } from "@/hooks/useContactAccess";
+import { maskName, maskField } from "@/lib/learnerPrivacy";
 
 interface Client {
   id: string;

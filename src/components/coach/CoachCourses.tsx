@@ -3,13 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import {
-  BookOpen, Plus, Edit, Trash2, Eye, EyeOff, Users, Download,
-  Clock, CheckCircle, AlertTriangle, ListTree, Search, LayoutGrid, List, Sparkles,
+  BookOpen, Plus, Edit, Trash2, Eye, EyeOff, Users,
+  Clock, CheckCircle, AlertTriangle, ListTree, Search, LayoutGrid, List, Sparkles, Lock,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface EnrolledStudent {
   id: string;

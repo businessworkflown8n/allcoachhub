@@ -9,13 +9,8 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
-interface EnrolledStudent {
-  id: string;
-  full_name: string;
-  email: string;
-  contact_number: string;
-  enrolled_at: string;
-}
+type FilterKey = "all" | "published" | "drafts" | "pending";
+type ViewMode = "grid" | "list";
 
 type FilterKey = "all" | "published" | "drafts" | "pending";
 type ViewMode = "grid" | "list";

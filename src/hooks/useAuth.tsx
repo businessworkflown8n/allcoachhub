@@ -30,7 +30,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshSession = useCallback(async () => {
     try {
-      const { data } = await withTimeout(retryOnce(() => supabase.auth.getSession()), 8000);
+      const { data } = await instrumentAuthCall(
+        "getSession",
+        async () => withTimeout(retryOnce(() => supabase.auth.getSession()), 8000),
+      );
       setSession(data.session);
       setUser(data.session?.user ?? null);
       setBackendReachable(true);

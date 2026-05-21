@@ -196,17 +196,20 @@ export default function CoachClients() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredEnrolled.map((e) => (
+                {filteredEnrolled.map((e) => {
+                  const access = hasAccess(e.learner_id);
+                  return (
                   <TableRow key={e.id}>
-                    <TableCell className="font-medium">{e.full_name}</TableCell>
-                    <TableCell className="text-xs">{e.email}</TableCell>
+                    <TableCell className="font-medium">{maskName(e.full_name, e.learner_id, access)}</TableCell>
+                    <TableCell className="text-xs">{maskField(e.email, access)}</TableCell>
                     <TableCell className="text-xs">{e.course_title}</TableCell>
                     <TableCell className="text-xs">{new Date(e.enrolled_at).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" variant="outline" onClick={() => promoteEnrolled(e)}>Add to CRM</Button>
+                      <Button size="sm" variant="outline" onClick={() => promoteEnrolled(e)} disabled={!access} title={!access ? "Request contact access from Enrollments to add this learner to CRM" : ""}>Add to CRM</Button>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           )}

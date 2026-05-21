@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Plus, Users, Search, Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
+import { useContactAccess } from "@/hooks/useContactAccess";
+import { maskName, maskField } from "@/lib/learnerPrivacy";
 
 interface Client {
   id: string;
@@ -29,6 +31,7 @@ interface Client {
 
 interface EnrolledLearner {
   id: string;
+  learner_id: string;
   full_name: string;
   email: string;
   course_title: string;
@@ -39,6 +42,7 @@ const STATUSES = ["active", "paused", "churned", "prospect"];
 
 export default function CoachClients() {
   const { user } = useAuth();
+  const { hasAccess } = useContactAccess();
   const [clients, setClients] = useState<Client[]>([]);
   const [enrolled, setEnrolled] = useState<EnrolledLearner[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +61,7 @@ export default function CoachClients() {
     setClients((clientsRes.data || []) as any);
     setEnrolled(((enrollRes.data || []) as any[]).map((e) => ({
       id: e.id,
+      learner_id: e.learner_id,
       full_name: e.profiles?.full_name || "Learner",
       email: e.profiles?.email || "",
       course_title: e.courses?.title || "",
@@ -191,17 +196,20 @@ export default function CoachClients() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredEnrolled.map((e) => (
+                {filteredEnrolled.map((e) => {
+                  const access = hasAccess(e.learner_id);
+                  return (
                   <TableRow key={e.id}>
-                    <TableCell className="font-medium">{e.full_name}</TableCell>
-                    <TableCell className="text-xs">{e.email}</TableCell>
+                    <TableCell className="font-medium">{maskName(e.full_name, e.learner_id, access)}</TableCell>
+                    <TableCell className="text-xs">{maskField(e.email, access)}</TableCell>
                     <TableCell className="text-xs">{e.course_title}</TableCell>
                     <TableCell className="text-xs">{new Date(e.enrolled_at).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" variant="outline" onClick={() => promoteEnrolled(e)}>Add to CRM</Button>
+                      <Button size="sm" variant="outline" onClick={() => promoteEnrolled(e)} disabled={!access} title={!access ? "Request contact access from Enrollments to add this learner to CRM" : ""}>Add to CRM</Button>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           )}

@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import GlobalDateRangePicker, { useDateRange } from "@/components/shared/GlobalDateRangePicker";
+import { maskName, maskField } from "@/lib/learnerPrivacy";
 
 const USD_TO_INR_FALLBACK = 83.5;
 
@@ -215,9 +216,13 @@ const CoachEnrollments = () => {
       const course = e.courses as any;
       const fee = e.currency === "USD" ? `$${course?.price_usd || 0}` : `₹${course?.price_inr || 0}`;
       const paid = e.amount_paid ? (e.currency === "USD" ? `$${e.amount_paid}` : `₹${e.amount_paid}`) : "—";
+      const access = hasAccess(e.learner_id);
       return [
-        e.row_type, e.full_name, course?.title, fee, paid, e.country, e.city, e.industry,
-        e.current_job_title, e.experience_level, e.education_qualification,
+        e.row_type,
+        maskName(e.full_name, e.learner_id, access),
+        course?.title, fee, paid,
+        maskField(e.country, access), maskField(e.city, access), maskField(e.industry, access),
+        maskField(e.current_job_title, access), maskField(e.experience_level, access), maskField(e.education_qualification, access),
         e.payment_status, e.payment_locked ? "Yes" : "No", new Date(e.enrolled_at).toLocaleDateString()
       ];
     });
@@ -363,7 +368,7 @@ const CoachEnrollments = () => {
                       {e.row_type}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-foreground font-medium whitespace-nowrap">{e.full_name}</TableCell>
+                  <TableCell className="text-foreground font-medium whitespace-nowrap">{maskName(e.full_name, e.learner_id, hasAccess(e.learner_id))}</TableCell>
                   <ContactCell enrollment={e} />
                   <TableCell className="text-foreground whitespace-nowrap">{(e.courses as any)?.title}</TableCell>
                   <TableCell className="text-foreground whitespace-nowrap">
@@ -376,14 +381,14 @@ const CoachEnrollments = () => {
                       ? (e.currency === "USD" ? `$${e.amount_paid}` : `₹${e.amount_paid}`)
                       : "—"}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{e.country}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.city}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.industry}</TableCell>
-                  <TableCell className="text-muted-foreground whitespace-nowrap">{e.current_job_title}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.experience_level}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.education_qualification}</TableCell>
+                  <TableCell className="text-muted-foreground">{maskField(e.country, hasAccess(e.learner_id))}</TableCell>
+                  <TableCell className="text-muted-foreground">{maskField(e.city, hasAccess(e.learner_id))}</TableCell>
+                  <TableCell className="text-muted-foreground">{maskField(e.industry, hasAccess(e.learner_id))}</TableCell>
+                  <TableCell className="text-muted-foreground whitespace-nowrap">{maskField(e.current_job_title, hasAccess(e.learner_id))}</TableCell>
+                  <TableCell className="text-muted-foreground">{maskField(e.experience_level, hasAccess(e.learner_id))}</TableCell>
+                  <TableCell className="text-muted-foreground">{maskField(e.education_qualification, hasAccess(e.learner_id))}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    {e.linkedin_profile ? <a href={e.linkedin_profile} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View</a> : "—"}
+                    {hasAccess(e.learner_id) && e.linkedin_profile ? <a href={e.linkedin_profile} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View</a> : (hasAccess(e.learner_id) ? "—" : "•••••")}
                   </TableCell>
                   <TableCell>
                     {isPaymentEditable(e) ? (

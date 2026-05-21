@@ -29,7 +29,7 @@ const AIClientMatching = () => {
       // Get learner profiles
       const { data: learners } = await supabase
         .from("profiles")
-        .select("full_name, bio, category, city, country, experience_level")
+        .select("user_id, bio, category, city, country, experience_level")
         .neq("user_id", user.id)
         .limit(100);
 
@@ -46,9 +46,8 @@ const AIClientMatching = () => {
         }
 
         // Profile completeness (20%)
-        if (l.full_name) score += 5;
         if (l.bio) score += 10;
-        if (l.category) score += 5;
+        if (l.category) score += 10;
 
         // Location (20%)
         if (l.country) score += 10;
@@ -57,8 +56,11 @@ const AIClientMatching = () => {
         // Base (20%)
         score += 10 + Math.random() * 10;
 
+        // Anonymized label — coaches see counts/scores, not learner identities,
+        // until admin approves contact access on the Enrollments/Leads pages.
+        const tail = (l.user_id || "").replace(/-/g, "").slice(-4).toUpperCase();
         return {
-          name: l.full_name || "Learner",
+          name: `Learner #${tail || "—"}`,
           matchScore: Math.min(Math.round(score), 98),
           interests: l.category || "AI & Technology",
           level: l.experience_level || "Beginner",

@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { trackLogin, trackPasswordReset, trackFormError } from "@/lib/analytics";
+import { withAuthRetry, friendlyAuthError } from "@/lib/authRetry";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -64,21 +65,27 @@ const LoginForm = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: authData, error } = await withAuthRetry(() =>
+      supabase.auth.signInWithPassword({ email, password })
+    );
 
     setLoading(false);
 
     if (error) {
       trackFormError("login", "credentials");
-      const isInvalidCredentials = error.message.toLowerCase().includes("invalid login credentials") || 
-                                    error.message.toLowerCase().includes("invalid email or password");
-      toast({
-        title: isInvalidCredentials ? "Email not registered" : "Login failed",
-        description: isInvalidCredentials 
-          ? "This email is not registered yet. Please complete the signup process first."
-          : error.message,
-        variant: "destructive",
-      });
+      const msg = String(error?.message || "").toLowerCase();
+      const isInvalidCredentials =
+        msg.includes("invalid login credentials") || msg.includes("invalid email or password");
+      if (isInvalidCredentials) {
+        toast({
+          title: "Email not registered",
+          description: "This email is not registered yet. Please complete the signup process first.",
+          variant: "destructive",
+        });
+      } else {
+        const f = friendlyAuthError(error);
+        toast({ title: f.title, description: f.description, variant: "destructive" });
+      }
       return;
     }
 

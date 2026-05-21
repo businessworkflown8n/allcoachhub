@@ -12,17 +12,11 @@ import { Button } from "@/components/ui/button";
 type FilterKey = "all" | "published" | "drafts" | "pending";
 type ViewMode = "grid" | "list";
 
-type FilterKey = "all" | "published" | "drafts" | "pending";
-type ViewMode = "grid" | "list";
-
 const CoachCourses = () => {
   const { user } = useAuth();
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [enrollCounts, setEnrollCounts] = useState<Record<string, number>>({});
-  const [showStudents, setShowStudents] = useState<string | null>(null);
-  const [students, setStudents] = useState<EnrolledStudent[]>([]);
-  const [studentsCourseTitle, setStudentsCourseTitle] = useState("");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [view, setView] = useState<ViewMode>("grid");

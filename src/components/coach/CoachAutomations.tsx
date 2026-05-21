@@ -76,14 +76,25 @@ export default function CoachAutomations() {
   const toggle = async (a: Auto) => { await supabase.from("coach_automations").update({ is_active: !a.is_active }).eq("id", a.id); load(); };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-xl font-bold text-foreground flex items-center gap-2"><Zap className="h-5 w-5" /> Automation Center</h2>
-          <p className="text-sm text-muted-foreground">Auto-send reminders, follow-ups, and reflection prompts</p>
+    <div className="space-y-8">
+      {/* Premium Header */}
+      <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-emerald-500/5 p-6 sm:p-8">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+        <div className="relative flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-start gap-4">
+            <div className="rounded-2xl bg-primary/20 p-3"><Zap className="h-6 w-6 text-primary" /></div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-primary/80 font-semibold mb-2">Automation</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground font-display tracking-tight">Automation Center</h2>
+              <p className="text-sm text-muted-foreground mt-2 max-w-xl">Auto-send reminders, follow-ups, and reflection prompts on a schedule.</p>
+            </div>
+          </div>
+          <Button onClick={openNew} className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_8px_30px_-10px_hsl(var(--primary)/0.6)] hover:shadow-[0_12px_40px_-10px_hsl(var(--primary)/0.8)] transition-all hover:-translate-y-0.5">
+            <Plus className="h-4 w-4 mr-1" /> New Automation
+          </Button>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> New Automation</Button>
       </div>
+
 
       {loading ? <p className="text-muted-foreground">Loading...</p> : autos.length === 0 ? (
         <div className="text-center py-12 border border-dashed rounded-xl"><Zap className="h-10 w-10 mx-auto text-muted-foreground mb-2" /><p className="text-muted-foreground">No automations yet.</p></div>

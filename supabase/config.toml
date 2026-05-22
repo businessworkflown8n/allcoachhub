@@ -61,3 +61,9 @@ project_id = "iipxwwrzkdkestikxcpg"
     verify_jwt = false
   [functions.welcome-learner-email]
     verify_jwt = false
+  [functions.create-checkout]
+    verify_jwt = false
+  [functions.payments-webhook]
+    verify_jwt = false
+  [functions.create-portal-session]
+    verify_jwt = false

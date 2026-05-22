@@ -5808,12 +5808,15 @@ export type Database = {
           coach_id: string
           created_at: string
           currency: string
-          enrollment_id: string
+          enrollment_id: string | null
           id: string
+          kind: string
           payment_provider: string
           payment_provider_id: string | null
           platform_commission: number
           status: string
+          stripe_session_id: string | null
+          stripe_subscription_id: string | null
           user_id: string
         }
         Insert: {
@@ -5822,12 +5825,15 @@ export type Database = {
           coach_id: string
           created_at?: string
           currency?: string
-          enrollment_id: string
+          enrollment_id?: string | null
           id?: string
+          kind?: string
           payment_provider?: string
           payment_provider_id?: string | null
           platform_commission?: number
           status?: string
+          stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
           user_id: string
         }
         Update: {
@@ -5836,12 +5842,15 @@ export type Database = {
           coach_id?: string
           created_at?: string
           currency?: string
-          enrollment_id?: string
+          enrollment_id?: string | null
           id?: string
+          kind?: string
           payment_provider?: string
           payment_provider_id?: string | null
           platform_commission?: number
           status?: string
+          stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -7095,6 +7104,54 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          environment: string
+          id: string
+          price_id: string
+          product_id: string
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id: string
+          product_id: string
+          status?: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id?: string
+          product_id?: string
+          status?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscription_plans: {
         Row: {
           billing_interval: string
@@ -7106,8 +7163,10 @@ export type Database = {
           is_active: boolean
           name: string
           price: number
+          price_usd: number | null
           slug: string
           sort_order: number
+          stripe_product_slug: string | null
           updated_at: string
         }
         Insert: {
@@ -7120,8 +7179,10 @@ export type Database = {
           is_active?: boolean
           name: string
           price?: number
+          price_usd?: number | null
           slug: string
           sort_order?: number
+          stripe_product_slug?: string | null
           updated_at?: string
         }
         Update: {
@@ -7134,8 +7195,10 @@ export type Database = {
           is_active?: boolean
           name?: string
           price?: number
+          price_usd?: number | null
           slug?: string
           sort_order?: number
+          stripe_product_slug?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -8429,6 +8492,10 @@ export type Database = {
       get_effective_feature: {
         Args: { _coach_id: string; _feature_key: string; _plan?: string }
         Returns: Json
+      }
+      has_active_subscription: {
+        Args: { check_env?: string; user_uuid: string }
+        Returns: boolean
       }
       has_role: {
         Args: {

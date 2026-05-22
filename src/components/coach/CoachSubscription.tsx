@@ -1,20 +1,24 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, Sparkles, Zap, ShieldCheck, ArrowUpRight } from "lucide-react";
+import { CheckCircle2, Sparkles, Zap, ShieldCheck, ArrowUpRight, AlertTriangle, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCoachPlan } from "@/hooks/useCoachPlan";
 import { Button } from "@/components/ui/button";
-import { openUpgradeModal } from "@/lib/upgradeModal";
+import { useStripeCheckout } from "@/hooks/useStripeCheckout";
+import { getStripeEnvironment } from "@/lib/stripe";
 import { format } from "date-fns";
+import { toast } from "@/hooks/use-toast";
 
 interface Plan {
   id: string;
   name: string;
   slug: string;
   price: number;
+  price_usd: number | null;
   currency: string;
   highlight: boolean;
   sort_order: number;
+  stripe_product_slug: string | null;
 }
 
 interface Sub {
@@ -23,6 +27,12 @@ interface Sub {
   ends_at: string | null;
   feature_bundles: { name: string; slug: string; feature_flags: Record<string, boolean> } | null;
   subscription_plans: { name: string; slug: string; price: number; currency: string } | null;
+}
+
+interface StripeSub {
+  status: string;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
 }
 
 const FEATURE_LABELS: Record<string, string> = {
@@ -44,8 +54,12 @@ const CoachSubscription = () => {
   const { user } = useAuth();
   const { plan } = useCoachPlan();
   const [sub, setSub] = useState<Sub | null>(null);
+  const [stripeSub, setStripeSub] = useState<StripeSub | null>(null);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [tab, setTab] = useState<"plan" | "billing">("plan");
+  const [cycle, setCycle] = useState<"monthly" | "yearly">("monthly");
+  const [portalLoading, setPortalLoading] = useState(false);
+  const { openCheckout, checkoutDialog } = useStripeCheckout();
 
   useEffect(() => {
     if (!user) return;
@@ -58,9 +72,20 @@ const CoachSubscription = () => {
         .eq("coach_id", user.id)
         .maybeSingle();
       setSub(data as any);
+
+      const { data: ssub } = await supabase
+        .from("stripe_subscriptions")
+        .select("status, current_period_end, cancel_at_period_end")
+        .eq("user_id", user.id)
+        .eq("environment", getStripeEnvironment())
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setStripeSub(ssub as any);
+
       const { data: pdata } = await supabase
         .from("subscription_plans")
-        .select("id, name, slug, price, currency, highlight, sort_order")
+        .select("id, name, slug, price, price_usd, currency, highlight, sort_order, stripe_product_slug")
         .eq("is_active", true)
         .order("sort_order");
       setPlans((pdata as Plan[]) || []);
@@ -71,12 +96,75 @@ const CoachSubscription = () => {
   const unlocked = Object.entries(FEATURE_LABELS).filter(([k]) => flags[k]);
   const locked = Object.entries(FEATURE_LABELS).filter(([k]) => !flags[k]);
 
+  const openPlanCheckout = (planSlug: string, planName: string) => {
+    const priceId = `${planSlug}_${cycle}`;
+    openCheckout(
+      {
+        mode: "subscription",
+        priceId,
+        userId: user?.id,
+        customerEmail: user?.email ?? undefined,
+      },
+      `Subscribe to ${planName} (${cycle})`
+    );
+  };
+
+  const openPortal = async () => {
+    setPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-portal-session", {
+        body: {
+          environment: getStripeEnvironment(),
+          returnUrl: `${window.location.origin}/coach/subscription`,
+        },
+      });
+      if (error || !data?.url) throw new Error(error?.message || "No portal URL returned");
+      window.open(data.url, "_blank", "noopener,noreferrer");
+    } catch (e: any) {
+      toast({
+        title: "Couldn't open billing portal",
+        description: e?.message?.includes("No subscription")
+          ? "You don't have an active Stripe subscription yet."
+          : e?.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {checkoutDialog}
+
       <div className="flex flex-col gap-2">
         <h2 className="font-display text-2xl font-bold text-foreground">My Subscription</h2>
         <p className="text-sm text-muted-foreground">Manage your plan, view usage, and unlock premium capabilities.</p>
       </div>
+
+      {/* Status banners */}
+      {stripeSub?.status === "past_due" && (
+        <div className="flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-4">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-foreground">Payment failed</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">We couldn't charge your card for the latest renewal. Update your payment method to keep access.</p>
+          </div>
+          <Button size="sm" variant="outline" onClick={openPortal} disabled={portalLoading}>Update card</Button>
+        </div>
+      )}
+      {stripeSub?.cancel_at_period_end && stripeSub.current_period_end && (
+        <div className="flex items-start gap-3 rounded-xl border border-orange-500/40 bg-orange-500/10 p-4">
+          <Clock className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-foreground">Subscription canceled</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Your access ends on {format(new Date(stripeSub.current_period_end), "MMM d, yyyy")}. Reactivate any time from billing.
+            </p>
+          </div>
+          <Button size="sm" variant="outline" onClick={openPortal} disabled={portalLoading}>Reactivate</Button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="inline-flex rounded-full border border-border bg-card/40 p-1 text-xs">
@@ -109,12 +197,26 @@ const CoachSubscription = () => {
                   </p>
                 )}
               </div>
-              <Button
-                onClick={() => openUpgradeModal({ reason: "Explore upgrade options", recommended: plan === "free" ? "pro" : "premium" })}
-                className="gap-1.5"
-              >
-                <Sparkles className="h-3.5 w-3.5" /> Upgrade
+              <Button onClick={() => setTab("billing")} className="gap-1.5">
+                <Sparkles className="h-3.5 w-3.5" /> Manage
               </Button>
+            </div>
+          </div>
+
+          {/* Billing cycle toggle */}
+          <div className="flex justify-center">
+            <div className="inline-flex rounded-full border border-border bg-card/40 p-1 text-xs">
+              {(["monthly", "yearly"] as const).map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setCycle(c)}
+                  className={`rounded-full px-4 py-1.5 font-medium capitalize transition-colors ${
+                    cycle === c ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {c} {c === "yearly" && <span className="ml-1 text-[10px] opacity-80">−20%</span>}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -140,14 +242,13 @@ const CoachSubscription = () => {
               <p className="mb-3 font-display text-sm font-semibold text-foreground">Unlock with an upgrade</p>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {locked.map(([k, label]) => (
-                  <button
+                  <div
                     key={k}
-                    onClick={() => openUpgradeModal({ reason: `${label} is locked`, featureKey: k, featureName: label, recommended: "pro" })}
-                    className="group flex items-center justify-between gap-2 rounded-xl border border-border/60 bg-card/30 p-3 text-left text-sm transition-colors hover:border-primary/30 hover:bg-card/60"
+                    className="flex items-center justify-between gap-2 rounded-xl border border-border/60 bg-card/30 p-3 text-sm"
                   >
                     <span className="text-muted-foreground">{label}</span>
-                    <ArrowUpRight className="h-3.5 w-3.5 text-primary opacity-0 transition-opacity group-hover:opacity-100" />
-                  </button>
+                    <ArrowUpRight className="h-3.5 w-3.5 text-primary opacity-60" />
+                  </div>
                 ))}
               </div>
             </div>
@@ -155,10 +256,12 @@ const CoachSubscription = () => {
 
           {/* Plan comparison */}
           <div>
-            <p className="mb-3 font-display text-sm font-semibold text-foreground">Available plans</p>
+            <p className="mb-3 font-display text-sm font-semibold text-foreground">Available plans (Stripe USD)</p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {plans.filter((p) => p.slug !== "free").map((p) => {
+              {plans.filter((p) => p.slug !== "free" && p.stripe_product_slug).map((p) => {
                 const isCurrent = p.slug === sub?.subscription_plans?.slug;
+                const monthly = Number(p.price_usd || 0);
+                const display = cycle === "yearly" ? Math.round(monthly * 0.8) : monthly;
                 return (
                   <div
                     key={p.id}
@@ -168,8 +271,8 @@ const CoachSubscription = () => {
                   >
                     <p className="font-display text-base font-semibold text-foreground">{p.name}</p>
                     <p className="mt-2 font-display text-xl font-bold text-foreground">
-                      ₹{Number(p.price).toLocaleString("en-IN")}
-                      <span className="text-xs font-normal text-muted-foreground">/mo</span>
+                      ${display}
+                      <span className="text-xs font-normal text-muted-foreground">/{cycle === "yearly" ? "mo billed yearly" : "mo"}</span>
                     </p>
                     {isCurrent ? (
                       <Button variant="outline" disabled size="sm" className="mt-3">Current</Button>
@@ -178,9 +281,9 @@ const CoachSubscription = () => {
                         size="sm"
                         variant={p.highlight ? "default" : "outline"}
                         className="mt-3 gap-1.5"
-                        onClick={() => openUpgradeModal({ reason: `Switch to ${p.name}`, recommended: p.slug as any })}
+                        onClick={() => openPlanCheckout(p.slug, p.name)}
                       >
-                        <Zap className="h-3 w-3" /> Choose
+                        <Zap className="h-3 w-3" /> Subscribe
                       </Button>
                     )}
                   </div>
@@ -198,20 +301,30 @@ const CoachSubscription = () => {
             <div className="flex-1">
               <p className="font-display text-sm font-semibold text-foreground">Billing & invoices</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Subscriptions are managed by our team. Reach out to billing@aicoachportal.com for invoices, upgrades or refunds.
+                Update your card, download invoices, switch plans, or cancel any time from the Stripe billing portal.
               </p>
               <div className="mt-4 grid gap-2 text-xs sm:grid-cols-2">
                 <div className="rounded-lg border border-border/60 bg-background/40 p-3">
                   <p className="text-muted-foreground">Status</p>
-                  <p className="mt-0.5 font-medium text-foreground capitalize">{sub?.status || "free"}</p>
+                  <p className="mt-0.5 font-medium text-foreground capitalize">{stripeSub?.status || sub?.status || "free"}</p>
                 </div>
                 <div className="rounded-lg border border-border/60 bg-background/40 p-3">
                   <p className="text-muted-foreground">Next renewal</p>
                   <p className="mt-0.5 font-medium text-foreground">
-                    {sub?.ends_at ? format(new Date(sub.ends_at), "MMM d, yyyy") : "—"}
+                    {stripeSub?.current_period_end
+                      ? format(new Date(stripeSub.current_period_end), "MMM d, yyyy")
+                      : sub?.ends_at
+                      ? format(new Date(sub.ends_at), "MMM d, yyyy")
+                      : "—"}
                   </p>
                 </div>
               </div>
+              <Button onClick={openPortal} disabled={portalLoading} className="mt-4 gap-1.5">
+                {portalLoading ? "Opening…" : "Manage billing"}
+              </Button>
+              <p className="mt-3 text-[11px] text-muted-foreground/70">
+                Opens Stripe's secure billing portal in a new tab.
+              </p>
             </div>
           </div>
         </div>

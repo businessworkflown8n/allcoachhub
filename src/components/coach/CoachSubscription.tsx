@@ -97,7 +97,7 @@ const CoachSubscription = () => {
   const locked = Object.entries(FEATURE_LABELS).filter(([k]) => !flags[k]);
 
   const openPlanCheckout = (planSlug: string, planName: string) => {
-    const priceId = `${planSlug}_${cycle}`;
+    const priceId = `${planSlug}_${cycle}_inr`;
     openCheckout(
       {
         mode: "subscription",

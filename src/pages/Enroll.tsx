@@ -27,6 +27,8 @@ const Enroll = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [currency, setCurrency] = useState<SupportedCurrency>("USD");
+  const { openCheckout, checkoutDialog } = useStripeCheckout();
 
   const [form, setForm] = useState({
     full_name: "",

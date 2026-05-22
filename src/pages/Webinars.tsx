@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
+import { useSEO } from "@/hooks/useSEO";
 
 interface WebinarWithCoach {
   id: string;
@@ -31,6 +32,11 @@ interface WebinarWithCoach {
 }
 
 const Webinars = () => {
+  useSEO({
+    title: "Live AI Webinars | AI Coach Portal",
+    description: "Join upcoming live AI webinars from top coaches. Free and paid sessions on prompt engineering, AI automation, and the latest AI trends.",
+    canonical: "https://www.aicoachportal.com/webinars",
+  });
   const { user } = useAuth();
   const navigate = useNavigate();
   const [webinars, setWebinars] = useState<WebinarWithCoach[]>([]);

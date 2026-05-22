@@ -5,6 +5,7 @@ import { Clock, Search, GraduationCap, BookOpen } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useSEO } from "@/hooks/useSEO";
 
 const categories = [
   "All",
@@ -36,6 +37,11 @@ const SORTS = [
 ];
 
 const Courses = () => {
+  useSEO({
+    title: "AI Courses | AI Coach Portal",
+    description: "Browse expert-led AI courses in prompt engineering, AI agents, automation, and more. Find the right course to level up your AI skills.",
+    canonical: "https://www.aicoachportal.com/courses",
+  });
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get("category") || "All";
   const activeLevel = searchParams.get("level") || "All";

@@ -50,7 +50,7 @@ const ITEMS_PER_PAGE = 12;
 
 const BrowseCoaches = () => {
   useSEO({
-    title: "Browse Coaches – Find Your Perfect AI Coach | AI Coach Portal",
+    title: "Browse AI Coaches | AI Coach Portal",
     description: "Discover top AI coaches filtered by category, skills, price & rating. Book sessions with verified experts in prompt engineering, AI automation, and more.",
     canonical: "https://www.aicoachportal.com/browse-coaches",
   });

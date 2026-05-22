@@ -97,7 +97,7 @@ const CoachSubscription = () => {
   const locked = Object.entries(FEATURE_LABELS).filter(([k]) => !flags[k]);
 
   const openPlanCheckout = (planSlug: string, planName: string) => {
-    const priceId = `${planSlug}_${cycle}`;
+    const priceId = `${planSlug}_${cycle}_inr`;
     openCheckout(
       {
         mode: "subscription",
@@ -256,11 +256,11 @@ const CoachSubscription = () => {
 
           {/* Plan comparison */}
           <div>
-            <p className="mb-3 font-display text-sm font-semibold text-foreground">Available plans (Stripe USD)</p>
+            <p className="mb-3 font-display text-sm font-semibold text-foreground">Available plans</p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {plans.filter((p) => p.slug !== "free" && p.stripe_product_slug).map((p) => {
                 const isCurrent = p.slug === sub?.subscription_plans?.slug;
-                const monthly = Number(p.price_usd || 0);
+                const monthly = Number(p.price || 0);
                 const display = cycle === "yearly" ? Math.round(monthly * 0.8) : monthly;
                 return (
                   <div
@@ -271,7 +271,7 @@ const CoachSubscription = () => {
                   >
                     <p className="font-display text-base font-semibold text-foreground">{p.name}</p>
                     <p className="mt-2 font-display text-xl font-bold text-foreground">
-                      ${display}
+                      ₹{display.toLocaleString("en-IN")}
                       <span className="text-xs font-normal text-muted-foreground">/{cycle === "yearly" ? "mo billed yearly" : "mo"}</span>
                     </p>
                     {isCurrent ? (

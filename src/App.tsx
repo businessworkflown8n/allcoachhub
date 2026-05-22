@@ -65,6 +65,7 @@ const ChatbotWidget = lazy(() => import("./components/ChatbotWidget"));
 const WebsitePopup = lazy(() => import("./components/WebsitePopup"));
 const FloatingPromptButton = lazy(() => import("./components/prompt/FloatingPromptButton"));
 const AnalyticsTracker = lazy(() => import("./components/AnalyticsTracker"));
+const PlanUpgradeModal = lazy(() => import("./components/plan/PlanUpgradeModal"));
 
 const queryClient = new QueryClient();
 
@@ -225,6 +226,9 @@ const App = () => (
           </Suspense>
           <Suspense fallback={null}>
             <WebsitePopup />
+          </Suspense>
+          <Suspense fallback={null}>
+            <PlanUpgradeModal />
           </Suspense>
         </BrowserRouter>
       </AuthProvider>

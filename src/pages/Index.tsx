@@ -117,6 +117,7 @@ const Index = () => {
         </Suspense>
       </main>
       <Footer />
+      <MobileStickyCTA />
     </div>
   );
 };

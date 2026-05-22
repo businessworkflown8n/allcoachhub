@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import Footer from "@/components/Footer";
+import MobileStickyCTA from "@/components/MobileStickyCTA";
 import { useSEO } from "@/hooks/useSEO";
 
 // Lazy load below-fold sections
@@ -116,6 +117,7 @@ const Index = () => {
         </Suspense>
       </main>
       <Footer />
+      <MobileStickyCTA />
     </div>
   );
 };

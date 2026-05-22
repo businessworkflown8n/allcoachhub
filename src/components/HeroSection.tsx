@@ -131,21 +131,21 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background" />
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 text-center">
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-1.5">
-          <span className="text-primary">✦</span>
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-secondary/80 backdrop-blur px-4 py-1.5 animate-fade-in-up">
+          <span className="text-primary ambient-glow">✦</span>
           <span className="text-sm text-muted-foreground">{t("hero.badge")}</span>
         </div>
 
-        <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl md:text-7xl">
+        <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl md:text-7xl animate-fade-in-up-delay-1">
           {t("hero.titleStart")}{" "}
           <span className="text-gradient-lime">{t("hero.titleHighlight")}</span> {t("hero.titleEnd")}
         </h1>
 
-        <p className="mx-auto mb-8 max-w-2xl text-sm text-muted-foreground sm:text-base md:text-lg">
+        <p className="mx-auto mb-8 max-w-2xl text-sm text-muted-foreground sm:text-base md:text-lg animate-fade-in-up-delay-2">
           {t("hero.subtitle")}
         </p>
 
-        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row animate-fade-in-up-delay-3">
           <button onClick={() => navigate("/auth?mode=signup")} className="cta-3d primary lg">
             {t("hero.ctaPrimary")} <ArrowRight className="h-4 w-4" />
           </button>

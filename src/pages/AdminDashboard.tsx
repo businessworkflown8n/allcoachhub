@@ -52,6 +52,7 @@ import AdminKnowledgeHub from "@/components/admin/AdminKnowledgeHub";
 import AdminFeatureControlSystem from "@/components/admin/AdminFeatureControlSystem";
 import AdminDigitalProductsControl from "@/components/admin/AdminDigitalProductsControl";
 import AdminExternalLinkControl from "@/components/admin/AdminExternalLinkControl";
+import AdminCurriculumControl from "@/components/admin/AdminCurriculumControl";
 
 const navItems = [
   { label: "Analytics", path: "/admin", icon: <BarChart3 className="h-4 w-4" /> },
@@ -104,6 +105,7 @@ const navItems = [
   { label: "Settings", path: "/admin/settings", icon: <Settings className="h-4 w-4" /> },
   { label: "Locale & Currency", path: "/admin/locale", icon: <Globe className="h-4 w-4" /> },
   { label: "External Link Control", path: "/admin/external-links", icon: <LinkIcon className="h-4 w-4" /> },
+  { label: "Curriculum Control", path: "/admin/curriculum-control", icon: <ShieldCheck className="h-4 w-4" /> },
 ];
 
 const AdminDashboard = () => {
@@ -168,6 +170,7 @@ const AdminDashboard = () => {
         <Route path="settings" element={<AdminSettings />} />
         <Route path="locale" element={<AdminLocaleSettings />} />
         <Route path="external-links" element={<AdminExternalLinkControl />} />
+        <Route path="curriculum-control" element={<AdminCurriculumControl />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     </DashboardLayout>

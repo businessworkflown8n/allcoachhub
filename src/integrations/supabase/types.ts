@@ -2859,9 +2859,13 @@ export type Database = {
           id: string
           is_free_preview: boolean
           is_published: boolean
+          link_clicks_count: number
+          link_type: string | null
           live_session_starts_at: string | null
           live_session_url: string | null
           module_id: string
+          open_in_new_tab: boolean
+          preview_enabled: boolean
           provider: string | null
           sort_order: number
           thumbnail_url: string | null
@@ -2878,9 +2882,13 @@ export type Database = {
           id?: string
           is_free_preview?: boolean
           is_published?: boolean
+          link_clicks_count?: number
+          link_type?: string | null
           live_session_starts_at?: string | null
           live_session_url?: string | null
           module_id: string
+          open_in_new_tab?: boolean
+          preview_enabled?: boolean
           provider?: string | null
           sort_order?: number
           thumbnail_url?: string | null
@@ -2897,9 +2905,13 @@ export type Database = {
           id?: string
           is_free_preview?: boolean
           is_published?: boolean
+          link_clicks_count?: number
+          link_type?: string | null
           live_session_starts_at?: string | null
           live_session_url?: string | null
           module_id?: string
+          open_in_new_tab?: boolean
+          preview_enabled?: boolean
           provider?: string | null
           sort_order?: number
           thumbnail_url?: string | null
@@ -3072,6 +3084,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      curriculum_link_settings: {
+        Row: {
+          allow_downloadable: boolean
+          allow_embed: boolean
+          allow_open_new_tab: boolean
+          allow_preview: boolean
+          allowed_link_types: string[]
+          created_at: string
+          domain_whitelist: string[]
+          id: string
+          max_links_per_lesson: number
+          require_admin_approval: boolean
+          updated_at: string
+          updated_by: string | null
+          uploads_disabled: boolean
+        }
+        Insert: {
+          allow_downloadable?: boolean
+          allow_embed?: boolean
+          allow_open_new_tab?: boolean
+          allow_preview?: boolean
+          allowed_link_types?: string[]
+          created_at?: string
+          domain_whitelist?: string[]
+          id?: string
+          max_links_per_lesson?: number
+          require_admin_approval?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          uploads_disabled?: boolean
+        }
+        Update: {
+          allow_downloadable?: boolean
+          allow_embed?: boolean
+          allow_open_new_tab?: boolean
+          allow_preview?: boolean
+          allowed_link_types?: string[]
+          created_at?: string
+          domain_whitelist?: string[]
+          id?: string
+          max_links_per_lesson?: number
+          require_admin_approval?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          uploads_disabled?: boolean
+        }
+        Relationships: []
       }
       daily_zip_level_scores: {
         Row: {
@@ -5588,6 +5648,41 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "lesson_discussions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_link_clicks: {
+        Row: {
+          id: string
+          lesson_id: string
+          link_type: string | null
+          occurred_at: string
+          url: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          lesson_id: string
+          link_type?: string | null
+          occurred_at?: string
+          url?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          lesson_id?: string
+          link_type?: string | null
+          occurred_at?: string
+          url?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_link_clicks_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "course_lessons"
             referencedColumns: ["id"]
           },
         ]

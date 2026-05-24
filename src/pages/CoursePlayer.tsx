@@ -7,14 +7,16 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { CheckCircle2, Lock, PlayCircle, FileText, BookOpen, Users, ClipboardList, Award, ArrowLeft } from "lucide-react";
+import { CheckCircle2, Lock, PlayCircle, FileText, BookOpen, Users, ClipboardList, Award, ArrowLeft, ExternalLink, Link2 } from "lucide-react";
 import QuizRunner from "@/components/learner/lms/QuizRunner";
 import AssignmentPanel from "@/components/learner/lms/AssignmentPanel";
+import LessonSidePanel from "@/components/learner/lms/LessonSidePanel";
+import { detectProvider, buildEmbedUrl, PROVIDER_LABELS } from "@/lib/lessonProviders";
 
 type Lesson = any;
 type Module = { id: string; title: string; sort_order: number; lessons: Lesson[] };
 
-const TYPE_ICON: Record<string, any> = { video: PlayCircle, pdf: FileText, text: BookOpen, quiz: ClipboardList, assignment: ClipboardList, live: Users };
+const TYPE_ICON: Record<string, any> = { video: PlayCircle, pdf: FileText, text: BookOpen, quiz: ClipboardList, assignment: ClipboardList, live: Users, external_link: Link2 };
 
 function isYouTube(url: string) { return /youtube\.com|youtu\.be/.test(url); }
 function isVimeo(url: string) { return /vimeo\.com/.test(url); }

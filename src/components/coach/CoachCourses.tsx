@@ -460,6 +460,12 @@ const CoachCourses = () => {
           </div>
         </div>
       )}
+      <CourseAccessManager
+        open={!!accessCourse}
+        onOpenChange={(v) => !v && setAccessCourse(null)}
+        course={accessCourse}
+        onUpdated={fetchCourses}
+      />
     </div>
   );
 };

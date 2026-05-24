@@ -130,6 +130,12 @@ const LearnerCourses = () => {
         )}
       </header>
 
+      {/* GAMIFICATION */}
+      <section className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2"><GamificationCard /></div>
+        <div className="lg:col-span-1"><Leaderboard /></div>
+      </section>
+
       {/* COACHES */}
       <AssignedCoachesRail coaches={coaches} />
 

@@ -9,13 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, Link2 } from "lucide-react";
+import { detectProvider, PROVIDER_LABELS } from "@/lib/lessonProviders";
 
 export type LessonRow = {
   id?: string;
   module_id: string;
   title: string;
-  content_type: "video" | "video_url" | "pdf" | "text" | "quiz" | "assignment" | "live";
+  content_type: "video" | "video_url" | "pdf" | "text" | "quiz" | "assignment" | "live" | "link";
   content_url?: string | null;
   content_text?: string | null;
   duration_minutes?: number | null;
@@ -35,9 +36,10 @@ interface Props {
 }
 
 const TYPES = [
+  { value: "link", label: "🔗 External Link (YouTube / Drive / Notion / PDF / …)" },
   { value: "video", label: "Video (Upload)" },
-  { value: "video_url", label: "Video (YouTube/Vimeo URL)" },
-  { value: "pdf", label: "PDF Document" },
+  { value: "video_url", label: "Video (YouTube / Vimeo URL)" },
+  { value: "pdf", label: "PDF Document (Upload)" },
   { value: "text", label: "Text / Rich Content" },
   { value: "quiz", label: "Quiz" },
   { value: "assignment", label: "Assignment" },
@@ -83,6 +85,8 @@ const LessonEditor = ({ open, onOpenChange, lesson, onSaved }: Props) => {
       return;
     }
     setSaving(true);
+    const isLink = form.content_type === "link";
+    const detectedProvider = isLink && form.content_url ? detectProvider(form.content_url) : null;
     const payload: any = {
       module_id: form.module_id,
       title: form.title,
@@ -95,6 +99,7 @@ const LessonEditor = ({ open, onOpenChange, lesson, onSaved }: Props) => {
       is_published: form.is_published !== false,
       live_session_url: form.live_session_url || null,
       live_session_starts_at: form.live_session_starts_at || null,
+      provider: detectedProvider,
     };
     const res = form.id
       ? await supabase.from("course_lessons").update(payload).eq("id", form.id)
@@ -129,6 +134,27 @@ const LessonEditor = ({ open, onOpenChange, lesson, onSaved }: Props) => {
               </SelectContent>
             </Select>
           </div>
+
+
+          {form.content_type === "link" && (
+            <div className="space-y-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
+              <Label className="flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" /> External URL</Label>
+              <Input
+                value={form.content_url || ""}
+                onChange={(e) => setForm({ ...form, content_url: e.target.value })}
+                placeholder="Paste any YouTube, Vimeo, Loom, Google Drive, Notion, Canva, PDF, audio, or external URL"
+              />
+              {form.content_url && (
+                <p className="text-xs text-muted-foreground">
+                  Detected: <span className="font-medium text-foreground">{PROVIDER_LABELS[detectProvider(form.content_url)]}</span>
+                  {" "}— learners will see an inline preview when supported, otherwise an open-link button.
+                </p>
+              )}
+              <p className="text-[11px] text-muted-foreground">
+                Supports: YouTube · Vimeo · Loom · Google Drive · Docs · Sheets · Slides · OneDrive · Dropbox · Notion · Canva · PDF · Audio · ZIP · any website.
+              </p>
+            </div>
+          )}
 
           {form.content_type === "video" && (
             <div>

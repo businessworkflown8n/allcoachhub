@@ -219,6 +219,27 @@ const CoursePlayer = () => {
               </div>
             )}
 
+            {/* External Link lesson */}
+            {active.content_type === "external_link" && active.content_url && (() => {
+              const provider = (active.provider as any) || detectProvider(active.content_url);
+              const embed = buildEmbedUrl(active.content_url, provider);
+              const canEmbed = ["youtube", "vimeo", "loom", "google_drive", "google_docs", "google_sheets", "google_slides", "canva", "pdf"].includes(provider);
+              return (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Link2 className="h-3 w-3" /> Source: <span className="text-foreground font-medium">{PROVIDER_LABELS[provider as keyof typeof PROVIDER_LABELS] || "External"}</span>
+                  </div>
+                  {canEmbed && embed ? (
+                    <iframe src={embed} className={provider === "pdf" ? "w-full h-[70vh] rounded-xl border border-border" : "aspect-video w-full rounded-xl border border-border"} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen title={active.title} />
+                  ) : (
+                    <a href={active.content_url} target="_blank" rel="noreferrer">
+                      <Button><ExternalLink className="h-4 w-4 mr-1" /> Open {PROVIDER_LABELS[provider as keyof typeof PROVIDER_LABELS] || "Link"}</Button>
+                    </a>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* Live */}
             {active.content_type === "live" && (
               <div className="rounded-xl border border-border bg-card p-6 space-y-3">

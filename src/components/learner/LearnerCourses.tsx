@@ -23,7 +23,7 @@ const LearnerCourses = () => {
     if (!user) return;
     (async () => {
       const [{ data: enrs }, { data: prof }, { count: cCount }] = await Promise.all([
-        supabase.from("enrollments").select("*, last_accessed_at, last_accessed_lesson_id, courses(id, title, slug, category, duration_hours, thumbnail_url, coach_id)").eq("learner_id", user.id),
+        supabase.from("enrollments").select("*, courses(id, title, slug, category, duration_hours, thumbnail_url, coach_id)").eq("learner_id", user.id),
         supabase.from("profiles").select("full_name, avatar_url").eq("user_id", user.id).maybeSingle(),
         supabase.from("issued_certificates").select("id", { count: "exact", head: true }).eq("user_id", user.id),
       ]);

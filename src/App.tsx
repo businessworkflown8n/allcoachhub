@@ -25,6 +25,7 @@ const AdminOTPLogin = lazy(() => import("./pages/AdminOTPLogin"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const CoursePlayer = lazy(() => import("./pages/CoursePlayer"));
 const Enroll = lazy(() => import("./pages/Enroll"));
+const RedeemInvite = lazy(() => import("./pages/RedeemInvite"));
 const LearnerDashboard = lazy(() => import("./pages/LearnerDashboard"));
 const CoachDashboard = lazy(() => import("./pages/CoachDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -202,6 +203,7 @@ const App = () => (
                 <Suspense fallback={<PageFallback />}><CoursePlayer /></Suspense>
               </ProtectedRoute>
             } />
+            <Route path="/invite/:token" element={<Suspense fallback={<PageFallback />}><RedeemInvite /></Suspense>} />
             <Route path="/learner/*" element={
               <ProtectedRoute allowedRole="learner">
                 <Suspense fallback={<PageFallback />}><LearnerDashboard /></Suspense>

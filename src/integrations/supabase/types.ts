@@ -2708,6 +2708,42 @@ export type Database = {
           },
         ]
       }
+      course_badges: {
+        Row: {
+          coach_id: string
+          course_id: string
+          created_at: string
+          criteria_type: string
+          criteria_value: number | null
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          coach_id: string
+          course_id: string
+          created_at?: string
+          criteria_type?: string
+          criteria_value?: number | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          coach_id?: string
+          course_id?: string
+          created_at?: string
+          criteria_type?: string
+          criteria_value?: number | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       course_cohorts: {
         Row: {
           course_id: string
@@ -5270,6 +5306,38 @@ export type Database = {
         }
         Relationships: []
       }
+      learner_course_badges: {
+        Row: {
+          awarded_at: string
+          badge_id: string
+          course_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          badge_id: string
+          course_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string
+          badge_id?: string
+          course_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_course_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "course_badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learner_notifications: {
         Row: {
           clicked_at: string | null
@@ -5319,6 +5387,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      learner_streaks: {
+        Row: {
+          current_streak: number
+          last_active_date: string | null
+          longest_streak: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number
+          last_active_date?: string | null
+          longest_streak?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_streak?: number
+          last_active_date?: string | null
+          longest_streak?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      learner_xp: {
+        Row: {
+          level: number
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          level?: number
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          level?: number
+          total_xp?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       lecture_media: {
         Row: {
@@ -8670,6 +8783,36 @@ export type Database = {
         }
         Relationships: []
       }
+      xp_events: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          id: string
+          points: number
+          source: string
+          source_id: string | null
+          user_id: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          points: number
+          source: string
+          source_id?: string | null
+          user_id: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          points?: number
+          source?: string
+          source_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       coach_profiles_public: {
@@ -8856,6 +8999,16 @@ export type Database = {
         Args: { _request_id: string; _reviewer_note?: string }
         Returns: Json
       }
+      award_xp: {
+        Args: {
+          _course_id?: string
+          _points: number
+          _source: string
+          _source_id?: string
+          _user_id: string
+        }
+        Returns: Json
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -8919,6 +9072,7 @@ export type Database = {
         Args: { _request_id: string; _reviewer_note?: string }
         Returns: Json
       }
+      update_learner_streak: { Args: { _user_id: string }; Returns: Json }
       user_has_course_access: {
         Args: { _course_id: string; _user_id: string }
         Returns: boolean

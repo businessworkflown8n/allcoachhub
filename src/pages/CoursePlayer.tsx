@@ -58,7 +58,9 @@ const CoursePlayer = () => {
       setModules(grouped);
       const { data: prog } = await supabase.from("lesson_progress").select("lesson_id").eq("learner_id", user.id).eq("course_id", courseId);
       setCompletedIds(new Set((prog || []).map((p: any) => p.lesson_id)));
-      const firstUnlocked = grouped.flatMap((m) => m.lessons).find((l: any) => isUnlocked(l, e));
+      const all = grouped.flatMap((m) => m.lessons);
+      const last = e?.last_accessed_lesson_id && all.find((l: any) => l.id === e.last_accessed_lesson_id && isUnlocked(l, e));
+      const firstUnlocked = last || all.find((l: any) => isUnlocked(l, e));
       setActiveId(firstUnlocked?.id || null);
       setLoading(false);
     })();

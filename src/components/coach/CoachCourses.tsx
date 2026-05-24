@@ -364,6 +364,7 @@ const CoachCourses = () => {
                     title="Manage access, cohorts & invites"
                   >
                     <ShieldCheck className="h-3 w-3" /> Access
+                  </button>
                   <button
                     onClick={() => togglePublish(c.id, c.is_published)}
                     className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground ${

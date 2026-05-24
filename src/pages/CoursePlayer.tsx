@@ -7,14 +7,16 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { CheckCircle2, Lock, PlayCircle, FileText, BookOpen, Users, ClipboardList, Award, ArrowLeft } from "lucide-react";
+import { CheckCircle2, Lock, PlayCircle, FileText, BookOpen, Users, ClipboardList, Award, ArrowLeft, ExternalLink, Link2 } from "lucide-react";
 import QuizRunner from "@/components/learner/lms/QuizRunner";
 import AssignmentPanel from "@/components/learner/lms/AssignmentPanel";
+import LessonSidePanel from "@/components/learner/lms/LessonSidePanel";
+import { detectProvider, buildEmbedUrl, PROVIDER_LABELS } from "@/lib/lessonProviders";
 
 type Lesson = any;
 type Module = { id: string; title: string; sort_order: number; lessons: Lesson[] };
 
-const TYPE_ICON: Record<string, any> = { video: PlayCircle, pdf: FileText, text: BookOpen, quiz: ClipboardList, assignment: ClipboardList, live: Users };
+const TYPE_ICON: Record<string, any> = { video: PlayCircle, pdf: FileText, text: BookOpen, quiz: ClipboardList, assignment: ClipboardList, live: Users, external_link: Link2 };
 
 function isYouTube(url: string) { return /youtube\.com|youtu\.be/.test(url); }
 function isVimeo(url: string) { return /vimeo\.com/.test(url); }
@@ -56,7 +58,9 @@ const CoursePlayer = () => {
       setModules(grouped);
       const { data: prog } = await supabase.from("lesson_progress").select("lesson_id").eq("learner_id", user.id).eq("course_id", courseId);
       setCompletedIds(new Set((prog || []).map((p: any) => p.lesson_id)));
-      const firstUnlocked = grouped.flatMap((m) => m.lessons).find((l: any) => isUnlocked(l, e));
+      const all = grouped.flatMap((m) => m.lessons);
+      const last = e?.last_accessed_lesson_id && all.find((l: any) => l.id === e.last_accessed_lesson_id && isUnlocked(l, e));
+      const firstUnlocked = last || all.find((l: any) => isUnlocked(l, e));
       setActiveId(firstUnlocked?.id || null);
       setLoading(false);
     })();
@@ -77,7 +81,14 @@ const CoursePlayer = () => {
     if (!activeId) { setActiveMedia([]); return; }
     supabase.from("lecture_media").select("*").eq("lesson_id", activeId).order("sort_order")
       .then(({ data }) => setActiveMedia(data || []));
-  }, [activeId]);
+    // Track last accessed lesson for Continue Learning
+    if (user && courseId && enrollment) {
+      supabase.from("enrollments")
+        .update({ last_accessed_lesson_id: activeId, last_accessed_at: new Date().toISOString() })
+        .eq("learner_id", user.id).eq("course_id", courseId)
+        .then(() => {});
+    }
+  }, [activeId, user, courseId, enrollment]);
 
   const markComplete = async () => {
     if (!user || !active || !courseId) return;
@@ -208,6 +219,27 @@ const CoursePlayer = () => {
               </div>
             )}
 
+            {/* External Link lesson */}
+            {active.content_type === "external_link" && active.content_url && (() => {
+              const provider = (active.provider as any) || detectProvider(active.content_url);
+              const embed = buildEmbedUrl(active.content_url, provider);
+              const canEmbed = ["youtube", "vimeo", "loom", "google_drive", "google_docs", "google_sheets", "google_slides", "canva", "pdf"].includes(provider);
+              return (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Link2 className="h-3 w-3" /> Source: <span className="text-foreground font-medium">{PROVIDER_LABELS[provider as keyof typeof PROVIDER_LABELS] || "External"}</span>
+                  </div>
+                  {canEmbed && embed ? (
+                    <iframe src={embed} className={provider === "pdf" ? "w-full h-[70vh] rounded-xl border border-border" : "aspect-video w-full rounded-xl border border-border"} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen title={active.title} />
+                  ) : (
+                    <a href={active.content_url} target="_blank" rel="noreferrer">
+                      <Button><ExternalLink className="h-4 w-4 mr-1" /> Open {PROVIDER_LABELS[provider as keyof typeof PROVIDER_LABELS] || "Link"}</Button>
+                    </a>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* Live */}
             {active.content_type === "live" && (
               <div className="rounded-xl border border-border bg-card p-6 space-y-3">
@@ -270,8 +302,17 @@ const CoursePlayer = () => {
           </div>
         )}
       </main>
+
+      {/* Side panel: notes / resources / discussion */}
+      {active && courseId && (
+        <div className="hidden lg:flex h-screen sticky top-0 overflow-hidden">
+          <LessonSidePanel courseId={courseId} lessonId={active.id} />
+        </div>
+      )}
     </div>
   );
 };
+
+
 
 export default CoursePlayer;

@@ -101,11 +101,14 @@ const CoursePlayer = () => {
     const next = new Set(completedIds); next.add(active.id); setCompletedIds(next);
     const { data: pct } = await supabase.rpc("recompute_course_progress", { _learner: user.id, _course: courseId });
     setEnrollment((e: any) => ({ ...e, progress_percent: pct }));
-    toast({ title: "Lesson complete ✓" });
+    // Award XP + update streak (fire-and-forget)
+    supabase.rpc("award_xp" as any, { _user_id: user.id, _points: 10, _source: "lesson_complete", _source_id: active.id, _course_id: courseId });
+    supabase.rpc("update_learner_streak" as any, { _user_id: user.id });
+    toast({ title: "Lesson complete ✓ +10 XP" });
     if (Number(pct) >= 100) {
-      // Trigger certificate generation
+      supabase.rpc("award_xp" as any, { _user_id: user.id, _points: 100, _source: "course_complete", _source_id: null, _course_id: courseId });
       supabase.functions.invoke("generate-certificate", { body: { course_id: courseId } }).then(({ data, error: cErr }) => {
-        if (!cErr && data?.pdf_url) toast({ title: "🎓 Certificate ready!", description: "View it from My Certificates." });
+        if (!cErr && data?.pdf_url) toast({ title: "🎓 Certificate ready! +100 XP", description: "View it from My Certificates." });
       });
     }
     // Auto-advance

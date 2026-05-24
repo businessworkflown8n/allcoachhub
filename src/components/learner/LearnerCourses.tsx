@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { BookOpen, Clock, PlayCircle, Search, Award, TrendingUp, CheckCircle2, Loader2, User as UserIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import AssignedCoachesRail from "./lms/AssignedCoachesRail";
+import GamificationCard from "./lms/GamificationCard";
+import Leaderboard from "./lms/Leaderboard";
 
 type Filter = "all" | "in_progress" | "completed" | "not_started" | "recent";
 

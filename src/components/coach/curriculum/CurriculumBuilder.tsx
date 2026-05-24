@@ -11,6 +11,9 @@ import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } 
 import { CSS } from "@dnd-kit/utilities";
 import LessonEditor, { LessonRow } from "./LessonEditor";
 import LessonMediaManager from "./LessonMediaManager";
+import CoachAssignments from "./CoachAssignments";
+import CoachQuizzes from "./CoachQuizzes";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Module = { id: string; title: string; sort_order: number; lessons: LessonRow[] };
 
@@ -173,40 +176,58 @@ const CurriculumBuilder = () => {
         <Button onClick={addModule}><Plus className="h-4 w-4 mr-1" /> Add Module</Button>
       </div>
 
-      {modules.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
-          <Zap className="h-10 w-10 mx-auto text-primary mb-3" />
-          <p className="font-semibold">No modules yet</p>
-          <p className="text-sm text-muted-foreground mb-4">Create your first module to start building curriculum.</p>
-          <Button onClick={addModule}><Plus className="h-4 w-4 mr-1" /> Add Module</Button>
-        </div>
-      ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleModuleDragEnd}>
-          <SortableContext items={modules.map((m) => m.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-3">
-              {modules.map((mod) => (
-                <SortableModule
-                  key={mod.id}
-                  mod={mod}
-                  expanded={expanded.has(mod.id)}
-                  onToggle={() => {
-                    const n = new Set(expanded);
-                    n.has(mod.id) ? n.delete(mod.id) : n.add(mod.id);
-                    setExpanded(n);
-                  }}
-                  onRename={(t: string) => renameModule(mod.id, t)}
-                  onDelete={() => deleteModule(mod.id)}
-                  onAddLesson={openAddLesson}
-                  onEditLesson={openEditLesson}
-                  onDeleteLesson={deleteLesson}
-                  onReorderLessons={handleLessonDragEnd}
-                  onLessonMedia={(l: LessonRow) => setMediaLesson(l)}
-                />
-              ))}
+      <Tabs defaultValue="curriculum">
+        <TabsList>
+          <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
+          <TabsTrigger value="assignments">Assignments</TabsTrigger>
+          <TabsTrigger value="quizzes">Quizzes</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="curriculum" className="mt-4">
+          {modules.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
+              <Zap className="h-10 w-10 mx-auto text-primary mb-3" />
+              <p className="font-semibold">No modules yet</p>
+              <p className="text-sm text-muted-foreground mb-4">Create your first module to start building curriculum.</p>
+              <Button onClick={addModule}><Plus className="h-4 w-4 mr-1" /> Add Module</Button>
             </div>
-          </SortableContext>
-        </DndContext>
-      )}
+          ) : (
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleModuleDragEnd}>
+              <SortableContext items={modules.map((m) => m.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-3">
+                  {modules.map((mod) => (
+                    <SortableModule
+                      key={mod.id}
+                      mod={mod}
+                      expanded={expanded.has(mod.id)}
+                      onToggle={() => {
+                        const n = new Set(expanded);
+                        n.has(mod.id) ? n.delete(mod.id) : n.add(mod.id);
+                        setExpanded(n);
+                      }}
+                      onRename={(t: string) => renameModule(mod.id, t)}
+                      onDelete={() => deleteModule(mod.id)}
+                      onAddLesson={openAddLesson}
+                      onEditLesson={openEditLesson}
+                      onDeleteLesson={deleteLesson}
+                      onReorderLessons={handleLessonDragEnd}
+                      onLessonMedia={(l: LessonRow) => setMediaLesson(l)}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
+        </TabsContent>
+
+        <TabsContent value="assignments" className="mt-4">
+          {courseId && <CoachAssignments courseId={courseId} />}
+        </TabsContent>
+
+        <TabsContent value="quizzes" className="mt-4">
+          {courseId && <CoachQuizzes courseId={courseId} />}
+        </TabsContent>
+      </Tabs>
 
       {editorOpen && activeLesson && (
         <LessonEditor open={editorOpen} onOpenChange={setEditorOpen} lesson={activeLesson} onSaved={load} />

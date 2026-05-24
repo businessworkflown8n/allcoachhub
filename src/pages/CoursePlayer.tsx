@@ -313,6 +313,6 @@ const CoursePlayer = () => {
   );
 };
 
-export { default as _legacy } from "./CoursePlayer";
+
 
 export default CoursePlayer;

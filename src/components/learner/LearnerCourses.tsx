@@ -131,6 +131,54 @@ const LearnerCourses = () => {
       {/* COACHES */}
       <AssignedCoachesRail coaches={coaches} />
 
+      {/* CONTINUE LEARNING */}
+      {(() => {
+        const continueList = [...enrollments]
+          .filter((e) => Number(e.progress_percent) > 0 && Number(e.progress_percent) < 100)
+          .sort((a, b) => new Date(b.last_accessed_at || b.enrolled_at).getTime() - new Date(a.last_accessed_at || a.enrolled_at).getTime())
+          .slice(0, 3);
+        if (!continueList.length) return null;
+        return (
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold uppercase tracking-wide text-foreground flex items-center gap-2">
+                <PlayCircle className="h-4 w-4 text-primary" /> Continue Learning
+              </h2>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {continueList.map((e) => {
+                const c = e.courses || {};
+                const pct = Number(e.progress_percent || 0);
+                return (
+                  <Link key={e.id} to={`/learn/${e.course_id}`}
+                    className="group flex gap-3 rounded-xl border border-border/60 bg-gradient-to-br from-card to-primary/5 p-3 hover:border-primary/40 transition">
+                    <div className="w-20 h-20 shrink-0 rounded-lg bg-secondary overflow-hidden">
+                      {c.thumbnail_url ? (
+                        <img src={c.thumbnail_url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                      ) : <div className="w-full h-full grid place-items-center text-muted-foreground"><BookOpen className="h-6 w-6" /></div>}
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-col justify-between">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wide text-primary font-semibold">Resume</p>
+                        <h3 className="text-xs font-bold text-foreground line-clamp-2 group-hover:text-primary transition">{c.title}</h3>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-[10px] mb-1">
+                          <span className="text-muted-foreground">{pct}% done</span>
+                        </div>
+                        <div className="h-1 rounded-full bg-secondary overflow-hidden">
+                          <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })()}
+
       {/* SEARCH + FILTERS */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">

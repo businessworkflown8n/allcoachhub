@@ -9,13 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, Link2 } from "lucide-react";
+import { detectProvider, PROVIDER_LABELS } from "@/lib/lessonProviders";
 
 export type LessonRow = {
   id?: string;
   module_id: string;
   title: string;
-  content_type: "video" | "video_url" | "pdf" | "text" | "quiz" | "assignment" | "live";
+  content_type: "video" | "video_url" | "pdf" | "text" | "quiz" | "assignment" | "live" | "link";
   content_url?: string | null;
   content_text?: string | null;
   duration_minutes?: number | null;
@@ -84,6 +85,8 @@ const LessonEditor = ({ open, onOpenChange, lesson, onSaved }: Props) => {
       return;
     }
     setSaving(true);
+    const isLink = form.content_type === "link";
+    const detectedProvider = isLink && form.content_url ? detectProvider(form.content_url) : null;
     const payload: any = {
       module_id: form.module_id,
       title: form.title,
@@ -96,6 +99,7 @@ const LessonEditor = ({ open, onOpenChange, lesson, onSaved }: Props) => {
       is_published: form.is_published !== false,
       live_session_url: form.live_session_url || null,
       live_session_starts_at: form.live_session_starts_at || null,
+      provider: detectedProvider,
     };
     const res = form.id
       ? await supabase.from("course_lessons").update(payload).eq("id", form.id)

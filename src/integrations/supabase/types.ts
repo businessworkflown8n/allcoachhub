@@ -2651,6 +2651,167 @@ export type Database = {
           },
         ]
       }
+      course_access_grants: {
+        Row: {
+          cohort_id: string | null
+          course_id: string
+          created_at: string
+          email: string | null
+          expires_at: string | null
+          granted_by: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          cohort_id?: string | null
+          course_id: string
+          created_at?: string
+          email?: string | null
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          cohort_id?: string | null
+          course_id?: string
+          created_at?: string
+          email?: string | null
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_access_grants_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "course_cohorts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_access_grants_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_cohorts: {
+        Row: {
+          course_id: string
+          created_at: string
+          description: string | null
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          max_seats: number | null
+          name: string
+          sort_order: number
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_seats?: number | null
+          name: string
+          sort_order?: number
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_seats?: number | null
+          name?: string
+          sort_order?: number
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_cohorts_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_invites: {
+        Row: {
+          cohort_id: string | null
+          course_id: string
+          created_at: string
+          created_by: string | null
+          email: string | null
+          expires_at: string | null
+          id: string
+          max_uses: number
+          token: string
+          use_count: number
+        }
+        Insert: {
+          cohort_id?: string | null
+          course_id: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number
+          token?: string
+          use_count?: number
+        }
+        Update: {
+          cohort_id?: string | null
+          course_id?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number
+          token?: string
+          use_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_invites_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "course_cohorts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_invites_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_lessons: {
         Row: {
           content_text: string | null
@@ -2665,7 +2826,9 @@ export type Database = {
           live_session_starts_at: string | null
           live_session_url: string | null
           module_id: string
+          provider: string | null
           sort_order: number
+          thumbnail_url: string | null
           title: string
           updated_at: string
         }
@@ -2682,7 +2845,9 @@ export type Database = {
           live_session_starts_at?: string | null
           live_session_url?: string | null
           module_id: string
+          provider?: string | null
           sort_order?: number
+          thumbnail_url?: string | null
           title: string
           updated_at?: string
         }
@@ -2699,7 +2864,9 @@ export type Database = {
           live_session_starts_at?: string | null
           live_session_url?: string | null
           module_id?: string
+          provider?: string | null
           sort_order?: number
+          thumbnail_url?: string | null
           title?: string
           updated_at?: string
         }
@@ -2756,6 +2923,7 @@ export type Database = {
       }
       courses: {
         Row: {
+          access_type: string
           approval_status: string
           category: string
           category_request_id: string | null
@@ -2769,22 +2937,28 @@ export type Database = {
           intro_video_url: string | null
           is_published: boolean
           language: string
+          learning_outcomes: string | null
           level: string
           original_price_inr: number | null
           original_price_usd: number | null
+          prerequisites: string | null
           price_inr: number
           price_usd: number
           rejection_reason: string | null
           requires_category_approval: boolean
           slug: string | null
+          status: string
+          subtitle: string | null
           thumbnail_approved_at: string | null
           thumbnail_approved_by: string | null
           thumbnail_status: string
           thumbnail_url: string | null
           title: string
           updated_at: string
+          visibility: string
         }
         Insert: {
+          access_type?: string
           approval_status?: string
           category?: string
           category_request_id?: string | null
@@ -2798,22 +2972,28 @@ export type Database = {
           intro_video_url?: string | null
           is_published?: boolean
           language?: string
+          learning_outcomes?: string | null
           level?: string
           original_price_inr?: number | null
           original_price_usd?: number | null
+          prerequisites?: string | null
           price_inr?: number
           price_usd?: number
           rejection_reason?: string | null
           requires_category_approval?: boolean
           slug?: string | null
+          status?: string
+          subtitle?: string | null
           thumbnail_approved_at?: string | null
           thumbnail_approved_by?: string | null
           thumbnail_status?: string
           thumbnail_url?: string | null
           title: string
           updated_at?: string
+          visibility?: string
         }
         Update: {
+          access_type?: string
           approval_status?: string
           category?: string
           category_request_id?: string | null
@@ -2827,20 +3007,25 @@ export type Database = {
           intro_video_url?: string | null
           is_published?: boolean
           language?: string
+          learning_outcomes?: string | null
           level?: string
           original_price_inr?: number | null
           original_price_usd?: number | null
+          prerequisites?: string | null
           price_inr?: number
           price_usd?: number
           rejection_reason?: string | null
           requires_category_approval?: boolean
           slug?: string | null
+          status?: string
+          subtitle?: string | null
           thumbnail_approved_at?: string | null
           thumbnail_approved_by?: string | null
           thumbnail_status?: string
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
+          visibility?: string
         }
         Relationships: [
           {
@@ -8536,6 +8721,10 @@ export type Database = {
       reject_notification_request: {
         Args: { _request_id: string; _reviewer_note?: string }
         Returns: Json
+      }
+      user_has_course_access: {
+        Args: { _course_id: string; _user_id: string }
+        Returns: boolean
       }
       wa_admin_grant_credits: {
         Args: {

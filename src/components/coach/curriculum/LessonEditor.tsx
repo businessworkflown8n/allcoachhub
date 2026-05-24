@@ -135,6 +135,27 @@ const LessonEditor = ({ open, onOpenChange, lesson, onSaved }: Props) => {
             </Select>
           </div>
 
+
+          {form.content_type === "link" && (
+            <div className="space-y-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
+              <Label className="flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" /> External URL</Label>
+              <Input
+                value={form.content_url || ""}
+                onChange={(e) => setForm({ ...form, content_url: e.target.value })}
+                placeholder="Paste any YouTube, Vimeo, Loom, Google Drive, Notion, Canva, PDF, audio, or external URL"
+              />
+              {form.content_url && (
+                <p className="text-xs text-muted-foreground">
+                  Detected: <span className="font-medium text-foreground">{PROVIDER_LABELS[detectProvider(form.content_url)]}</span>
+                  {" "}— learners will see an inline preview when supported, otherwise an open-link button.
+                </p>
+              )}
+              <p className="text-[11px] text-muted-foreground">
+                Supports: YouTube · Vimeo · Loom · Google Drive · Docs · Sheets · Slides · OneDrive · Dropbox · Notion · Canva · PDF · Audio · ZIP · any website.
+              </p>
+            </div>
+          )}
+
           {form.content_type === "video" && (
             <div>
               <Label>Upload Video</Label>

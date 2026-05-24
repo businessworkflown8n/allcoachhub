@@ -105,7 +105,13 @@ const QuizRunner = ({ lessonId, courseId, hideIfEmpty }: Props) => {
     setActiveAttempt({ score, total: totalPoints, passed, details });
     const { data: at } = await supabase.from("quiz_attempts").select("*").eq("quiz_id", quiz.id).eq("user_id", user.id).order("started_at", { ascending: false });
     setAttempts(at || []);
-    toast({ title: passed ? "🎉 Passed!" : "Try again", description: `${score}/${totalPoints} points` });
+    if (passed && !attempts.some((a) => a.passed)) {
+      supabase.rpc("award_xp" as any, { _user_id: user.id, _points: 25, _source: "quiz_passed", _source_id: quiz.id, _course_id: quiz.course_id || courseId });
+      supabase.rpc("update_learner_streak" as any, { _user_id: user.id });
+      toast({ title: "🎉 Passed! +25 XP", description: `${score}/${totalPoints} points` });
+    } else {
+      toast({ title: passed ? "🎉 Passed!" : "Try again", description: `${score}/${totalPoints} points` });
+    }
   };
 
   if (loading) return <Skeleton className="h-40 w-full" />;

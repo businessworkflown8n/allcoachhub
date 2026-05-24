@@ -35,9 +35,10 @@ interface Props {
 }
 
 const TYPES = [
+  { value: "link", label: "🔗 External Link (YouTube / Drive / Notion / PDF / …)" },
   { value: "video", label: "Video (Upload)" },
-  { value: "video_url", label: "Video (YouTube/Vimeo URL)" },
-  { value: "pdf", label: "PDF Document" },
+  { value: "video_url", label: "Video (YouTube / Vimeo URL)" },
+  { value: "pdf", label: "PDF Document (Upload)" },
   { value: "text", label: "Text / Rich Content" },
   { value: "quiz", label: "Quiz" },
   { value: "assignment", label: "Assignment" },

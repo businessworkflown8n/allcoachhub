@@ -79,7 +79,14 @@ const CoursePlayer = () => {
     if (!activeId) { setActiveMedia([]); return; }
     supabase.from("lecture_media").select("*").eq("lesson_id", activeId).order("sort_order")
       .then(({ data }) => setActiveMedia(data || []));
-  }, [activeId]);
+    // Track last accessed lesson for Continue Learning
+    if (user && courseId && enrollment) {
+      supabase.from("enrollments")
+        .update({ last_accessed_lesson_id: activeId, last_accessed_at: new Date().toISOString() })
+        .eq("learner_id", user.id).eq("course_id", courseId)
+        .then(() => {});
+    }
+  }, [activeId, user, courseId, enrollment]);
 
   const markComplete = async () => {
     if (!user || !active || !courseId) return;

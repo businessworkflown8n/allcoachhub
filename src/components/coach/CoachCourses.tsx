@@ -4,10 +4,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import {
   BookOpen, Plus, Edit, Trash2, Eye, EyeOff, Users,
-  Clock, CheckCircle, AlertTriangle, ListTree, Search, LayoutGrid, List, Sparkles, Lock,
+  Clock, CheckCircle, AlertTriangle, ListTree, Search, LayoutGrid, List, Sparkles, Lock, ShieldCheck,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import CourseAccessManager from "@/components/coach/curriculum/CourseAccessManager";
 
 type FilterKey = "all" | "published" | "drafts" | "pending";
 type ViewMode = "grid" | "list";
@@ -20,6 +21,7 @@ const CoachCourses = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [view, setView] = useState<ViewMode>("grid");
+  const [accessCourse, setAccessCourse] = useState<any | null>(null);
 
   const fetchCourses = async () => {
     if (!user) return;
@@ -356,6 +358,12 @@ const CoachCourses = () => {
                   >
                     <ListTree className="h-3 w-3" /> Curriculum
                   </Link>
+                  <button
+                    onClick={() => setAccessCourse(c)}
+                    className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                    title="Manage access, cohorts & invites"
+                  >
+                    <ShieldCheck className="h-3 w-3" /> Access
                   <button
                     onClick={() => togglePublish(c.id, c.is_published)}
                     className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground ${

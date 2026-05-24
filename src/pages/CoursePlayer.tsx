@@ -302,8 +302,17 @@ const CoursePlayer = () => {
           </div>
         )}
       </main>
+
+      {/* Side panel: notes / resources / discussion */}
+      {active && courseId && (
+        <div className="hidden lg:flex h-screen sticky top-0 overflow-hidden">
+          <LessonSidePanel courseId={courseId} lessonId={active.id} />
+        </div>
+      )}
     </div>
   );
 };
+
+export { default as _legacy } from "./CoursePlayer";
 
 export default CoursePlayer;

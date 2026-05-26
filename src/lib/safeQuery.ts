@@ -8,7 +8,7 @@
 export type SafeResult<T> = { data: T | null; error: Error | null };
 
 export async function safeQuery<T>(
-  fn: () => Promise<{ data: T | null; error: any }>,
+  fn: () => PromiseLike<{ data: T | null; error: any }>,
   context?: string
 ): Promise<SafeResult<T>> {
   try {

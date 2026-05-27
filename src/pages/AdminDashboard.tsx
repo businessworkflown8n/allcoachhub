@@ -176,7 +176,9 @@ const AdminDashboard = () => {
         <Route path="locale" element={<AdminLocaleSettings />} />
         <Route path="external-links" element={<AdminExternalLinkControl />} />
         <Route path="curriculum-control" element={<AdminCurriculumControl />} />
+        <Route path="currencies" element={<AdminCurrencyManagement />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
+
       </Routes>
     </DashboardLayout>
   );

@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSEO } from "@/hooks/useSEO";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { BarChart3, Users, GraduationCap, DollarSign, Settings, Star, Shield, BookOpen, Video, ClipboardList, TrendingUp, Globe, Bot, MessageSquare, Gamepad2, Mail, Share2, Megaphone, UserCheck, MousePointerClick, FolderOpen, Plug, FileCheck, Search, KeyRound, LayoutGrid, MessageCircle, ImageIcon, ScrollText, ShieldCheck, Image, Bell, CreditCard, Package, Inbox, HelpCircle, Link as LinkIcon } from "lucide-react";
+import { BarChart3, Users, GraduationCap, DollarSign, Settings, Star, Shield, BookOpen, Video, ClipboardList, TrendingUp, Globe, Bot, MessageSquare, Gamepad2, Mail, Share2, Megaphone, UserCheck, MousePointerClick, FolderOpen, Plug, FileCheck, Search, KeyRound, LayoutGrid, MessageCircle, ImageIcon, ScrollText, ShieldCheck, Image, Bell, CreditCard, Package, Inbox, HelpCircle, Link as LinkIcon, Coins } from "lucide-react";
+
 import AdminMarqueeManager from "@/components/admin/AdminMarqueeManager";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminCoaches from "@/components/admin/AdminCoaches";

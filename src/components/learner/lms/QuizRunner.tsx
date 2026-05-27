@@ -17,7 +17,6 @@ type Question = {
   question_text: string;
   question_type: "multiple_choice" | "true_false" | "multi_select" | "descriptive" | string;
   options: string[];
-  correct_answer: string; // JSON or plain string for descriptive
   points: number;
 };
 
@@ -42,8 +41,9 @@ const QuizRunner = ({ lessonId, courseId, hideIfEmpty }: Props) => {
       const { data: qz } = await q.maybeSingle();
       setQuiz(qz);
       if (qz) {
-        const { data: qs } = await supabase.from("quiz_questions").select("*").eq("quiz_id", qz.id).order("sort_order");
-        setQuestions((qs || []) as any);
+        const { data: qs } = await supabase.rpc("get_quiz_questions_for_learner" as any, { _quiz_id: qz.id });
+        const normalized = (qs || []).map((q: any) => ({ ...q, options: Array.isArray(q.options) ? q.options : (q.options ? q.options : []) }));
+        setQuestions(normalized as any);
         if (user) {
           const { data: at } = await supabase.from("quiz_attempts").select("*").eq("quiz_id", qz.id).eq("user_id", user.id).order("started_at", { ascending: false });
           setAttempts(at || []);
@@ -69,48 +69,35 @@ const QuizRunner = ({ lessonId, courseId, hideIfEmpty }: Props) => {
     if (quiz?.time_limit_minutes) setSecondsLeft(quiz.time_limit_minutes * 60);
   };
 
-  const grade = (q: Question, ans: any): boolean => {
-    if (ans === undefined || ans === null || ans === "") return false;
-    if (q.question_type === "multi_select") {
-      let correct: string[] = [];
-      try { correct = JSON.parse(q.correct_answer); } catch { correct = String(q.correct_answer).split(",").map((s) => s.trim()); }
-      const given: string[] = Array.isArray(ans) ? ans : [];
-      return correct.length === given.length && correct.every((c) => given.includes(c));
-    }
-    if (q.question_type === "descriptive") {
-      // Auto-pass descriptive (manual review). Award full points; coach can adjust.
-      return String(ans).trim().length > 0;
-    }
-    return String(ans).trim().toLowerCase() === String(q.correct_answer).trim().toLowerCase();
-  };
-
   const handleSubmit = async () => {
     if (!user || !quiz) return;
     setSubmitting(true);
-    let score = 0;
-    const details = questions.map((q) => {
-      const correct = grade(q, answers[q.id]);
-      if (correct) score += q.points || 1;
-      return { question_id: q.id, answer: answers[q.id] ?? null, correct, points: q.points || 1 };
-    });
-    const passed = totalPoints > 0 && (score / totalPoints) * 100 >= (quiz.pass_percentage || 70);
-    const { error } = await supabase.from("quiz_attempts").insert({
-      quiz_id: quiz.id, user_id: user.id, score, total_points: totalPoints,
-      passed, answers: details, completed_at: new Date().toISOString(),
+    const answersPayload: Record<string, any> = {};
+    questions.forEach((q) => { answersPayload[q.id] = answers[q.id] ?? null; });
+    const { data, error } = await supabase.rpc("grade_quiz_attempt" as any, {
+      _quiz_id: quiz.id,
+      _answers: answersPayload,
     });
     setSubmitting(false);
     setSecondsLeft(null);
     setTaking(false);
-    if (error) { toast({ title: "Could not save attempt", description: error.message, variant: "destructive" }); return; }
-    setActiveAttempt({ score, total: totalPoints, passed, details });
+    if (error || !data) {
+      toast({ title: "Could not submit quiz", description: error?.message || "Try again", variant: "destructive" });
+      return;
+    }
+    const result = data as any;
+    const score = result.score ?? 0;
+    const total = result.total ?? totalPoints;
+    const passed = !!result.passed;
+    setActiveAttempt({ score, total, passed, details: result.details || [] });
     const { data: at } = await supabase.from("quiz_attempts").select("*").eq("quiz_id", quiz.id).eq("user_id", user.id).order("started_at", { ascending: false });
     setAttempts(at || []);
     if (passed && !attempts.some((a) => a.passed)) {
       supabase.rpc("award_xp" as any, { _user_id: user.id, _points: 25, _source: "quiz_passed", _source_id: quiz.id, _course_id: quiz.course_id || courseId });
       supabase.rpc("update_learner_streak" as any, { _user_id: user.id });
-      toast({ title: "🎉 Passed! +25 XP", description: `${score}/${totalPoints} points` });
+      toast({ title: "🎉 Passed! +25 XP", description: `${score}/${total} points` });
     } else {
-      toast({ title: passed ? "🎉 Passed!" : "Try again", description: `${score}/${totalPoints} points` });
+      toast({ title: passed ? "🎉 Passed!" : "Try again", description: `${score}/${total} points` });
     }
   };
 

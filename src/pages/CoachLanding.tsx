@@ -64,10 +64,10 @@ const CoachLanding = () => {
       // Find coach profile by slug or user_id
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
       const { data: profile } = await supabase
-        .from("profiles")
+        .from("coach_public_profiles" as any)
         .select("*")
         .eq(isUUID ? "user_id" : "slug", slug)
-        .single();
+        .maybeSingle();
 
       if (!profile) {
         setNotFound(true);
@@ -76,11 +76,12 @@ const CoachLanding = () => {
       }
 
 
-      setCoach(profile);
+      const coachProfile: any = profile;
+      setCoach(coachProfile);
 
       // Track page view
       await supabase.from("coach_page_views").insert({
-        coach_user_id: profile.user_id,
+        coach_user_id: coachProfile.user_id,
         referrer: document.referrer || null,
         utm_source: searchParams.get("utm_source") || null,
         utm_medium: searchParams.get("utm_medium") || null,
@@ -91,7 +92,7 @@ const CoachLanding = () => {
       const { data: coursesData } = await supabase
         .from("courses")
         .select("*")
-        .eq("coach_id", profile.user_id)
+        .eq("coach_id", coachProfile.user_id)
         .eq("is_published", true)
         .eq("approval_status", "approved")
         .order("created_at", { ascending: false });
@@ -116,7 +117,7 @@ const CoachLanding = () => {
       const { data: webinarsData } = await supabase
         .from("webinars")
         .select("*")
-        .eq("coach_id", profile.user_id)
+        .eq("coach_id", coachProfile.user_id)
         .eq("is_published", true)
         .gte("webinar_date", today)
         .order("webinar_date", { ascending: true });

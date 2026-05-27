@@ -54,6 +54,8 @@ import AdminFeatureControlSystem from "@/components/admin/AdminFeatureControlSys
 import AdminDigitalProductsControl from "@/components/admin/AdminDigitalProductsControl";
 import AdminExternalLinkControl from "@/components/admin/AdminExternalLinkControl";
 import AdminCurriculumControl from "@/components/admin/AdminCurriculumControl";
+import AdminCurrencyManagement from "@/components/admin/AdminCurrencyManagement";
+
 
 const navItems = [
   { label: "Analytics", path: "/admin", icon: <BarChart3 className="h-4 w-4" /> },

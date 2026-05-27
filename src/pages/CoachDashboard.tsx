@@ -149,7 +149,9 @@ const CoachDashboard = () => {
         <Route path="digital-products/*" element={<CoachDigitalProducts />} />
         <Route path="overview" element={<CoachOverview />} />
         <Route path="subscription" element={<CoachSubscription />} />
+        <Route path="currency" element={<CoachCurrencySettings />} />
         <Route path="*" element={<Navigate to="overview" replace />} />
+
       </Routes>
     </DashboardLayout>
   );

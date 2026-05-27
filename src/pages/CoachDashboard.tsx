@@ -106,7 +106,9 @@ const CoachDashboard = () => {
     { label: "SEO & Indexing", path: "/coach/seo", icon: <Search className="h-4 w-4" /> },
     { label: "Profile", path: "/coach/profile", icon: <User className="h-4 w-4" /> },
     { label: "Subscription", path: "/coach/subscription", icon: <CreditCard className="h-4 w-4" /> },
+    { label: "Currency Settings", path: "/coach/currency", icon: <Coins className="h-4 w-4" /> },
   ];
+
 
   return (
     <DashboardLayout navItems={navItems} title="Coach Dashboard" marqueeSegment="coach">

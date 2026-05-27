@@ -1375,6 +1375,69 @@ export type Database = {
           },
         ]
       }
+      coach_currency_requests: {
+        Row: {
+          admin_notes: string | null
+          coach_id: string
+          created_at: string
+          id: string
+          requested_currency: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          coach_id: string
+          created_at?: string
+          id?: string
+          requested_currency: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          coach_id?: string
+          created_at?: string
+          id?: string
+          requested_currency?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      coach_currency_settings: {
+        Row: {
+          allowed_currencies: string[]
+          coach_id: string
+          created_at: string
+          currency_updated_at: string
+          primary_currency: string
+          updated_at: string
+        }
+        Insert: {
+          allowed_currencies?: string[]
+          coach_id: string
+          created_at?: string
+          currency_updated_at?: string
+          primary_currency?: string
+          updated_at?: string
+        }
+        Update: {
+          allowed_currencies?: string[]
+          coach_id?: string
+          created_at?: string
+          currency_updated_at?: string
+          primary_currency?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coach_feature_flags: {
         Row: {
           approved_at: string | null
@@ -3144,6 +3207,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      currencies: {
+        Row: {
+          country: string | null
+          created_at: string
+          currency_code: string
+          currency_name: string
+          currency_symbol: string
+          exchange_rate: number
+          id: string
+          is_active: boolean
+          is_default: boolean
+          updated_at: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          currency_code: string
+          currency_name: string
+          currency_symbol: string
+          exchange_rate?: number
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          updated_at?: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          currency_code?: string
+          currency_name?: string
+          currency_symbol?: string
+          exchange_rate?: number
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          updated_at?: string
+        }
+        Relationships: []
       }
       curriculum_link_settings: {
         Row: {

@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSEO } from "@/hooks/useSEO";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { BarChart3, Users, GraduationCap, DollarSign, Settings, Star, Shield, BookOpen, Video, ClipboardList, TrendingUp, Globe, Bot, MessageSquare, Gamepad2, Mail, Share2, Megaphone, UserCheck, MousePointerClick, FolderOpen, Plug, FileCheck, Search, KeyRound, LayoutGrid, MessageCircle, ImageIcon, ScrollText, ShieldCheck, Image, Bell, CreditCard, Package, Inbox, HelpCircle, Link as LinkIcon } from "lucide-react";
+import { BarChart3, Users, GraduationCap, DollarSign, Settings, Star, Shield, BookOpen, Video, ClipboardList, TrendingUp, Globe, Bot, MessageSquare, Gamepad2, Mail, Share2, Megaphone, UserCheck, MousePointerClick, FolderOpen, Plug, FileCheck, Search, KeyRound, LayoutGrid, MessageCircle, ImageIcon, ScrollText, ShieldCheck, Image, Bell, CreditCard, Package, Inbox, HelpCircle, Link as LinkIcon, Coins } from "lucide-react";
+
 import AdminMarqueeManager from "@/components/admin/AdminMarqueeManager";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminCoaches from "@/components/admin/AdminCoaches";
@@ -53,6 +54,8 @@ import AdminFeatureControlSystem from "@/components/admin/AdminFeatureControlSys
 import AdminDigitalProductsControl from "@/components/admin/AdminDigitalProductsControl";
 import AdminExternalLinkControl from "@/components/admin/AdminExternalLinkControl";
 import AdminCurriculumControl from "@/components/admin/AdminCurriculumControl";
+import AdminCurrencyManagement from "@/components/admin/AdminCurrencyManagement";
+
 
 const navItems = [
   { label: "Analytics", path: "/admin", icon: <BarChart3 className="h-4 w-4" /> },
@@ -106,7 +109,9 @@ const navItems = [
   { label: "Locale & Currency", path: "/admin/locale", icon: <Globe className="h-4 w-4" /> },
   { label: "External Link Control", path: "/admin/external-links", icon: <LinkIcon className="h-4 w-4" /> },
   { label: "Curriculum Control", path: "/admin/curriculum-control", icon: <ShieldCheck className="h-4 w-4" /> },
+  { label: "Currency Management", path: "/admin/currencies", icon: <Coins className="h-4 w-4" /> },
 ];
+
 
 const AdminDashboard = () => {
   useSEO({
@@ -171,7 +176,9 @@ const AdminDashboard = () => {
         <Route path="locale" element={<AdminLocaleSettings />} />
         <Route path="external-links" element={<AdminExternalLinkControl />} />
         <Route path="curriculum-control" element={<AdminCurriculumControl />} />
+        <Route path="currencies" element={<AdminCurrencyManagement />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
+
       </Routes>
     </DashboardLayout>
   );

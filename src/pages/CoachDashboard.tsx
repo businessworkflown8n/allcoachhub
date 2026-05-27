@@ -44,7 +44,9 @@ import CoachLinkedInPost from "@/components/coach/CoachLinkedInPost";
 import { useFeatureControl } from "@/hooks/useFeatureControl";
 import { useExternalLinkControl } from "@/hooks/useExternalLinkControl";
 import CoachSubscription from "@/components/coach/CoachSubscription";
-import { CreditCard } from "lucide-react";
+import CoachCurrencySettings from "@/components/coach/CoachCurrencySettings";
+import { CreditCard, Coins } from "lucide-react";
+
 
 const CoachDashboard = () => {
   useSEO({
@@ -104,7 +106,9 @@ const CoachDashboard = () => {
     { label: "SEO & Indexing", path: "/coach/seo", icon: <Search className="h-4 w-4" /> },
     { label: "Profile", path: "/coach/profile", icon: <User className="h-4 w-4" /> },
     { label: "Subscription", path: "/coach/subscription", icon: <CreditCard className="h-4 w-4" /> },
+    { label: "Currency Settings", path: "/coach/currency", icon: <Coins className="h-4 w-4" /> },
   ];
+
 
   return (
     <DashboardLayout navItems={navItems} title="Coach Dashboard" marqueeSegment="coach">
@@ -145,7 +149,9 @@ const CoachDashboard = () => {
         <Route path="digital-products/*" element={<CoachDigitalProducts />} />
         <Route path="overview" element={<CoachOverview />} />
         <Route path="subscription" element={<CoachSubscription />} />
+        <Route path="currency" element={<CoachCurrencySettings />} />
         <Route path="*" element={<Navigate to="overview" replace />} />
+
       </Routes>
     </DashboardLayout>
   );

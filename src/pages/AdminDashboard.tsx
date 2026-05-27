@@ -109,7 +109,9 @@ const navItems = [
   { label: "Locale & Currency", path: "/admin/locale", icon: <Globe className="h-4 w-4" /> },
   { label: "External Link Control", path: "/admin/external-links", icon: <LinkIcon className="h-4 w-4" /> },
   { label: "Curriculum Control", path: "/admin/curriculum-control", icon: <ShieldCheck className="h-4 w-4" /> },
+  { label: "Currency Management", path: "/admin/currencies", icon: <Coins className="h-4 w-4" /> },
 ];
+
 
 const AdminDashboard = () => {
   useSEO({

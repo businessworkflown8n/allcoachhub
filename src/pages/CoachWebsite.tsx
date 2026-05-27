@@ -47,7 +47,7 @@ const CoachWebsite = () => {
       if (!website) { setNotFound(true); setLoading(false); return; }
       setSite(website);
 
-      const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", website.coach_id).single();
+      const { data: profile } = await supabase.from("coach_public_profiles" as any).select("*").eq("user_id", website.coach_id).maybeSingle();
       setCoach(profile);
 
       if (website.show_courses) {

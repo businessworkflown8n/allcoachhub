@@ -64,10 +64,10 @@ const CoachLanding = () => {
       // Find coach profile by slug or user_id
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
       const { data: profile } = await supabase
-        .from("profiles")
+        .from("coach_public_profiles" as any)
         .select("*")
         .eq(isUUID ? "user_id" : "slug", slug)
-        .single();
+        .maybeSingle();
 
       if (!profile) {
         setNotFound(true);

@@ -92,6 +92,9 @@ const CategoriesSection = () => {
                   <p className="text-[11px] text-muted-foreground">
                     {cat.coachCount} {cat.coachCount === 1 ? "coach" : "coaches"}
                   </p>
+                  <span className="mt-1.5 inline-block text-[11px] font-semibold text-primary opacity-70 transition-opacity duration-200 group-hover:opacity-100">
+                    View Coaches →
+                  </span>
                 </Link>
               ))}
             </div>

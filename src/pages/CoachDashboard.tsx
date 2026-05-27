@@ -44,7 +44,9 @@ import CoachLinkedInPost from "@/components/coach/CoachLinkedInPost";
 import { useFeatureControl } from "@/hooks/useFeatureControl";
 import { useExternalLinkControl } from "@/hooks/useExternalLinkControl";
 import CoachSubscription from "@/components/coach/CoachSubscription";
-import { CreditCard } from "lucide-react";
+import CoachCurrencySettings from "@/components/coach/CoachCurrencySettings";
+import { CreditCard, Coins } from "lucide-react";
+
 
 const CoachDashboard = () => {
   useSEO({

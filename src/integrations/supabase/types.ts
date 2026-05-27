@@ -9284,6 +9284,22 @@ export type Database = {
         Args: { _coach_id: string; _feature_key: string; _plan?: string }
         Returns: Json
       }
+      get_quiz_questions_for_learner: {
+        Args: { _quiz_id: string }
+        Returns: {
+          id: string
+          options: Json
+          points: number
+          question_text: string
+          question_type: string
+          quiz_id: string
+          sort_order: number
+        }[]
+      }
+      grade_quiz_attempt: {
+        Args: { _answers: Json; _quiz_id: string }
+        Returns: Json
+      }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean

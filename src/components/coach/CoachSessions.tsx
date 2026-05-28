@@ -121,6 +121,9 @@ export default function CoachSessions() {
   const setStatus = async (id: string, status: string) => {
     await supabase.from("coach_sessions").update({ status }).eq("id", id);
     toast.success(`Marked as ${status}`);
+    if (status === "cancelled") {
+      supabase.functions.invoke("notify-course-session", { body: { sessionId: id, kind: "cancelled" } }).catch(() => {});
+    }
     load();
   };
 

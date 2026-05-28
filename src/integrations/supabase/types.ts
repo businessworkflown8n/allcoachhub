@@ -1496,6 +1496,7 @@ export type Database = {
         Row: {
           approved_at: string | null
           approved_by: string | null
+          assignments_access: boolean
           automations_access: boolean
           blueprint_access: boolean
           coach_id: string
@@ -1524,6 +1525,7 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
+          assignments_access?: boolean
           automations_access?: boolean
           blueprint_access?: boolean
           coach_id: string
@@ -1552,6 +1554,7 @@ export type Database = {
         Update: {
           approved_at?: string | null
           approved_by?: string | null
+          assignments_access?: boolean
           automations_access?: boolean
           blueprint_access?: boolean
           coach_id?: string
@@ -9382,6 +9385,10 @@ export type Database = {
           _user_id: string
         }
         Returns: Json
+      }
+      coach_has_assignments_access: {
+        Args: { _coach_id: string }
+        Returns: boolean
       }
       delete_email: {
         Args: { message_id: number; queue_name: string }

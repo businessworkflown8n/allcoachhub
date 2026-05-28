@@ -20,6 +20,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 const CoachAssignments = ({ courseId }: Props) => {
   const { user } = useAuth();
+  const { assignments_access, loading: featLoading } = useCoachFeatures();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<any[]>([]);
   const [subs, setSubs] = useState<Record<string, any[]>>({});

@@ -217,6 +217,24 @@ export default function CoachSessions() {
           <DialogHeader><DialogTitle>{editing ? "Edit Session" : "Schedule Session"}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div><Label>Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Discovery call with Priya" /></div>
+            <div>
+              <Label>Course *</Label>
+              <Select value={form.course_id} onValueChange={(v) => setForm({ ...form, course_id: v })}>
+                <SelectTrigger><SelectValue placeholder={courses.length ? "Select a course" : "No courses yet — create one first"} /></SelectTrigger>
+                <SelectContent>
+                  {courses.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      <div className="flex items-center gap-2">
+                        {c.thumbnail_url && <img src={c.thumbnail_url} alt="" className="h-6 w-6 rounded object-cover" />}
+                        <span className="flex-1">{c.title}</span>
+                        <span className="text-xs text-muted-foreground">· {c.enrolled_count} enrolled</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground mt-1">All enrolled learners of this course will be notified by email + in-app.</p>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Type</Label>

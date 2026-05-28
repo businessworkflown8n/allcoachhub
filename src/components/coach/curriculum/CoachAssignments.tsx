@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCoachFeatures } from "@/hooks/useCoachFeatures";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, ClipboardList, ExternalLink, Star, CalendarClock, Link as LinkIcon } from "lucide-react";
+import { Plus, Edit, Trash2, ClipboardList, ExternalLink, Star, CalendarClock, Link as LinkIcon, Lock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props { courseId: string; }
@@ -19,6 +20,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 const CoachAssignments = ({ courseId }: Props) => {
   const { user } = useAuth();
+  const { assignments_access, loading: featLoading } = useCoachFeatures();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<any[]>([]);
   const [subs, setSubs] = useState<Record<string, any[]>>({});
@@ -99,7 +101,17 @@ const CoachAssignments = ({ courseId }: Props) => {
     load();
   };
 
-  if (loading) return <Skeleton className="h-40 w-full" />;
+  if (loading || featLoading) return <Skeleton className="h-40 w-full" />;
+
+  if (!assignments_access) {
+    return (
+      <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center space-y-2">
+        <Lock className="h-6 w-6 text-muted-foreground mx-auto" />
+        <p className="text-sm font-medium">Assignments feature is not enabled for your account</p>
+        <p className="text-xs text-muted-foreground">Contact an admin to request access to the Assignments module.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

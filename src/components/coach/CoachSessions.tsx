@@ -27,6 +27,7 @@ interface Session {
 }
 
 interface Client { id: string; full_name: string; }
+interface CourseOpt { id: string; title: string; thumbnail_url: string | null; enrolled_count: number; }
 
 const TYPES = ["one_on_one", "group", "workshop", "discovery"];
 
@@ -34,13 +35,14 @@ export default function CoachSessions() {
   const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
+  const [courses, setCourses] = useState<CourseOpt[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Session | null>(null);
   const [notesOpen, setNotesOpen] = useState<Session | null>(null);
   const [notesForm, setNotesForm] = useState({ summary: "", private_notes: "" });
   const [form, setForm] = useState({
-    title: "", client_id: "", client_name: "", session_type: "one_on_one",
+    title: "", course_id: "", client_id: "", client_name: "", session_type: "one_on_one",
     scheduled_at: "", duration_minutes: 60, meeting_url: "", agenda: "",
   });
 

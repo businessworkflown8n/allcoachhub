@@ -21,6 +21,7 @@ export interface CoachFeatures {
   copilot_access: boolean;
   content_studio_access: boolean;
   external_materials_access: boolean;
+  assignments_access: boolean;
   status: string;
 }
 

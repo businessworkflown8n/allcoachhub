@@ -296,41 +296,74 @@ export type Database = {
         }
         Relationships: []
       }
+      assignment_leaderboard_settings: {
+        Row: {
+          course_id: string
+          is_enabled: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          course_id: string
+          is_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          course_id?: string
+          is_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       assignment_submissions: {
         Row: {
           assignment_id: string
+          evaluation_status: string | null
           feedback: string | null
           graded_at: string | null
           id: string
+          is_late: boolean
+          link_type: string | null
           score: number | null
           status: string
           submission_text: string | null
           submission_url: string | null
           submitted_at: string
+          updated_at: string
           user_id: string
         }
         Insert: {
           assignment_id: string
+          evaluation_status?: string | null
           feedback?: string | null
           graded_at?: string | null
           id?: string
+          is_late?: boolean
+          link_type?: string | null
           score?: number | null
           status?: string
           submission_text?: string | null
           submission_url?: string | null
           submitted_at?: string
+          updated_at?: string
           user_id: string
         }
         Update: {
           assignment_id?: string
+          evaluation_status?: string | null
           feedback?: string | null
           graded_at?: string | null
           id?: string
+          is_late?: boolean
+          link_type?: string | null
           score?: number | null
           status?: string
           submission_text?: string | null
           submission_url?: string | null
           submitted_at?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -345,38 +378,59 @@ export type Database = {
       }
       assignments: {
         Row: {
+          attachment_url: string | null
+          coach_id: string | null
           course_id: string
           created_at: string
+          deadline_at: string | null
           description: string | null
           due_days: number | null
           id: string
+          instructions: string | null
           is_published: boolean
           max_score: number
           module_id: string | null
+          passing_marks: number | null
+          reference_links: Json
+          status: string
           title: string
           updated_at: string
         }
         Insert: {
+          attachment_url?: string | null
+          coach_id?: string | null
           course_id: string
           created_at?: string
+          deadline_at?: string | null
           description?: string | null
           due_days?: number | null
           id?: string
+          instructions?: string | null
           is_published?: boolean
           max_score?: number
           module_id?: string | null
+          passing_marks?: number | null
+          reference_links?: Json
+          status?: string
           title: string
           updated_at?: string
         }
         Update: {
+          attachment_url?: string | null
+          coach_id?: string | null
           course_id?: string
           created_at?: string
+          deadline_at?: string | null
           description?: string | null
           due_days?: number | null
           id?: string
+          instructions?: string | null
           is_published?: boolean
           max_score?: number
           module_id?: string | null
+          passing_marks?: number | null
+          reference_links?: Json
+          status?: string
           title?: string
           updated_at?: string
         }
@@ -4303,6 +4357,47 @@ export type Database = {
             columns: ["last_accessed_lesson_id"]
             isOneToOne: false
             referencedRelation: "course_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evaluation_history: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          evaluation_status: string | null
+          evaluator_id: string
+          feedback: string | null
+          id: string
+          score: number | null
+          submission_id: string
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          evaluation_status?: string | null
+          evaluator_id: string
+          feedback?: string | null
+          id?: string
+          score?: number | null
+          submission_id: string
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          evaluation_status?: string | null
+          evaluator_id?: string
+          feedback?: string | null
+          id?: string
+          score?: number | null
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluation_history_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "assignment_submissions"
             referencedColumns: ["id"]
           },
         ]
@@ -9208,6 +9303,28 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "coach_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_leaderboard_v: {
+        Row: {
+          avg_score: number | null
+          completed_count: number | null
+          course_id: string | null
+          last_submitted_at: string | null
+          rank_position: number | null
+          submitted_count: number | null
+          total_published: number | null
+          total_score: number | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]

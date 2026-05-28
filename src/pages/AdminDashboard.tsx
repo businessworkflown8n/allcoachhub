@@ -55,6 +55,7 @@ import AdminDigitalProductsControl from "@/components/admin/AdminDigitalProducts
 import AdminExternalLinkControl from "@/components/admin/AdminExternalLinkControl";
 import AdminCurriculumControl from "@/components/admin/AdminCurriculumControl";
 import AdminCurrencyManagement from "@/components/admin/AdminCurrencyManagement";
+import AdminAssignments from "@/components/admin/AdminAssignments";
 
 
 const navItems = [
@@ -110,6 +111,7 @@ const navItems = [
   { label: "External Link Control", path: "/admin/external-links", icon: <LinkIcon className="h-4 w-4" /> },
   { label: "Curriculum Control", path: "/admin/curriculum-control", icon: <ShieldCheck className="h-4 w-4" /> },
   { label: "Currency Management", path: "/admin/currencies", icon: <Coins className="h-4 w-4" /> },
+  { label: "Assignments", path: "/admin/assignments", icon: <ClipboardList className="h-4 w-4" /> },
 ];
 
 
@@ -177,6 +179,7 @@ const AdminDashboard = () => {
         <Route path="external-links" element={<AdminExternalLinkControl />} />
         <Route path="curriculum-control" element={<AdminCurriculumControl />} />
         <Route path="currencies" element={<AdminCurrencyManagement />} />
+        <Route path="assignments" element={<AdminAssignments />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
 
       </Routes>

@@ -27,6 +27,7 @@ interface Session {
 }
 
 interface Client { id: string; full_name: string; }
+interface CourseOpt { id: string; title: string; thumbnail_url: string | null; enrolled_count: number; }
 
 const TYPES = ["one_on_one", "group", "workshop", "discovery"];
 
@@ -34,25 +35,38 @@ export default function CoachSessions() {
   const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
+  const [courses, setCourses] = useState<CourseOpt[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Session | null>(null);
   const [notesOpen, setNotesOpen] = useState<Session | null>(null);
   const [notesForm, setNotesForm] = useState({ summary: "", private_notes: "" });
   const [form, setForm] = useState({
-    title: "", client_id: "", client_name: "", session_type: "one_on_one",
+    title: "", course_id: "", client_id: "", client_name: "", session_type: "one_on_one",
     scheduled_at: "", duration_minutes: 60, meeting_url: "", agenda: "",
   });
 
   const load = async () => {
     if (!user) return;
     setLoading(true);
-    const [sRes, cRes] = await Promise.all([
+    const [sRes, cRes, coRes] = await Promise.all([
       supabase.from("coach_sessions").select("*").eq("coach_id", user.id).order("scheduled_at", { ascending: false }),
       supabase.from("coach_clients").select("id, full_name").eq("coach_id", user.id),
+      supabase.from("courses").select("id, title, thumbnail_url").eq("coach_id", user.id).order("created_at", { ascending: false }),
     ]);
     setSessions((sRes.data || []) as any);
     setClients((cRes.data || []) as any);
+    // Enrollment counts per course
+    const courseList = (coRes.data || []) as any[];
+    const counts: Record<string, number> = {};
+    if (courseList.length) {
+      const { data: enr } = await supabase
+        .from("enrollments")
+        .select("course_id")
+        .in("course_id", courseList.map((c) => c.id));
+      for (const e of enr || []) counts[(e as any).course_id] = (counts[(e as any).course_id] || 0) + 1;
+    }
+    setCourses(courseList.map((c) => ({ ...c, enrolled_count: counts[c.id] || 0 })));
     setLoading(false);
   };
   useEffect(() => { load(); }, [user]);
@@ -60,13 +74,13 @@ export default function CoachSessions() {
   const openNew = () => {
     setEditing(null);
     const now = new Date(); now.setMinutes(0); now.setSeconds(0);
-    setForm({ title: "", client_id: "", client_name: "", session_type: "one_on_one", scheduled_at: now.toISOString().slice(0, 16), duration_minutes: 60, meeting_url: "", agenda: "" });
+    setForm({ title: "", course_id: "", client_id: "", client_name: "", session_type: "one_on_one", scheduled_at: now.toISOString().slice(0, 16), duration_minutes: 60, meeting_url: "", agenda: "" });
     setOpen(true);
   };
   const openEdit = (s: Session) => {
     setEditing(s);
     setForm({
-      title: s.title, client_id: s.client_id || "", client_name: s.client_name || "",
+      title: s.title, course_id: (s as any).course_id || "", client_id: s.client_id || "", client_name: s.client_name || "",
       session_type: s.session_type, scheduled_at: new Date(s.scheduled_at).toISOString().slice(0, 16),
       duration_minutes: s.duration_minutes, meeting_url: s.meeting_url || "", agenda: s.agenda || "",
     });
@@ -75,9 +89,12 @@ export default function CoachSessions() {
 
   const save = async () => {
     if (!user || !form.title.trim() || !form.scheduled_at) { toast.error("Title and date required"); return; }
+    if (!form.course_id) { toast.error("Please select a course for this session"); return; }
+    if (form.meeting_url && !/^https?:\/\//i.test(form.meeting_url)) { toast.error("Meeting URL must start with http(s)://"); return; }
     const client = clients.find((c) => c.id === form.client_id);
-    const payload = {
+    const payload: any = {
       coach_id: user.id, title: form.title,
+      course_id: form.course_id,
       client_id: form.client_id || null,
       client_name: client?.full_name || form.client_name || null,
       session_type: form.session_type,
@@ -86,17 +103,27 @@ export default function CoachSessions() {
       meeting_url: form.meeting_url || null,
       agenda: form.agenda || null,
     };
-    const { error } = editing
-      ? await supabase.from("coach_sessions").update(payload).eq("id", editing.id)
-      : await supabase.from("coach_sessions").insert(payload);
-    if (error) { toast.error(error.message); return; }
-    toast.success(editing ? "Session updated" : "Session scheduled");
+    const res = editing
+      ? await supabase.from("coach_sessions").update(payload).eq("id", editing.id).select("id").maybeSingle()
+      : await supabase.from("coach_sessions").insert(payload).select("id").maybeSingle();
+    if (res.error) { toast.error(res.error.message); return; }
+    const sessionId = (res.data as any)?.id || editing?.id;
+    toast.success(editing ? "Session updated · learners notified" : "Session scheduled · learners notified");
+    // Fire-and-forget emails to enrolled learners (in-app notif handled by DB trigger)
+    if (sessionId) {
+      supabase.functions.invoke("notify-course-session", {
+        body: { sessionId, kind: editing ? "updated" : "scheduled" },
+      }).catch(() => {});
+    }
     setOpen(false); load();
   };
 
   const setStatus = async (id: string, status: string) => {
     await supabase.from("coach_sessions").update({ status }).eq("id", id);
     toast.success(`Marked as ${status}`);
+    if (status === "cancelled") {
+      supabase.functions.invoke("notify-course-session", { body: { sessionId: id, kind: "cancelled" } }).catch(() => {});
+    }
     load();
   };
 
@@ -193,6 +220,24 @@ export default function CoachSessions() {
           <DialogHeader><DialogTitle>{editing ? "Edit Session" : "Schedule Session"}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div><Label>Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Discovery call with Priya" /></div>
+            <div>
+              <Label>Course *</Label>
+              <Select value={form.course_id} onValueChange={(v) => setForm({ ...form, course_id: v })}>
+                <SelectTrigger><SelectValue placeholder={courses.length ? "Select a course" : "No courses yet — create one first"} /></SelectTrigger>
+                <SelectContent>
+                  {courses.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      <div className="flex items-center gap-2">
+                        {c.thumbnail_url && <img src={c.thumbnail_url} alt="" className="h-6 w-6 rounded object-cover" />}
+                        <span className="flex-1">{c.title}</span>
+                        <span className="text-xs text-muted-foreground">· {c.enrolled_count} enrolled</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground mt-1">All enrolled learners of this course will be notified by email + in-app.</p>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Type</Label>

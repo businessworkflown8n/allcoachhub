@@ -1927,16 +1927,22 @@ export type Database = {
           client_id: string | null
           client_name: string | null
           coach_id: string
+          course_id: string | null
           created_at: string
           duration_minutes: number
           id: string
           location: string | null
           meeting_url: string | null
+          notified_on_create: boolean
           outcome: string | null
+          reminder_10m_sent: boolean
+          reminder_1h_sent: boolean
+          reminder_24h_sent: boolean
           reminder_sent: boolean | null
           scheduled_at: string
           session_type: string
           status: string
+          thumbnail_url: string | null
           title: string
           updated_at: string
         }
@@ -1945,16 +1951,22 @@ export type Database = {
           client_id?: string | null
           client_name?: string | null
           coach_id: string
+          course_id?: string | null
           created_at?: string
           duration_minutes?: number
           id?: string
           location?: string | null
           meeting_url?: string | null
+          notified_on_create?: boolean
           outcome?: string | null
+          reminder_10m_sent?: boolean
+          reminder_1h_sent?: boolean
+          reminder_24h_sent?: boolean
           reminder_sent?: boolean | null
           scheduled_at: string
           session_type?: string
           status?: string
+          thumbnail_url?: string | null
           title: string
           updated_at?: string
         }
@@ -1963,16 +1975,22 @@ export type Database = {
           client_id?: string | null
           client_name?: string | null
           coach_id?: string
+          course_id?: string | null
           created_at?: string
           duration_minutes?: number
           id?: string
           location?: string | null
           meeting_url?: string | null
+          notified_on_create?: boolean
           outcome?: string | null
+          reminder_10m_sent?: boolean
+          reminder_1h_sent?: boolean
+          reminder_24h_sent?: boolean
           reminder_sent?: boolean | null
           scheduled_at?: string
           session_type?: string
           status?: string
+          thumbnail_url?: string | null
           title?: string
           updated_at?: string
         }
@@ -1982,6 +2000,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "coach_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_sessions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]

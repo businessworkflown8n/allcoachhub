@@ -25,7 +25,7 @@ const AdminAssignments = () => {
     const { data: aRows } = await (supabase as any)
       .from("assignments").select("*").order("created_at", { ascending: false }).limit(200);
     setAssignments(aRows || []);
-    const courseIds = Array.from(new Set((aRows || []).map((a: any) => a.course_id)));
+    const courseIds = Array.from(new Set<string>((aRows || []).map((a: any) => a.course_id as string)));
     if (courseIds.length) {
       const { data: cs } = await supabase.from("courses").select("id, title").in("id", courseIds);
       const map: Record<string, string> = {};

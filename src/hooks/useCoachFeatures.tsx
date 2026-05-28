@@ -44,6 +44,7 @@ const DEFAULT_FEATURES: CoachFeatures = {
   copilot_access: false,
   content_studio_access: false,
   external_materials_access: false,
+  assignments_access: true,
   status: "pending",
 };
 

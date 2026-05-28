@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCoachFeatures } from "@/hooks/useCoachFeatures";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, ClipboardList, ExternalLink, Star, CalendarClock, Link as LinkIcon } from "lucide-react";
+import { Plus, Edit, Trash2, ClipboardList, ExternalLink, Star, CalendarClock, Link as LinkIcon, Lock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props { courseId: string; }

@@ -127,6 +127,8 @@ const CoursePlayer = () => {
       supabase.functions.invoke("generate-certificate", { body: { course_id: courseId } }).then(({ data, error: cErr }) => {
         if (!cErr && data?.pdf_url) toast({ title: "🎓 Certificate ready! +100 XP", description: "View it from My Certificates." });
       });
+      // Fire-and-forget course completion email + in-app notification (idempotent server-side)
+      supabase.functions.invoke("course-completion-email", { body: { course_id: courseId } }).catch(() => {});
     }
     // Auto-advance
     const idx = allLessons.findIndex((l) => l.id === active.id);

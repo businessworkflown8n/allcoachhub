@@ -11,6 +11,7 @@ import { CheckCircle2, Lock, PlayCircle, FileText, BookOpen, Users, ClipboardLis
 import QuizRunner from "@/components/learner/lms/QuizRunner";
 import AssignmentPanel from "@/components/learner/lms/AssignmentPanel";
 import LessonSidePanel from "@/components/learner/lms/LessonSidePanel";
+import CourseUpcomingSessions from "@/components/learner/lms/CourseUpcomingSessions";
 import { detectProvider, buildEmbedUrl, PROVIDER_LABELS } from "@/lib/lessonProviders";
 
 type Lesson = any;
@@ -42,28 +43,44 @@ const CoursePlayer = () => {
 
   useSEO({ title: course ? `${course.title} – Learn` : "Course Player", noIndex: true });
 
-  useEffect(() => {
+  const loadCurriculum = async (initial = false) => {
     if (!user || !courseId) return;
-    (async () => {
+    if (initial) {
       const { data: c } = await supabase.from("courses").select("*").eq("id", courseId).single();
       setCourse(c);
       const { data: e } = await supabase.from("enrollments").select("*").eq("course_id", courseId).eq("learner_id", user.id).maybeSingle();
       setEnrollment(e);
-      const { data: mods } = await supabase.from("course_modules").select("*").eq("course_id", courseId).eq("is_published", true).order("sort_order");
-      const ids = (mods || []).map((m: any) => m.id);
-      const { data: lessons } = ids.length
-        ? await supabase.from("course_lessons").select("*").in("module_id", ids).eq("is_published", true).order("sort_order")
-        : { data: [] };
-      const grouped: Module[] = (mods || []).map((m: any) => ({ ...m, lessons: (lessons || []).filter((l: any) => l.module_id === m.id) }));
-      setModules(grouped);
+    }
+    const { data: mods } = await supabase.from("course_modules").select("*").eq("course_id", courseId).eq("is_published", true).order("sort_order");
+    const ids = (mods || []).map((m: any) => m.id);
+    const { data: lessons } = ids.length
+      ? await supabase.from("course_lessons").select("*").in("module_id", ids).eq("is_published", true).order("sort_order")
+      : { data: [] };
+    const grouped: Module[] = (mods || []).map((m: any) => ({ ...m, lessons: (lessons || []).filter((l: any) => l.module_id === m.id) }));
+    setModules(grouped);
+    if (initial) {
       const { data: prog } = await supabase.from("lesson_progress").select("lesson_id").eq("learner_id", user.id).eq("course_id", courseId);
       setCompletedIds(new Set((prog || []).map((p: any) => p.lesson_id)));
+      const { data: enr } = await supabase.from("enrollments").select("last_accessed_lesson_id, payment_status, enrolled_at").eq("course_id", courseId).eq("learner_id", user.id).maybeSingle();
       const all = grouped.flatMap((m) => m.lessons);
-      const last = e?.last_accessed_lesson_id && all.find((l: any) => l.id === e.last_accessed_lesson_id && isUnlocked(l, e));
-      const firstUnlocked = last || all.find((l: any) => isUnlocked(l, e));
+      const last = enr?.last_accessed_lesson_id && all.find((l: any) => l.id === enr.last_accessed_lesson_id && isUnlocked(l, enr));
+      const firstUnlocked = last || all.find((l: any) => isUnlocked(l, enr));
       setActiveId(firstUnlocked?.id || null);
       setLoading(false);
-    })();
+    }
+  };
+
+  useEffect(() => {
+    loadCurriculum(true);
+    if (!user || !courseId) return;
+    // Realtime: re-fetch curriculum when coach adds/edits modules or lessons
+    const ch = supabase
+      .channel(`course-curriculum-${courseId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "course_modules", filter: `course_id=eq.${courseId}` }, () => loadCurriculum(false))
+      .on("postgres_changes", { event: "*", schema: "public", table: "course_lessons" }, () => loadCurriculum(false))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, courseId]);
 
   const isUnlocked = (l: any, enr: any) => {

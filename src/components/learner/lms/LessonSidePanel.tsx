@@ -116,6 +116,13 @@ export default function LessonSidePanel({ courseId, lessonId }: Props) {
             {resources.length === 0 && <p className="text-xs text-muted-foreground text-center py-6">No additional resources for this lesson.</p>}
             {resources.map((r) => (
               <a key={r.id} href={r.url} target="_blank" rel="noreferrer"
+                onClick={() => {
+                  if (user) {
+                    supabase.from("lesson_link_clicks").insert({
+                      lesson_id: lessonId, user_id: user.id, link_type: r.kind || "resource", url: r.url,
+                    }).then(() => {});
+                  }
+                }}
                 className="flex items-center gap-2 rounded-lg border border-border bg-background/40 p-3 hover:border-primary/40 transition">
                 <FileText className="h-4 w-4 text-primary shrink-0" />
                 <div className="flex-1 min-w-0">

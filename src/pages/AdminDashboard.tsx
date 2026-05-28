@@ -56,6 +56,7 @@ import AdminExternalLinkControl from "@/components/admin/AdminExternalLinkContro
 import AdminCurriculumControl from "@/components/admin/AdminCurriculumControl";
 import AdminCurrencyManagement from "@/components/admin/AdminCurrencyManagement";
 import AdminAssignments from "@/components/admin/AdminAssignments";
+import AdminLMSOverview from "@/components/admin/AdminLMSOverview";
 
 
 const navItems = [
@@ -112,6 +113,7 @@ const navItems = [
   { label: "Curriculum Control", path: "/admin/curriculum-control", icon: <ShieldCheck className="h-4 w-4" /> },
   { label: "Currency Management", path: "/admin/currencies", icon: <Coins className="h-4 w-4" /> },
   { label: "Assignments", path: "/admin/assignments", icon: <ClipboardList className="h-4 w-4" /> },
+  { label: "LMS Oversight", path: "/admin/lms-overview", icon: <TrendingUp className="h-4 w-4" /> },
 ];
 
 
@@ -180,6 +182,7 @@ const AdminDashboard = () => {
         <Route path="curriculum-control" element={<AdminCurriculumControl />} />
         <Route path="currencies" element={<AdminCurrencyManagement />} />
         <Route path="assignments" element={<AdminAssignments />} />
+        <Route path="lms-overview" element={<AdminLMSOverview />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
 
       </Routes>

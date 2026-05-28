@@ -170,6 +170,11 @@ const CoursePlayer = () => {
             </div>
           </div>
         </div>
+        {courseId && (
+          <div className="p-3 border-b border-border">
+            <CourseUpcomingSessions courseId={courseId} />
+          </div>
+        )}
         <div className="p-2 space-y-3">
           {modules.map((m) => (
             <div key={m.id}>

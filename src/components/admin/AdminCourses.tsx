@@ -1,9 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { BookOpen, Search, CheckCircle, XCircle, MessageSquare, Eye, Upload, ImageIcon } from "lucide-react";
+import { BookOpen, Search, CheckCircle, XCircle, MessageSquare, Upload, ImageIcon, Eye, Trash2, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { compressImage } from "@/lib/imageCompress";
 
 const AdminCourses = () => {
   const [courses, setCourses] = useState<any[]>([]);

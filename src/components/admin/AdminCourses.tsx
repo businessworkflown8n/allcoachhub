@@ -376,6 +376,13 @@ const AdminCourses = () => {
           </div>
         </div>
       )}
+
+      {/* Thumbnail preview */}
+      <Dialog open={!!previewUrl} onOpenChange={(o) => { if (!o) setPreviewUrl(null); }}>
+        <DialogContent className="max-w-2xl p-2">
+          {previewUrl && <img src={previewUrl} alt="Thumbnail preview" className="w-full rounded-lg" />}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

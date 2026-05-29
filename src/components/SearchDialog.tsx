@@ -35,7 +35,7 @@ const SearchDialog = () => {
     const fetchCourses = async () => {
       const { data } = await supabase
         .from("courses")
-        .select("id, title, category, slug")
+        .select("id, title, category, slug, thumbnail_url")
         .eq("is_published", true)
         .eq("approval_status", "approved")
         .limit(50);
@@ -83,7 +83,16 @@ const SearchDialog = () => {
                 key={course.id}
                 onSelect={() => handleCourseSelect(course, idx)}
               >
-                <Search className="mr-2 h-4 w-4" />
+                {(course as any).thumbnail_url ? (
+                  <img
+                    src={(course as any).thumbnail_url}
+                    alt=""
+                    loading="lazy"
+                    className="mr-2 h-8 w-14 rounded object-cover"
+                  />
+                ) : (
+                  <Search className="mr-2 h-4 w-4" />
+                )}
                 <div>
                   <p>{course.title}</p>
                   <p className="text-xs text-muted-foreground">{course.category}</p>

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import { ShieldCheck, Search, Users, CheckCircle, XCircle, Clock } from "lucide-react";
+import AdminCoachProfilePictures from "./AdminCoachProfilePictures";
 
 interface CoachFlags {
   coach_id: string;

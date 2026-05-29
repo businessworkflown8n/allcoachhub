@@ -29,47 +29,60 @@ const CoachProfile = () => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast({ title: "Invalid file", description: "Please select an image.", variant: "destructive" });
+    const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      toast({ title: "Invalid format", description: "Please use JPG, JPEG, PNG or WEBP.", variant: "destructive" });
       return;
     }
-    if (file.size > 200 * 1024) {
-      toast({ title: "Image too large", description: "Please upload an image below 200KB.", variant: "destructive" });
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Image too large", description: "Please upload an image under 5MB.", variant: "destructive" });
       return;
     }
 
     setUploadingAvatar(true);
     const ext = file.name.split(".").pop();
-    const path = `${user.id}/avatar-${Date.now()}.${ext}`;
-    const { error: uploadError } = await supabase.storage.from("logos").upload(path, file, { upsert: true, cacheControl: "3600" });
+    const path = `${user.id}/profile-${Date.now()}.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from("coach-profile-images")
+      .upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type });
     if (uploadError) {
       setUploadingAvatar(false);
       toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
       return;
     }
-    const { data: pub } = supabase.storage.from("logos").getPublicUrl(path);
+    const { data: pub } = supabase.storage.from("coach-profile-images").getPublicUrl(path);
     const url = pub.publicUrl;
-    const { error: dbError } = await supabase.from("profiles").update({ avatar_url: url }).eq("user_id", user.id);
+    const { error: dbError } = await supabase.from("profiles").update({
+      coach_profile_image_url: url,
+      profile_image_status: "pending",
+      profile_image_uploaded_at: new Date().toISOString(),
+      profile_image_reject_reason: null,
+    } as any).eq("user_id", user.id);
     setUploadingAvatar(false);
     if (dbError) {
       toast({ title: "Save failed", description: dbError.message, variant: "destructive" });
       return;
     }
-    setProfile({ ...profile, avatar_url: url });
-    toast({ title: "Profile picture updated" });
+    setProfile({ ...profile, coach_profile_image_url: url, profile_image_status: "pending" });
+    toast({ title: "Submitted for approval", description: "Admin will review your new profile picture shortly." });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const removeAvatar = async () => {
     if (!user) return;
     setUploadingAvatar(true);
-    const { error } = await supabase.from("profiles").update({ avatar_url: null }).eq("user_id", user.id);
+    const { error } = await supabase.from("profiles").update({
+      avatar_url: null,
+      coach_profile_image_url: null,
+      profile_image_status: "approved",
+      profile_image_uploaded_at: null,
+    } as any).eq("user_id", user.id);
     setUploadingAvatar(false);
     if (error) {
       toast({ title: "Failed", description: error.message, variant: "destructive" });
       return;
     }
-    setProfile({ ...profile, avatar_url: null });
+    setProfile({ ...profile, avatar_url: null, coach_profile_image_url: null, profile_image_status: "approved" });
     toast({ title: "Profile picture removed" });
   };
 
@@ -129,7 +142,19 @@ const CoachProfile = () => {
           <p className="text-sm font-medium text-foreground">Profile Picture</p>
           {canUploadAvatar ? (
             <>
-              <p className="text-xs text-muted-foreground">Square JPG/PNG, under 200KB. Shown on your public coach page.</p>
+              <p className="text-xs text-muted-foreground">Square JPG/JPEG/PNG/WEBP, under 5MB (recommended 500×500). Uploads require admin approval before going live.</p>
+              {profile?.profile_image_status === "pending" && (
+                <p className="text-xs text-amber-600">⏳ Pending admin approval</p>
+              )}
+              {profile?.profile_image_status === "rejected" && (
+                <p className="text-xs text-destructive">✗ Rejected{profile?.profile_image_reject_reason ? `: ${profile.profile_image_reject_reason}` : ""}. Please re-upload.</p>
+              )}
+              {profile?.coach_profile_image_url && profile.coach_profile_image_url !== profile.avatar_url && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Preview (awaiting review):</span>
+                  <img src={profile.coach_profile_image_url} alt="Pending" className="h-10 w-10 rounded-full object-cover border border-border" />
+                </div>
+              )}
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -137,9 +162,9 @@ const CoachProfile = () => {
                   disabled={uploadingAvatar}
                   className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
                 >
-                  <Upload className="h-3.5 w-3.5" /> {profile?.avatar_url ? "Change" : "Upload"}
+                  <Upload className="h-3.5 w-3.5" /> {profile?.avatar_url || profile?.coach_profile_image_url ? "Change" : "Upload"}
                 </button>
-                {profile?.avatar_url && (
+                {(profile?.avatar_url || profile?.coach_profile_image_url) && (
                   <button
                     type="button"
                     onClick={removeAvatar}
@@ -150,7 +175,7 @@ const CoachProfile = () => {
                   </button>
                 )}
               </div>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/jpg,image/png,image/webp" onChange={handleAvatarUpload} className="hidden" />
             </>
           ) : (
             <p className="text-xs text-muted-foreground">Profile picture uploads are currently disabled by the admin.</p>

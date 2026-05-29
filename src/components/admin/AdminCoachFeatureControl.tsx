@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import { ShieldCheck, Search, Users, CheckCircle, XCircle, Clock } from "lucide-react";
+import AdminCoachProfilePictures from "./AdminCoachProfilePictures";
 
 interface CoachFlags {
   coach_id: string;
@@ -196,6 +197,8 @@ const AdminCoachFeatureControl = () => {
         <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><CheckCircle className="h-5 w-5 text-emerald-500" /><div><p className="text-2xl font-bold text-emerald-600">{counts.approved}</p><p className="text-sm text-muted-foreground">Approved</p></div></div></CardContent></Card>
         <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><Clock className="h-5 w-5 text-amber-500" /><div><p className="text-2xl font-bold text-amber-600">{counts.pending}</p><p className="text-sm text-muted-foreground">Pending</p></div></div></CardContent></Card>
       </div>
+
+      <AdminCoachProfilePictures />
 
       <Card>
         <CardHeader>

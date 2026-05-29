@@ -292,6 +292,20 @@ const Courses = () => {
                       key={course.id}
                       className="group flex flex-col overflow-hidden rounded-xl border border-border/60 bg-card/40 transition-all duration-300 hover:border-primary/50 hover:-translate-y-0.5"
                     >
+                      <div className="relative aspect-video w-full overflow-hidden bg-secondary/60">
+                        {course.thumbnail_url ? (
+                          <img
+                            src={course.thumbnail_url}
+                            alt={course.title}
+                            loading="lazy"
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                            <GraduationCap className="h-12 w-12" />
+                          </div>
+                        )}
+                      </div>
                       <div className="flex h-full flex-col p-6">
                         <div className="mb-6 flex items-start justify-between">
                           <div className="flex flex-col gap-2">
@@ -310,9 +324,6 @@ const Courses = () => {
                                 </span>
                               )}
                             </div>
-                          </div>
-                          <div className="rounded-lg bg-secondary/60 p-2 text-muted-foreground transition-colors group-hover:text-primary">
-                            <GraduationCap className="h-5 w-5" />
                           </div>
                         </div>
 

@@ -29,47 +29,60 @@ const CoachProfile = () => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast({ title: "Invalid file", description: "Please select an image.", variant: "destructive" });
+    const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      toast({ title: "Invalid format", description: "Please use JPG, JPEG, PNG or WEBP.", variant: "destructive" });
       return;
     }
-    if (file.size > 200 * 1024) {
-      toast({ title: "Image too large", description: "Please upload an image below 200KB.", variant: "destructive" });
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Image too large", description: "Please upload an image under 5MB.", variant: "destructive" });
       return;
     }
 
     setUploadingAvatar(true);
     const ext = file.name.split(".").pop();
-    const path = `${user.id}/avatar-${Date.now()}.${ext}`;
-    const { error: uploadError } = await supabase.storage.from("logos").upload(path, file, { upsert: true, cacheControl: "3600" });
+    const path = `${user.id}/profile-${Date.now()}.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from("coach-profile-images")
+      .upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type });
     if (uploadError) {
       setUploadingAvatar(false);
       toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
       return;
     }
-    const { data: pub } = supabase.storage.from("logos").getPublicUrl(path);
+    const { data: pub } = supabase.storage.from("coach-profile-images").getPublicUrl(path);
     const url = pub.publicUrl;
-    const { error: dbError } = await supabase.from("profiles").update({ avatar_url: url }).eq("user_id", user.id);
+    const { error: dbError } = await supabase.from("profiles").update({
+      coach_profile_image_url: url,
+      profile_image_status: "pending",
+      profile_image_uploaded_at: new Date().toISOString(),
+      profile_image_reject_reason: null,
+    } as any).eq("user_id", user.id);
     setUploadingAvatar(false);
     if (dbError) {
       toast({ title: "Save failed", description: dbError.message, variant: "destructive" });
       return;
     }
-    setProfile({ ...profile, avatar_url: url });
-    toast({ title: "Profile picture updated" });
+    setProfile({ ...profile, coach_profile_image_url: url, profile_image_status: "pending" });
+    toast({ title: "Submitted for approval", description: "Admin will review your new profile picture shortly." });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const removeAvatar = async () => {
     if (!user) return;
     setUploadingAvatar(true);
-    const { error } = await supabase.from("profiles").update({ avatar_url: null }).eq("user_id", user.id);
+    const { error } = await supabase.from("profiles").update({
+      avatar_url: null,
+      coach_profile_image_url: null,
+      profile_image_status: "approved",
+      profile_image_uploaded_at: null,
+    } as any).eq("user_id", user.id);
     setUploadingAvatar(false);
     if (error) {
       toast({ title: "Failed", description: error.message, variant: "destructive" });
       return;
     }
-    setProfile({ ...profile, avatar_url: null });
+    setProfile({ ...profile, avatar_url: null, coach_profile_image_url: null, profile_image_status: "approved" });
     toast({ title: "Profile picture removed" });
   };
 

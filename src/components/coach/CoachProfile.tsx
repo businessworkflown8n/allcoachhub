@@ -142,7 +142,19 @@ const CoachProfile = () => {
           <p className="text-sm font-medium text-foreground">Profile Picture</p>
           {canUploadAvatar ? (
             <>
-              <p className="text-xs text-muted-foreground">Square JPG/PNG, under 200KB. Shown on your public coach page.</p>
+              <p className="text-xs text-muted-foreground">Square JPG/JPEG/PNG/WEBP, under 5MB (recommended 500×500). Uploads require admin approval before going live.</p>
+              {profile?.profile_image_status === "pending" && (
+                <p className="text-xs text-amber-600">⏳ Pending admin approval</p>
+              )}
+              {profile?.profile_image_status === "rejected" && (
+                <p className="text-xs text-destructive">✗ Rejected{profile?.profile_image_reject_reason ? `: ${profile.profile_image_reject_reason}` : ""}. Please re-upload.</p>
+              )}
+              {profile?.coach_profile_image_url && profile.coach_profile_image_url !== profile.avatar_url && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Preview (awaiting review):</span>
+                  <img src={profile.coach_profile_image_url} alt="Pending" className="h-10 w-10 rounded-full object-cover border border-border" />
+                </div>
+              )}
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -150,9 +162,9 @@ const CoachProfile = () => {
                   disabled={uploadingAvatar}
                   className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
                 >
-                  <Upload className="h-3.5 w-3.5" /> {profile?.avatar_url ? "Change" : "Upload"}
+                  <Upload className="h-3.5 w-3.5" /> {profile?.avatar_url || profile?.coach_profile_image_url ? "Change" : "Upload"}
                 </button>
-                {profile?.avatar_url && (
+                {(profile?.avatar_url || profile?.coach_profile_image_url) && (
                   <button
                     type="button"
                     onClick={removeAvatar}
@@ -163,7 +175,7 @@ const CoachProfile = () => {
                   </button>
                 )}
               </div>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/jpg,image/png,image/webp" onChange={handleAvatarUpload} className="hidden" />
             </>
           ) : (
             <p className="text-xs text-muted-foreground">Profile picture uploads are currently disabled by the admin.</p>

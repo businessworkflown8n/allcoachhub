@@ -198,6 +198,8 @@ const AdminCoachFeatureControl = () => {
         <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><Clock className="h-5 w-5 text-amber-500" /><div><p className="text-2xl font-bold text-amber-600">{counts.pending}</p><p className="text-sm text-muted-foreground">Pending</p></div></div></CardContent></Card>
       </div>
 
+      <AdminCoachProfilePictures />
+
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-3 justify-between">

@@ -21,7 +21,8 @@ const AdminCourses = () => {
   const [changingId, setChangingId] = useState<string | null>(null);
   const [changeMessage, setChangeMessage] = useState("");
   const [thumbUploadId, setThumbUploadId] = useState<string | null>(null);
-  const [thumbUploading, setThumbUploading] = useState(false);
+  const [thumbUploading, setThumbUploading] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const thumbInputRef = useRef<HTMLInputElement>(null);
 
   const fetchAll = async () => {

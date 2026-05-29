@@ -259,20 +259,43 @@ const AdminCourses = () => {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {c.thumbnail_url ? (
-                        <img src={c.thumbnail_url} alt="" className="h-10 w-16 rounded object-cover border border-border" />
+                        <button onClick={() => setPreviewUrl(c.thumbnail_url)} className="block">
+                          <img src={c.thumbnail_url} alt="" className="h-10 w-16 rounded object-cover border border-border hover:ring-2 hover:ring-primary/40" />
+                        </button>
                       ) : (
                         <div className="h-10 w-16 rounded border border-dashed border-border bg-secondary flex items-center justify-center">
                           <ImageIcon className="h-4 w-4 text-muted-foreground" />
                         </div>
                       )}
-                      <button
-                        onClick={() => { setThumbUploadId(c.id); thumbInputRef.current?.click(); }}
-                        title="Upload thumbnail"
-                        className="rounded p-1 text-primary hover:bg-primary/10"
-                        disabled={thumbUploading}
-                      >
-                        <Upload className="h-3.5 w-3.5" />
-                      </button>
+                      <div className="flex flex-col gap-0.5">
+                        <button
+                          onClick={() => { setThumbUploadId(c.id); thumbInputRef.current?.click(); }}
+                          title={c.thumbnail_url ? "Replace thumbnail" : "Upload thumbnail"}
+                          className="rounded p-1 text-primary hover:bg-primary/10 disabled:opacity-50"
+                          disabled={!!thumbUploading}
+                        >
+                          {thumbUploading === c.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                        </button>
+                        {c.thumbnail_url && (
+                          <>
+                            <button
+                              onClick={() => setPreviewUrl(c.thumbnail_url)}
+                              title="Preview"
+                              className="rounded p-1 text-muted-foreground hover:bg-secondary"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteThumb(c.id, c.thumbnail_url)}
+                              title="Delete thumbnail"
+                              className="rounded p-1 text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                              disabled={!!thumbUploading}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                     {c.rejection_reason?.startsWith("THUMBNAIL_REQUEST:") && (
                       <p className="text-[10px] text-blue-400 mt-1 max-w-[150px] truncate" title={c.rejection_reason.replace("THUMBNAIL_REQUEST: ", "")}>

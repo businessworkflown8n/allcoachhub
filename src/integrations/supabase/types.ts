@@ -6933,6 +6933,7 @@ export type Database = {
           category_id: string | null
           certifications: string[] | null
           city: string | null
+          coach_profile_image_url: string | null
           company_name: string | null
           contact_number: string | null
           country: string | null
@@ -6950,6 +6951,11 @@ export type Database = {
           last_active_at: string | null
           linkedin_profile: string | null
           marketing_consent: boolean
+          profile_image_approved_at: string | null
+          profile_image_approved_by: string | null
+          profile_image_reject_reason: string | null
+          profile_image_status: string
+          profile_image_uploaded_at: string | null
           public_listing_status: string
           slug: string | null
           social_links: Json | null
@@ -6968,6 +6974,7 @@ export type Database = {
           category_id?: string | null
           certifications?: string[] | null
           city?: string | null
+          coach_profile_image_url?: string | null
           company_name?: string | null
           contact_number?: string | null
           country?: string | null
@@ -6985,6 +6992,11 @@ export type Database = {
           last_active_at?: string | null
           linkedin_profile?: string | null
           marketing_consent?: boolean
+          profile_image_approved_at?: string | null
+          profile_image_approved_by?: string | null
+          profile_image_reject_reason?: string | null
+          profile_image_status?: string
+          profile_image_uploaded_at?: string | null
           public_listing_status?: string
           slug?: string | null
           social_links?: Json | null
@@ -7003,6 +7015,7 @@ export type Database = {
           category_id?: string | null
           certifications?: string[] | null
           city?: string | null
+          coach_profile_image_url?: string | null
           company_name?: string | null
           contact_number?: string | null
           country?: string | null
@@ -7020,6 +7033,11 @@ export type Database = {
           last_active_at?: string | null
           linkedin_profile?: string | null
           marketing_consent?: boolean
+          profile_image_approved_at?: string | null
+          profile_image_approved_by?: string | null
+          profile_image_reject_reason?: string | null
+          profile_image_status?: string
+          profile_image_uploaded_at?: string | null
           public_listing_status?: string
           slug?: string | null
           social_links?: Json | null
@@ -9498,6 +9516,10 @@ export type Database = {
       redeem_course_invite: { Args: { _token: string }; Returns: Json }
       reject_notification_request: {
         Args: { _request_id: string; _reviewer_note?: string }
+        Returns: Json
+      }
+      review_coach_profile_image: {
+        Args: { _action: string; _coach_id: string; _reason?: string }
         Returns: Json
       }
       update_learner_streak: { Args: { _user_id: string }; Returns: Json }

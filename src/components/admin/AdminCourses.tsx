@@ -69,26 +69,102 @@ const AdminCourses = () => {
     fetchAll();
   };
 
+  const ALLOWED = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+  // Optimize an image File: max 1280px wide, JPEG quality 0.85, returns Blob
+  const optimizeImage = async (file: File): Promise<Blob> => {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = reject;
+        i.src = r.result as string;
+      };
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+    const MAX = 1280;
+    let w = img.width, h = img.height;
+    if (w > MAX) { h = Math.round((h * MAX) / w); w = MAX; }
+    const canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+    return await new Promise<Blob>((resolve) =>
+      canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85)
+    );
+  };
+
   const handleAdminThumbUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !thumbUploadId) return;
-    if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
-      toast({ title: "Invalid file. Use an image under 5MB.", variant: "destructive" });
+    if (!file || !thumbUploadId || !user) return;
+    if (!ALLOWED.includes(file.type)) {
+      toast({ title: "Invalid format", description: "Use JPG, PNG, or WEBP.", variant: "destructive" });
       return;
     }
-    setThumbUploading(true);
-    const course = courses.find(c => c.id === thumbUploadId);
-    const ext = file.name.split(".").pop();
-    const path = `course-thumbnails/${course?.coach_id || "admin"}/${thumbUploadId}.${ext}`;
-    const { error } = await supabase.storage.from("logos").upload(path, file, { upsert: true });
-    if (error) { toast({ title: "Upload failed", description: error.message, variant: "destructive" }); setThumbUploading(false); return; }
-    const { data: urlData } = supabase.storage.from("logos").getPublicUrl(path);
-    await supabase.from("courses").update({ thumbnail_url: urlData.publicUrl, rejection_reason: null }).eq("id", thumbUploadId);
-    toast({ title: "Thumbnail updated" });
-    setThumbUploadId(null);
-    setThumbUploading(false);
-    if (thumbInputRef.current) thumbInputRef.current.value = "";
-    fetchAll();
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Too large", description: "Max 5MB.", variant: "destructive" });
+      return;
+    }
+    setThumbUploading(thumbUploadId);
+    try {
+      const optimized = await optimizeImage(file);
+      // Admin path: store under admin uid first folder so storage policy passes
+      const path = `${user.id}/${thumbUploadId}-${Date.now()}.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("course-thumbnails")
+        .upload(path, optimized, { upsert: true, contentType: "image/jpeg", cacheControl: "3600" });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from("course-thumbnails").getPublicUrl(path);
+      const { error: dbErr } = await supabase
+        .from("courses")
+        .update({
+          thumbnail_url: urlData.publicUrl,
+          thumbnail_updated_at: new Date().toISOString(),
+          thumbnail_updated_by: user.id,
+          rejection_reason: null,
+        })
+        .eq("id", thumbUploadId);
+      if (dbErr) throw dbErr;
+      toast({ title: "Thumbnail updated" });
+      fetchAll();
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      setThumbUploadId(null);
+      setThumbUploading(null);
+      if (thumbInputRef.current) thumbInputRef.current.value = "";
+    }
+  };
+
+  const handleDeleteThumb = async (courseId: string, url: string | null) => {
+    if (!user || !url) return;
+    if (!confirm("Delete this thumbnail?")) return;
+    setThumbUploading(courseId);
+    try {
+      // Best-effort storage delete (only works for course-thumbnails bucket files)
+      const marker = "/course-thumbnails/";
+      const idx = url.indexOf(marker);
+      if (idx > -1) {
+        const path = url.slice(idx + marker.length).split("?")[0];
+        await supabase.storage.from("course-thumbnails").remove([path]);
+      }
+      const { error } = await supabase
+        .from("courses")
+        .update({
+          thumbnail_url: null,
+          thumbnail_updated_at: new Date().toISOString(),
+          thumbnail_updated_by: user.id,
+        })
+        .eq("id", courseId);
+      if (error) throw error;
+      toast({ title: "Thumbnail removed" });
+      fetchAll();
+    } catch (err: any) {
+      toast({ title: "Delete failed", description: err.message, variant: "destructive" });
+    } finally {
+      setThumbUploading(null);
+    }
   };
 
   const filtered = courses.filter((c) => {

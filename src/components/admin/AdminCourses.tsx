@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { compressImage } from "@/lib/imageCompress";
 
 const AdminCourses = () => {
+  const { user } = useAuth();
   const [courses, setCourses] = useState<any[]>([]);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<any[]>([]);

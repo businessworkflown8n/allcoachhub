@@ -205,8 +205,8 @@ const CoachProfile = () => {
           <Input value={profile?.full_name || ""} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} className="bg-secondary border-border" />
         </div>
         <div className="space-y-2">
-          <Label className="text-foreground">Category</Label>
-          <Input value={profile?.category || ""} onChange={(e) => setProfile({ ...profile, category: e.target.value })} className="bg-secondary border-border" placeholder="e.g. AI, Marketing" />
+          <Label className="text-foreground">Headline / Tagline</Label>
+          <Input value={profile?.category || ""} onChange={(e) => setProfile({ ...profile, category: e.target.value })} className="bg-secondary border-border" placeholder="e.g. AI Prompt Expert" />
         </div>
         <div className="space-y-2">
           <Label className="text-foreground">Experience</Label>

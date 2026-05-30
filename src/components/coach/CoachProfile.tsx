@@ -237,6 +237,8 @@ const CoachProfile = () => {
         <Label className="text-foreground">Bio</Label>
         <Textarea value={profile?.bio || ""} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} className="bg-secondary border-border" rows={4} />
       </div>
+
+      <CoachCategoryManager />
       <button onClick={handleSave} disabled={saving} className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:brightness-110 disabled:opacity-50">
         {saving ? "Saving..." : "Save Changes"}
       </button>

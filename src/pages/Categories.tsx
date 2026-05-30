@@ -97,7 +97,7 @@ const Categories = () => {
 
   useEffect(() => {
     const fetchAll = async () => {
-      const [{ data: cats }, { data: profs }, { data: courses }, { data: reviews }] = await Promise.all([
+      const [{ data: cats }, { data: profs }, { data: courses }, { data: reviews }, { data: perms }] = await Promise.all([
         supabase
           .from("coach_categories")
           .select("id, name, slug, icon, sort_order")
@@ -115,6 +115,10 @@ const Categories = () => {
         supabase
           .from("reviews")
           .select("coach_id, rating")
+          .eq("status", "approved"),
+        supabase
+          .from("coach_category_permissions")
+          .select("coach_id, category_id")
           .eq("status", "approved"),
       ]);
 
@@ -141,15 +145,33 @@ const Categories = () => {
         };
       });
 
+      const profileById: Record<string, Coach> = {};
+      enriched.forEach((c) => { profileById[c.user_id] = c; });
+
+      // Build category -> coaches using BOTH the multi-cat assignment table
+      // and the legacy profiles.category_id / category name. De-dupe per category.
       const grouped: Record<string, Coach[]> = {};
       (cats || []).forEach((c: any) => {
-        grouped[c.id] = enriched
+        const seen = new Set<string>();
+        const list: Coach[] = [];
+        const push = (coach?: Coach) => {
+          if (!coach || seen.has(coach.user_id)) return;
+          seen.add(coach.user_id);
+          list.push(coach);
+        };
+        (perms || [])
+          .filter((p: any) => p.category_id === c.id)
+          .forEach((p: any) => push(profileById[p.coach_id]));
+        enriched
           .filter(
             (e) =>
               e.category_id === c.id ||
               (e.category && e.category.toLowerCase() === c.name.toLowerCase())
           )
-          .sort((a, b) => b.reviewCount - a.reviewCount || b.courseCount - a.courseCount);
+          .forEach(push);
+        grouped[c.id] = list.sort(
+          (a, b) => b.reviewCount - a.reviewCount || b.courseCount - a.courseCount
+        );
       });
 
       setCategories((cats as Category[]) || []);

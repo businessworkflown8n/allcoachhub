@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Camera, Upload, Trash2, Loader2 } from "lucide-react";
+import CoachCategoryManager from "./CoachCategoryManager";
 
 const CoachProfile = () => {
   const { user } = useAuth();
@@ -204,8 +205,8 @@ const CoachProfile = () => {
           <Input value={profile?.full_name || ""} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} className="bg-secondary border-border" />
         </div>
         <div className="space-y-2">
-          <Label className="text-foreground">Category</Label>
-          <Input value={profile?.category || ""} onChange={(e) => setProfile({ ...profile, category: e.target.value })} className="bg-secondary border-border" placeholder="e.g. AI, Marketing" />
+          <Label className="text-foreground">Headline / Tagline</Label>
+          <Input value={profile?.category || ""} onChange={(e) => setProfile({ ...profile, category: e.target.value })} className="bg-secondary border-border" placeholder="e.g. AI Prompt Expert" />
         </div>
         <div className="space-y-2">
           <Label className="text-foreground">Experience</Label>
@@ -236,6 +237,8 @@ const CoachProfile = () => {
         <Label className="text-foreground">Bio</Label>
         <Textarea value={profile?.bio || ""} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} className="bg-secondary border-border" rows={4} />
       </div>
+
+      <CoachCategoryManager />
       <button onClick={handleSave} disabled={saving} className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:brightness-110 disabled:opacity-50">
         {saving ? "Saving..." : "Save Changes"}
       </button>

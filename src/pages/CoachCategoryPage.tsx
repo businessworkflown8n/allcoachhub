@@ -92,31 +92,67 @@ const CoachCategoryPage = () => {
   }, [slug]);
 
   const fetchCoachesByCategory = async (categoryId: string | null) => {
-    let profileQuery = supabase
-      .from("profiles")
-      .select("user_id, full_name, slug, avatar_url, bio, category_id");
+    // 1. Collect coach IDs from BOTH the multi-category assignment table
+    //    and the legacy profiles.category_id mapping.
+    const coachIdSet = new Set<string>();
 
     if (categoryId) {
-      profileQuery = profileQuery.eq("category_id", categoryId);
+      const [{ data: perms }, { data: legacyProfs }] = await Promise.all([
+        supabase
+          .from("coach_category_permissions")
+          .select("coach_id")
+          .eq("status", "approved")
+          .eq("category_id", categoryId),
+        supabase
+          .from("profiles")
+          .select("user_id")
+          .eq("category_id", categoryId),
+      ]);
+      (perms || []).forEach((p: any) => coachIdSet.add(p.coach_id));
+      (legacyProfs || []).forEach((p: any) => coachIdSet.add(p.user_id));
     } else {
-      profileQuery = profileQuery.not("category_id", "is", null);
+      const [{ data: perms }, { data: legacyProfs }] = await Promise.all([
+        supabase
+          .from("coach_category_permissions")
+          .select("coach_id")
+          .eq("status", "approved"),
+        supabase
+          .from("profiles")
+          .select("user_id")
+          .not("category_id", "is", null),
+      ]);
+      (perms || []).forEach((p: any) => coachIdSet.add(p.coach_id));
+      (legacyProfs || []).forEach((p: any) => coachIdSet.add(p.user_id));
     }
 
-    const { data: profilesData } = await profileQuery;
+    if (coachIdSet.size === 0) {
+      setCoaches([]);
+      return;
+    }
+
+    const coachIds = Array.from(coachIdSet);
+
+    // 2. Fetch only approved / non-suspended public profiles for those coaches.
+    const { data: profilesData } = await supabase
+      .from("coach_public_profiles")
+      .select("user_id, full_name, slug, avatar_url, bio, category_id")
+      .in("user_id", coachIds)
+      .eq("is_suspended", false);
+
     if (!profilesData || profilesData.length === 0) {
       setCoaches([]);
       return;
     }
 
-    const coachIds = profilesData.map((p) => p.user_id);
+    const visibleIds = profilesData.map((p: any) => p.user_id);
 
-    // Fetch courses for these coaches
+    // 3. Fetch published+approved courses for these coaches.
     const { data: coursesData } = await supabase
       .from("courses")
       .select("id, title, slug, price_usd, price_inr, level, duration_hours, coach_id")
       .eq("is_published", true)
       .eq("approval_status", "approved")
-      .in("coach_id", coachIds);
+      .in("coach_id", visibleIds);
 
     const coursesByCoach: Record<string, any[]> = {};
     (coursesData || []).forEach((c) => {
@@ -125,8 +161,9 @@ const CoachCategoryPage = () => {
     });
 
     setCoaches(
-      profilesData.map((p) => ({
+      profilesData.map((p: any) => ({
         ...p,
+        category_id: p.category_id || categoryId || "",
         courses: coursesByCoach[p.user_id] || [],
       }))
     );

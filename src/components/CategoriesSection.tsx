@@ -34,15 +34,27 @@ const CategoriesSection = () => {
         return;
       }
 
-      // Get coach counts per category_id
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("category_id")
-        .not("category_id", "is", null);
+      // Coach counts per category — union of legacy profiles.category_id
+      // and approved entries in the multi-cat assignment table. De-dup by coach.
+      const [{ data: profiles }, { data: perms }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("user_id, category_id")
+          .not("category_id", "is", null),
+        supabase
+          .from("coach_category_permissions")
+          .select("coach_id, category_id")
+          .eq("status", "approved"),
+      ]);
+
+      const pairs = new Set<string>();
+      (profiles || []).forEach((p: any) => pairs.add(`${p.category_id}::${p.user_id}`));
+      (perms || []).forEach((p: any) => pairs.add(`${p.category_id}::${p.coach_id}`));
 
       const counts: Record<string, number> = {};
-      (profiles || []).forEach((p: any) => {
-        counts[p.category_id] = (counts[p.category_id] || 0) + 1;
+      pairs.forEach((k) => {
+        const [catId] = k.split("::");
+        counts[catId] = (counts[catId] || 0) + 1;
       });
 
       setCategories(

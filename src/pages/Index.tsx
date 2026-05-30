@@ -16,6 +16,7 @@ const CTASection = lazy(() => import("@/components/CTASection"));
 const HomeBlogSection = lazy(() => import("@/components/HomeBlogSection"));
 const WhyCoachesJoinSection = lazy(() => import("@/components/WhyCoachesJoinSection"));
 const EarningsCalculator = lazy(() => import("@/components/EarningsCalculator"));
+const AIDiscoverySection = lazy(() => import("@/components/AIDiscoverySection"));
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -111,6 +112,9 @@ const Index = () => {
         </Suspense>
         <Suspense fallback={<SectionFallback />}>
           <section id="blogs"><HomeBlogSection /></section>
+        </Suspense>
+        <Suspense fallback={<SectionFallback />}>
+          <section id="about-platform"><AIDiscoverySection /></section>
         </Suspense>
         <Suspense fallback={<SectionFallback />}>
           <section id="cta"><CTASection /></section>

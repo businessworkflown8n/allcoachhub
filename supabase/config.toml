@@ -39,6 +39,8 @@ project_id = "iipxwwrzkdkestikxcpg"
     verify_jwt = true
   [functions.notify-category-approval]
     verify_jwt = false
+  [functions.notify-course-access-granted]
+    verify_jwt = true
   [functions.notify-coach-registration]
     verify_jwt = false
   [functions.notify-learner-registration]

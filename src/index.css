@@ -386,3 +386,36 @@
 .mobile-cta-bar {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
+
+/* Make native date/time picker calendar icon visible in dark mode */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator,
+input[type="week"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(2);
+  opacity: 0.9;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  background-color: hsl(var(--primary) / 0.15);
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover,
+input[type="month"]::-webkit-calendar-picker-indicator:hover,
+input[type="week"]::-webkit-calendar-picker-indicator:hover {
+  background-color: hsl(var(--primary) / 0.3);
+  opacity: 1;
+}
+
+/* Light mode: don't invert (keep dark icon on light bg) */
+:root:not(.dark) input[type="date"]::-webkit-calendar-picker-indicator,
+:root:not(.dark) input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+:root:not(.dark) input[type="time"]::-webkit-calendar-picker-indicator,
+:root:not(.dark) input[type="month"]::-webkit-calendar-picker-indicator,
+:root:not(.dark) input[type="week"]::-webkit-calendar-picker-indicator {
+  filter: none;
+  background-color: hsl(var(--primary) / 0.1);
+}

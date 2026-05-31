@@ -108,16 +108,30 @@ const CourseAccessManager = ({ open, onOpenChange, course, onUpdated }: Props) =
 
   const addGrant = async () => {
     if (!course || !newGrant.email.trim()) return toast({ title: "Email required", variant: "destructive" });
+    const learnerEmail = newGrant.email.trim().toLowerCase();
+    const expiresAt = newGrant.expires_at ? new Date(newGrant.expires_at).toISOString() : null;
     const { error } = await supabase.from("course_access_grants").insert({
       course_id: course.id,
-      email: newGrant.email.trim().toLowerCase(),
-      expires_at: newGrant.expires_at ? new Date(newGrant.expires_at).toISOString() : null,
+      email: learnerEmail,
+      expires_at: expiresAt,
       cohort_id: newGrant.cohort_id || null,
       granted_by: user?.id,
     });
     if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
     setNewGrant({ email: "", expires_at: "", cohort_id: "" });
-    toast({ title: "Access granted" });
+    toast({ title: "Access granted", description: "Sending notification email…" });
+    // Fire-and-forget enrollment email + in-app notification
+    supabase.functions
+      .invoke("notify-course-access-granted", {
+        body: { courseId: course.id, learnerEmail, expiresAt },
+      })
+      .then(({ error: fnErr }) => {
+        if (fnErr) {
+          toast({ title: "Email notification failed", description: fnErr.message, variant: "destructive" });
+        } else {
+          toast({ title: "Learner notified by email ✉️" });
+        }
+      });
     load();
   };
 

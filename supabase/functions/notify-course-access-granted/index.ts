@@ -140,7 +140,7 @@ serve(async (req) => {
     }
 
     const result = await sendWithRetry({
-      from: "AI Coach Portal <noreply@aicoachportal.com>",
+      from: "AI Coach Portal <hello@notify.www.aicoachportal.com>",
       to: [learnerEmail],
       subject: `🎉 Congratulations! You Have Been Enrolled in ${course.title}`,
       html,

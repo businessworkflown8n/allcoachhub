@@ -1883,10 +1883,13 @@ export type Database = {
           client_visible: boolean | null
           coach_id: string
           created_at: string
+          external_url: string | null
+          file_url: string | null
           id: string
           private_notes: string | null
           session_id: string
           summary: string | null
+          title: string | null
           updated_at: string
         }
         Insert: {
@@ -1894,10 +1897,13 @@ export type Database = {
           client_visible?: boolean | null
           coach_id: string
           created_at?: string
+          external_url?: string | null
+          file_url?: string | null
           id?: string
           private_notes?: string | null
           session_id: string
           summary?: string | null
+          title?: string | null
           updated_at?: string
         }
         Update: {
@@ -1905,10 +1911,13 @@ export type Database = {
           client_visible?: boolean | null
           coach_id?: string
           created_at?: string
+          external_url?: string | null
+          file_url?: string | null
           id?: string
           private_notes?: string | null
           session_id?: string
           summary?: string | null
+          title?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1929,12 +1938,16 @@ export type Database = {
           coach_id: string
           course_id: string | null
           created_at: string
+          description: string | null
           duration_minutes: number
           id: string
           location: string | null
           meeting_url: string | null
           notified_on_create: boolean
           outcome: string | null
+          parent_session_id: string | null
+          recurrence_rule: Json | null
+          recurrence_type: string
           reminder_10m_sent: boolean
           reminder_1h_sent: boolean
           reminder_24h_sent: boolean
@@ -1942,8 +1955,10 @@ export type Database = {
           scheduled_at: string
           session_type: string
           status: string
+          tags: string[]
           thumbnail_url: string | null
           title: string
+          topic: string | null
           updated_at: string
         }
         Insert: {
@@ -1953,12 +1968,16 @@ export type Database = {
           coach_id: string
           course_id?: string | null
           created_at?: string
+          description?: string | null
           duration_minutes?: number
           id?: string
           location?: string | null
           meeting_url?: string | null
           notified_on_create?: boolean
           outcome?: string | null
+          parent_session_id?: string | null
+          recurrence_rule?: Json | null
+          recurrence_type?: string
           reminder_10m_sent?: boolean
           reminder_1h_sent?: boolean
           reminder_24h_sent?: boolean
@@ -1966,8 +1985,10 @@ export type Database = {
           scheduled_at: string
           session_type?: string
           status?: string
+          tags?: string[]
           thumbnail_url?: string | null
           title: string
+          topic?: string | null
           updated_at?: string
         }
         Update: {
@@ -1977,12 +1998,16 @@ export type Database = {
           coach_id?: string
           course_id?: string | null
           created_at?: string
+          description?: string | null
           duration_minutes?: number
           id?: string
           location?: string | null
           meeting_url?: string | null
           notified_on_create?: boolean
           outcome?: string | null
+          parent_session_id?: string | null
+          recurrence_rule?: Json | null
+          recurrence_type?: string
           reminder_10m_sent?: boolean
           reminder_1h_sent?: boolean
           reminder_24h_sent?: boolean
@@ -1990,8 +2015,10 @@ export type Database = {
           scheduled_at?: string
           session_type?: string
           status?: string
+          tags?: string[]
           thumbnail_url?: string | null
           title?: string
+          topic?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -2007,6 +2034,13 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_sessions_parent_session_id_fkey"
+            columns: ["parent_session_id"]
+            isOneToOne: false
+            referencedRelation: "coach_sessions"
             referencedColumns: ["id"]
           },
         ]
@@ -5739,6 +5773,50 @@ export type Database = {
           },
         ]
       }
+      learner_session_access: {
+        Row: {
+          created_at: string
+          id: string
+          joined_at: string | null
+          last_viewed_at: string
+          learner_id: string
+          session_id: string
+          view_count: number
+          viewed_notes: boolean
+          watched_recording: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          joined_at?: string | null
+          last_viewed_at?: string
+          learner_id: string
+          session_id: string
+          view_count?: number
+          viewed_notes?: boolean
+          watched_recording?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          joined_at?: string | null
+          last_viewed_at?: string
+          learner_id?: string
+          session_id?: string
+          view_count?: number
+          viewed_notes?: boolean
+          watched_recording?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_session_access_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "coach_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learner_streaks: {
         Row: {
           current_streak: number
@@ -7902,6 +7980,85 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      session_recordings: {
+        Row: {
+          coach_id: string
+          created_at: string
+          id: string
+          provider: string | null
+          recording_url: string
+          session_id: string
+          title: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          id?: string
+          provider?: string | null
+          recording_url: string
+          session_id: string
+          title: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          id?: string
+          provider?: string | null
+          recording_url?: string
+          session_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_recordings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "coach_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_resources: {
+        Row: {
+          coach_id: string
+          created_at: string
+          external_url: string | null
+          file_url: string | null
+          id: string
+          resource_type: string
+          session_id: string
+          title: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          external_url?: string | null
+          file_url?: string | null
+          id?: string
+          resource_type?: string
+          session_id: string
+          title: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          external_url?: string | null
+          file_url?: string | null
+          id?: string
+          resource_type?: string
+          session_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_resources_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "coach_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       signup_submissions: {
         Row: {

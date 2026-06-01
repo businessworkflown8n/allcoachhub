@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSEO } from "@/hooks/useSEO";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { BookOpen, User, Heart, History, Award, Settings, Video, Zap, Share2, FileText, MessageSquare, Sparkles, Bell, Star, Link as LinkIcon, Briefcase } from "lucide-react";
+import { BookOpen, User, Heart, History, Award, Settings, Video, Zap, Share2, FileText, MessageSquare, Sparkles, Bell, Star, Link as LinkIcon, Briefcase, Calendar } from "lucide-react";
 import { useExternalLinkControl } from "@/hooks/useExternalLinkControl";
 import LearnerProfile from "@/components/learner/LearnerProfile";
 import LearnerCourses from "@/components/learner/LearnerCourses";
@@ -20,6 +20,7 @@ import LearnerWorkshops from "@/components/learner/LearnerWorkshops";
 import LearnerNotifications from "@/components/learner/LearnerNotifications";
 import LearnerReviews from "@/components/learner/LearnerReviews";
 import LearnerCoachMaterials from "@/components/learner/LearnerCoachMaterials";
+import LearnerSessions from "@/components/learner/LearnerSessions";
 
 const LearnerDashboard = () => {
   const { enabled: aiJobsLinkedInEnabled } = useExternalLinkControl("ai_jobs_news_linkedin_post");
@@ -37,6 +38,7 @@ const LearnerDashboard = () => {
     { label: "My Reviews", path: "/learner/reviews", icon: <Star className="h-4 w-4" /> },
     { label: "Webinars", path: "/learner/webinars", icon: <Video className="h-4 w-4" /> },
     { label: "Workshops", path: "/learner/workshops", icon: <Video className="h-4 w-4" /> },
+    { label: "My Sessions", path: "/learner/sessions", icon: <Calendar className="h-4 w-4" /> },
     { label: "Certificates", path: "/learner/certificates", icon: <Award className="h-4 w-4" /> },
     { label: "Materials", path: "/learner/materials", icon: <FileText className="h-4 w-4" /> },
     { label: "My Coach Materials", path: "/learner/coach-materials", icon: <LinkIcon className="h-4 w-4" /> },
@@ -61,6 +63,7 @@ const LearnerDashboard = () => {
         <Route path="reviews" element={<LearnerReviews />} />
         <Route path="webinars" element={<LearnerWebinars />} />
         <Route path="workshops" element={<LearnerWorkshops />} />
+        <Route path="sessions" element={<LearnerSessions />} />
         <Route path="certificates" element={<LearnerCertificates />} />
         <Route path="materials" element={<DashboardMaterials />} />
         <Route path="coach-materials" element={<LearnerCoachMaterials />} />

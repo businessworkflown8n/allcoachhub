@@ -80,18 +80,12 @@ const CoursesSection = () => {
                 key={course.id || course.title}
                 className="group flex flex-col rounded-xl border border-border bg-card transition-all hover:border-primary/20"
               >
-                <div className="relative aspect-video w-full overflow-hidden rounded-t-xl bg-secondary">
-                  {course.thumbnail_url ? (
-                    <img
-                      src={course.thumbnail_url}
-                      alt={course.title}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-4xl">🎓</div>
-                  )}
-                </div>
+                <CourseThumbnail
+                  src={course.thumbnail_url}
+                  alt={course.title}
+                  imgClassName="group-hover:scale-105"
+                />
+
                 <div className="border-b border-border p-5">
                   <div className="mb-3 flex items-center gap-2">
                     <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs text-muted-foreground">{course.level}</span>

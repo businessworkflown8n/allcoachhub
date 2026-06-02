@@ -72,11 +72,12 @@ const CategoryCourseGrid = ({
                 </div>
 
                 {/* Thumbnail */}
-                {course.thumbnail_url ? (
-                  <img src={course.thumbnail_url} alt={course.title} className="h-44 w-full rounded-t-xl object-cover" loading="lazy" />
-                ) : (
-                  <div className="flex h-44 items-center justify-center rounded-t-xl bg-secondary text-4xl">🎓</div>
-                )}
+                <CourseThumbnail
+                  src={course.thumbnail_url}
+                  alt={course.title}
+                  imgClassName="group-hover:scale-[1.03]"
+                />
+
 
                 <div className="flex flex-1 flex-col p-5">
                   {/* Tags */}

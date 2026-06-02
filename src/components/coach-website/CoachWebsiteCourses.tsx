@@ -28,7 +28,17 @@ const CoachWebsiteCourses = ({ courses, themeColor }: Props) => {
           {courses.map((course) => (
             <Card key={course.id} className="flex flex-col overflow-hidden transition-shadow hover:shadow-lg">
               {course.thumbnail_url && (
-                <img src={course.thumbnail_url} alt={course.title} className="h-44 w-full object-cover" />
+                <div className="relative aspect-video w-full overflow-hidden bg-secondary">
+                  <img
+                    src={course.thumbnail_url}
+                    alt={course.title}
+                    width={1280}
+                    height={720}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                  />
+                </div>
               )}
               <CardHeader className="pb-2">
                 <CardTitle className="line-clamp-2 text-lg">{course.title}</CardTitle>

@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { toast } from "@/hooks/use-toast";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useTranslation } from "@/i18n/TranslationProvider";
+import CourseThumbnail from "@/components/shared/CourseThumbnail";
 
 const CoursesSection = () => {
   const { user } = useAuth();

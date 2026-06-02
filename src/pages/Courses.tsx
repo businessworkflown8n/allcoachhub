@@ -280,7 +280,7 @@ const Courses = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {filtered.map((course) => {
+                {filtered.map((course, index) => {
                   const price = Number(course[priceKey] || course.price_usd);
                   const originalPrice = Number(
                     course[originalPriceKey] || course.original_price_usd || 0,

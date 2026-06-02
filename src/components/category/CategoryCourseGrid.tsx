@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Clock, Users, TrendingUp, Sparkles } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import CourseThumbnail from "@/components/shared/CourseThumbnail";
 
 interface Props {
   courses: any[];

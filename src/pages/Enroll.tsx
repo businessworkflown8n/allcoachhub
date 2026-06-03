@@ -11,6 +11,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { detectCurrency, priceForCurrency, type SupportedCurrency } from "@/lib/currencyRouter";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const Enroll = () => {
   useSEO({

@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useSEO } from "@/hooks/useSEO";
 import CourseThumbnail from "@/components/shared/CourseThumbnail";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const categories = [
   "All",

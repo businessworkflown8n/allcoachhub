@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { Heart, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const LearnerWishlist = () => {
   const { user } = useAuth();
@@ -41,7 +42,7 @@ const LearnerWishlist = () => {
             <div key={item.id} className="rounded-xl border border-border bg-card p-4 space-y-3">
               <span className="text-xs text-primary">{(item.courses as any)?.category}</span>
               <h3 className="text-sm font-bold text-foreground">{(item.courses as any)?.title}</h3>
-              <p className="text-lg font-bold text-foreground">${Number((item.courses as any)?.price_usd)}</p>
+              <PriceDisplay priceInr={(item.courses as any)?.price_inr} priceUsd={(item.courses as any)?.price_usd} size="md" />
               <div className="flex gap-2">
                 <Link to={`/course/${(item.courses as any)?.slug || (item.courses as any)?.id}`} className="flex-1 rounded-lg bg-primary py-2 text-center text-xs font-semibold text-primary-foreground hover:brightness-110">
                   View Course

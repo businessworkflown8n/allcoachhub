@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { GraduationCap, Video, MapPin, Briefcase, ExternalLink, Star, Clock, Users, Calendar } from "lucide-react";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const CoachLanding = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -235,7 +236,13 @@ const CoachLanding = () => {
                           <Users className="h-3.5 w-3.5" /> {enrollmentCounts[course.id]} students enrolled
                         </p>
                       )}
-                      <p className="text-lg font-bold text-primary">{symbol}{course[priceKey]}</p>
+                      <PriceDisplay
+                        priceInr={course.price_inr}
+                        priceUsd={course.price_usd}
+                        originalPriceInr={course.original_price_inr}
+                        originalPriceUsd={course.original_price_usd}
+                        size="md"
+                      />
                     </div>
                     <Link to={`/course/${course.slug}`}>
                       <Button className="w-full">View & Enroll</Button>

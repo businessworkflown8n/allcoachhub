@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, GraduationCap } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 interface Props {
   courses: any[];
@@ -52,16 +53,13 @@ const CoachWebsiteCourses = ({ courses, themeColor }: Props) => {
                     <Badge variant="outline" className="text-xs">{course.level}</Badge>
                     <Badge variant="outline" className="text-xs">{course.category}</Badge>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-lg font-bold" style={{ color: themeColor }}>
-                      {symbol}{course[priceKey]}
-                    </p>
-                    {course.original_price_usd && course.discount_percent > 0 && (
-                      <span className="text-sm text-muted-foreground line-through">
-                        {symbol}{course[priceKey === "price_usd" ? "original_price_usd" : "original_price_inr"]}
-                      </span>
-                    )}
-                  </div>
+                  <PriceDisplay
+                    priceInr={course.price_inr}
+                    priceUsd={course.price_usd}
+                    originalPriceInr={course.original_price_inr}
+                    originalPriceUsd={course.original_price_usd}
+                    size="md"
+                  />
                 </div>
                 <Link to={`/course/${course.slug}`}>
                   <Button className="w-full" style={{ backgroundColor: themeColor }}>View & Enroll</Button>

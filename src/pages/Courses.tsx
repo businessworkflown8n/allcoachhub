@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useSEO } from "@/hooks/useSEO";
 import CourseThumbnail from "@/components/shared/CourseThumbnail";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const categories = [
   "All",
@@ -337,18 +338,13 @@ const Courses = () => {
                           </div>
 
                           <div className="flex items-center justify-between border-t border-border/70 pt-6">
-                            <div>
-                              {originalPrice > price && (
-                                <span className="block text-xs text-muted-foreground line-through">
-                                  {symbol}
-                                  {originalPrice}
-                                </span>
-                              )}
-                              <span className="text-xl font-bold text-foreground">
-                                {symbol}
-                                {price}
-                              </span>
-                            </div>
+                            <PriceDisplay
+                              priceInr={course.price_inr}
+                              priceUsd={course.price_usd}
+                              originalPriceInr={course.original_price_inr}
+                              originalPriceUsd={course.original_price_usd}
+                              size="md"
+                            />
                             <span className="rounded-lg bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/10 transition-colors group-hover:brightness-110">
                               View Course
                             </span>

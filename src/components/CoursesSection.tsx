@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useTranslation } from "@/i18n/TranslationProvider";
 import CourseThumbnail from "@/components/shared/CourseThumbnail";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const CoursesSection = () => {
   const { user } = useAuth();
@@ -104,16 +105,13 @@ const CoursesSection = () => {
                   </div>
 
                   <div className="flex items-center justify-between border-t border-border pt-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg font-bold text-foreground">{symbol}{Number(course[priceKey] || course.price_usd)}</span>
-                      {(() => {
-                        const orig = Number(course[originalPriceKey] || course.original_price_usd || 0);
-                        const price = Number(course[priceKey] || course.price_usd);
-                        return orig > price ? (
-                          <span className="text-sm text-muted-foreground line-through">{symbol}{orig}</span>
-                        ) : null;
-                      })()}
-                    </div>
+                    <PriceDisplay
+                      priceInr={course.price_inr}
+                      priceUsd={course.price_usd}
+                      originalPriceInr={course.original_price_inr}
+                      originalPriceUsd={course.original_price_usd}
+                      size="md"
+                    />
                     <div className="flex items-center gap-2">
                       <Popover>
                         <PopoverTrigger asChild>

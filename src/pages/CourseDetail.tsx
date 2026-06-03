@@ -7,6 +7,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Star, Clock, Users, ArrowLeft, Heart, Share2, Lock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const CourseDetail = () => {
   const { slug } = useParams();
@@ -228,15 +229,13 @@ const CourseDetail = () => {
 
           <div className="lg:col-span-1">
             <div className="sticky top-24 rounded-xl border border-border bg-card p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl font-bold text-foreground">${Number(course.price_usd)}</span>
-                {course.original_price_usd && Number(course.original_price_usd) > Number(course.price_usd) && (
-                  <span className="text-lg text-muted-foreground line-through">${Number(course.original_price_usd)}</span>
-                )}
-              </div>
-              {Number(course.price_inr) > 0 && (
-                <p className="text-sm text-muted-foreground">₹{Number(course.price_inr)}</p>
-              )}
+              <PriceDisplay
+                priceInr={course.price_inr}
+                priceUsd={course.price_usd}
+                originalPriceInr={course.original_price_inr}
+                originalPriceUsd={course.original_price_usd}
+                size="xl"
+              />
 
               <button
                 onClick={handleEnroll}

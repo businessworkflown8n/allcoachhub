@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Clock, Users, TrendingUp, Sparkles } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import CourseThumbnail from "@/components/shared/CourseThumbnail";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 interface Props {
   courses: any[];
@@ -132,12 +133,13 @@ const CategoryCourseGrid = ({
                     </div>
 
                     <div className="flex items-center justify-between border-t border-border pt-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-foreground">{price === 0 ? "Free" : `${symbol}${price}`}</span>
-                        {originalPrice > price && (
-                          <span className="text-sm text-muted-foreground line-through">{symbol}{originalPrice}</span>
-                        )}
-                      </div>
+                      <PriceDisplay
+                        priceInr={course.price_inr}
+                        priceUsd={course.price_usd}
+                        originalPriceInr={course.original_price_inr}
+                        originalPriceUsd={course.original_price_usd}
+                        size="md"
+                      />
                       <span className="rounded-lg bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground transition-all group-hover:brightness-110">
                         Enroll
                       </span>

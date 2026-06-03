@@ -11,6 +11,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { detectCurrency, priceForCurrency, type SupportedCurrency } from "@/lib/currencyRouter";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const Enroll = () => {
   useSEO({
@@ -161,7 +162,7 @@ const Enroll = () => {
         <div className="mb-6 rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-primary">{course.category}</p>
           <h2 className="text-lg font-bold text-foreground">{course.title}</h2>
-          <p className="mt-1 text-2xl font-bold text-primary">${Number(course.price_usd)}</p>
+          <div className="mt-2"><PriceDisplay priceInr={course.price_inr} priceUsd={course.price_usd} originalPriceInr={course.original_price_inr} originalPriceUsd={course.original_price_usd} size="lg" /></div>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-6">

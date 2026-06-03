@@ -7,6 +7,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Star, Clock, Users, ArrowLeft, Heart, Share2, Lock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const CourseDetail = () => {
   const { slug } = useParams();

@@ -57,11 +57,13 @@ import AdminCurriculumControl from "@/components/admin/AdminCurriculumControl";
 import AdminCurrencyManagement from "@/components/admin/AdminCurrencyManagement";
 import AdminAssignments from "@/components/admin/AdminAssignments";
 import AdminLMSOverview from "@/components/admin/AdminLMSOverview";
+import AdminCourseCategories from "@/components/admin/AdminCourseCategories";
 
 
 const navItems = [
   { label: "Analytics", path: "/admin", icon: <BarChart3 className="h-4 w-4" /> },
   { label: "Traffic Analytics", path: "/admin/traffic", icon: <MousePointerClick className="h-4 w-4" /> },
+  { label: "Course Categories", path: "/admin/course-categories", icon: <LayoutGrid className="h-4 w-4" /> },
   { label: "Coaches", path: "/admin/coaches", icon: <Shield className="h-4 w-4" /> },
   { label: "Coach Categories", path: "/admin/coach-categories", icon: <LayoutGrid className="h-4 w-4" /> },
   { label: "Category Requests", path: "/admin/category-requests", icon: <ClipboardList className="h-4 w-4" /> },
@@ -129,6 +131,7 @@ const AdminDashboard = () => {
     <DashboardLayout navItems={navItems} title="Admin Dashboard">
       <Routes>
         <Route index element={<AdminOverview />} />
+        <Route path="course-categories" element={<AdminCourseCategories />} />
         <Route path="traffic" element={<AdminTrafficAnalytics />} />
         <Route path="coaches" element={<AdminCoaches />} />
         <Route path="coach-categories" element={<AdminCoachCategories />} />

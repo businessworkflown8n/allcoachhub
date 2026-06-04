@@ -17,6 +17,7 @@ const HomeBlogSection = lazy(() => import("@/components/HomeBlogSection"));
 const WhyCoachesJoinSection = lazy(() => import("@/components/WhyCoachesJoinSection"));
 const EarningsCalculator = lazy(() => import("@/components/EarningsCalculator"));
 const AIDiscoverySection = lazy(() => import("@/components/AIDiscoverySection"));
+const AIKidsProSection = lazy(() => import("@/components/AIKidsProSection"));
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -94,6 +95,9 @@ const Index = () => {
         </Suspense>
         <Suspense fallback={<SectionFallback />}>
           <section id="coaches"><CoachesSection /></section>
+        </Suspense>
+        <Suspense fallback={<SectionFallback />}>
+          <section id="ai-kids-pro"><AIKidsProSection /></section>
         </Suspense>
         <Suspense fallback={<SectionFallback />}>
           <section id="courses"><CoursesSection /></section>

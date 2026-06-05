@@ -77,6 +77,7 @@ const CoachDashboard = () => {
       { label: "My Webinars", path: "/coach/webinars", icon: <Video className="h-4 w-4" /> },
     ] : []),
     { label: "Enrollments", path: "/coach/enrollments", icon: <BarChart3 className="h-4 w-4" /> },
+    { label: "AI Kids Leads", path: "/coach/ai-kids-leads", icon: <Sparkles className="h-4 w-4" /> },
     ...((features as any).crm_access ? [{ label: "Clients", path: "/coach/clients", icon: <Users className="h-4 w-4" /> }] : []),
     ...((features as any).leads_access ? [{ label: "Lead Pipeline", path: "/coach/leads", icon: <TrendingUp className="h-4 w-4" /> }] : []),
     ...((features as any).sessions_access ? [{ label: "Sessions", path: "/coach/sessions", icon: <Calendar className="h-4 w-4" /> }] : []),

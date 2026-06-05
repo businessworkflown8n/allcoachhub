@@ -58,12 +58,14 @@ import AdminCurrencyManagement from "@/components/admin/AdminCurrencyManagement"
 import AdminAssignments from "@/components/admin/AdminAssignments";
 import AdminLMSOverview from "@/components/admin/AdminLMSOverview";
 import AdminCourseCategories from "@/components/admin/AdminCourseCategories";
+import AdminAIKidsEnrollments from "@/components/admin/AdminAIKidsEnrollments";
 
 
 const navItems = [
   { label: "Analytics", path: "/admin", icon: <BarChart3 className="h-4 w-4" /> },
   { label: "Traffic Analytics", path: "/admin/traffic", icon: <MousePointerClick className="h-4 w-4" /> },
   { label: "Course Categories", path: "/admin/course-categories", icon: <LayoutGrid className="h-4 w-4" /> },
+  { label: "AI Kids Enrollments", path: "/admin/ai-kids-enrollments", icon: <GraduationCap className="h-4 w-4" /> },
   { label: "Coaches", path: "/admin/coaches", icon: <Shield className="h-4 w-4" /> },
   { label: "Coach Categories", path: "/admin/coach-categories", icon: <LayoutGrid className="h-4 w-4" /> },
   { label: "Category Requests", path: "/admin/category-requests", icon: <ClipboardList className="h-4 w-4" /> },
@@ -132,6 +134,7 @@ const AdminDashboard = () => {
       <Routes>
         <Route index element={<AdminOverview />} />
         <Route path="course-categories" element={<AdminCourseCategories />} />
+        <Route path="ai-kids-enrollments" element={<AdminAIKidsEnrollments />} />
         <Route path="traffic" element={<AdminTrafficAnalytics />} />
         <Route path="coaches" element={<AdminCoaches />} />
         <Route path="coach-categories" element={<AdminCoachCategories />} />

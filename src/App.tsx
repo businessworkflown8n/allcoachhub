@@ -59,6 +59,7 @@ const KnowledgeTopic = lazy(() => import("./pages/KnowledgeTopic"));
 const KnowledgeQuestion = lazy(() => import("./pages/KnowledgeQuestion"));
 const AiMastermindLearning = lazy(() => import("./pages/AiMastermindLearning"));
 const AiJobsNewsLinkedInPost = lazy(() => import("./pages/AiJobsNewsLinkedInPost"));
+const AIKidsEnrollment = lazy(() => import("./pages/AIKidsEnrollment"));
 
 // Lazy-loaded global widgets (non-critical)
 
@@ -220,6 +221,7 @@ const App = () => (
             <Route path="/Ai-mastermind-learning/:coachSlug" element={<Suspense fallback={<PageFallback />}><AiMastermindLearning /></Suspense>} />
             <Route path="/ai-mastermind-learning/:coachSlug" element={<Suspense fallback={<PageFallback />}><AiMastermindLearning /></Suspense>} />
             <Route path="/ai-jobs-news/linkedin-post" element={<Suspense fallback={<PageFallback />}><AiJobsNewsLinkedInPost /></Suspense>} />
+            <Route path="/ai-kids/enrollment" element={<Suspense fallback={<PageFallback />}><AIKidsEnrollment /></Suspense>} />
             <Route path="*" element={<Suspense fallback={<PageFallback />}><NotFound /></Suspense>} />
           </Routes>
           <FloatingButtons />

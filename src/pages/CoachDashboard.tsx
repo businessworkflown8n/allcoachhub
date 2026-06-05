@@ -45,6 +45,7 @@ import { useFeatureControl } from "@/hooks/useFeatureControl";
 import { useExternalLinkControl } from "@/hooks/useExternalLinkControl";
 import CoachSubscription from "@/components/coach/CoachSubscription";
 import CoachCurrencySettings from "@/components/coach/CoachCurrencySettings";
+import CoachAIKidsLeads from "@/components/coach/CoachAIKidsLeads";
 import { CreditCard, Coins } from "lucide-react";
 
 
@@ -76,6 +77,7 @@ const CoachDashboard = () => {
       { label: "My Webinars", path: "/coach/webinars", icon: <Video className="h-4 w-4" /> },
     ] : []),
     { label: "Enrollments", path: "/coach/enrollments", icon: <BarChart3 className="h-4 w-4" /> },
+    { label: "AI Kids Leads", path: "/coach/ai-kids-leads", icon: <Sparkles className="h-4 w-4" /> },
     ...((features as any).crm_access ? [{ label: "Clients", path: "/coach/clients", icon: <Users className="h-4 w-4" /> }] : []),
     ...((features as any).leads_access ? [{ label: "Lead Pipeline", path: "/coach/leads", icon: <TrendingUp className="h-4 w-4" /> }] : []),
     ...((features as any).sessions_access ? [{ label: "Sessions", path: "/coach/sessions", icon: <Calendar className="h-4 w-4" /> }] : []),
@@ -119,6 +121,7 @@ const CoachDashboard = () => {
         <Route path="courses/:id/curriculum" element={features.courses_access ? <CurriculumBuilder /> : <Navigate to="overview" replace />} />
         <Route path="webinars" element={features.workshops_access ? <CoachWebinars /> : <Navigate to="overview" replace />} />
         <Route path="enrollments" element={<CoachEnrollments />} />
+        <Route path="ai-kids-leads" element={<CoachAIKidsLeads />} />
         <Route path="clients" element={(features as any).crm_access ? <CoachClients /> : <Navigate to="overview" replace />} />
         <Route path="leads" element={(features as any).leads_access ? <CoachLeads /> : <Navigate to="overview" replace />} />
         <Route path="sessions" element={(features as any).sessions_access ? <CoachSessions /> : <Navigate to="overview" replace />} />

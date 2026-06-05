@@ -134,6 +134,7 @@ const AdminDashboard = () => {
       <Routes>
         <Route index element={<AdminOverview />} />
         <Route path="course-categories" element={<AdminCourseCategories />} />
+        <Route path="ai-kids-enrollments" element={<AdminAIKidsEnrollments />} />
         <Route path="traffic" element={<AdminTrafficAnalytics />} />
         <Route path="coaches" element={<AdminCoaches />} />
         <Route path="coach-categories" element={<AdminCoachCategories />} />

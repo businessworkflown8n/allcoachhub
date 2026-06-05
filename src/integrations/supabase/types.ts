@@ -212,6 +212,87 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_kids_enrollments: {
+        Row: {
+          assigned_coach_id: string | null
+          city: string
+          consent_accepted: boolean
+          created_at: string
+          email: string
+          enrolled_by: string
+          has_laptop: boolean
+          id: string
+          interested_course: string
+          last_contacted_date: string | null
+          lead_status: string
+          learning_reason: string | null
+          medium_of_education: string
+          mobile_country_code: string
+          mobile_number: string
+          notes: string | null
+          parent_name: string
+          reference_id: string
+          school_name: string
+          student_class: string
+          student_name: string
+          updated_at: string
+          whatsapp_country_code: string | null
+          whatsapp_number: string | null
+        }
+        Insert: {
+          assigned_coach_id?: string | null
+          city: string
+          consent_accepted?: boolean
+          created_at?: string
+          email: string
+          enrolled_by: string
+          has_laptop?: boolean
+          id?: string
+          interested_course: string
+          last_contacted_date?: string | null
+          lead_status?: string
+          learning_reason?: string | null
+          medium_of_education: string
+          mobile_country_code?: string
+          mobile_number: string
+          notes?: string | null
+          parent_name: string
+          reference_id?: string
+          school_name: string
+          student_class: string
+          student_name: string
+          updated_at?: string
+          whatsapp_country_code?: string | null
+          whatsapp_number?: string | null
+        }
+        Update: {
+          assigned_coach_id?: string | null
+          city?: string
+          consent_accepted?: boolean
+          created_at?: string
+          email?: string
+          enrolled_by?: string
+          has_laptop?: boolean
+          id?: string
+          interested_course?: string
+          last_contacted_date?: string | null
+          lead_status?: string
+          learning_reason?: string | null
+          medium_of_education?: string
+          mobile_country_code?: string
+          mobile_number?: string
+          notes?: string | null
+          parent_name?: string
+          reference_id?: string
+          school_name?: string
+          student_class?: string
+          student_name?: string
+          updated_at?: string
+          whatsapp_country_code?: string | null
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           coach_id: string | null

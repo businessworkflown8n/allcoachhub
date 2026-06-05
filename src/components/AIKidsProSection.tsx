@@ -101,7 +101,7 @@ const AIKidsProSection = () => {
           <Link to="/courses?category=AI%20Kids%20Pro" className="cta-3d primary">
             Explore AI Kids Pro <span className="cta-arrow">→</span>
           </Link>
-          <Link to="/signup" className="cta-3d secondary">
+          <Link to="/ai-kids/enrollment" className="cta-3d secondary">
             Enroll Your Child
           </Link>
         </div>

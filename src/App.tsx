@@ -221,6 +221,7 @@ const App = () => (
             <Route path="/Ai-mastermind-learning/:coachSlug" element={<Suspense fallback={<PageFallback />}><AiMastermindLearning /></Suspense>} />
             <Route path="/ai-mastermind-learning/:coachSlug" element={<Suspense fallback={<PageFallback />}><AiMastermindLearning /></Suspense>} />
             <Route path="/ai-jobs-news/linkedin-post" element={<Suspense fallback={<PageFallback />}><AiJobsNewsLinkedInPost /></Suspense>} />
+            <Route path="/ai-kids/enrollment" element={<Suspense fallback={<PageFallback />}><AIKidsEnrollment /></Suspense>} />
             <Route path="*" element={<Suspense fallback={<PageFallback />}><NotFound /></Suspense>} />
           </Routes>
           <FloatingButtons />

@@ -121,6 +121,7 @@ const CoachDashboard = () => {
         <Route path="courses/:id/curriculum" element={features.courses_access ? <CurriculumBuilder /> : <Navigate to="overview" replace />} />
         <Route path="webinars" element={features.workshops_access ? <CoachWebinars /> : <Navigate to="overview" replace />} />
         <Route path="enrollments" element={<CoachEnrollments />} />
+        <Route path="ai-kids-leads" element={<CoachAIKidsLeads />} />
         <Route path="clients" element={(features as any).crm_access ? <CoachClients /> : <Navigate to="overview" replace />} />
         <Route path="leads" element={(features as any).leads_access ? <CoachLeads /> : <Navigate to="overview" replace />} />
         <Route path="sessions" element={(features as any).sessions_access ? <CoachSessions /> : <Navigate to="overview" replace />} />

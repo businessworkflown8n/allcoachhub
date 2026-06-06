@@ -32,11 +32,14 @@ const CoachCourseForm = () => {
   const { approvedCategories, requests, loading: permLoading, refetch: refetchPerms } = useCoachCategoryPermissions(user?.id);
   const { categories: allCategories } = useCoachCategories(true);
   const { hasAccess: hasThumbnailAccess } = useThumbnailAccess();
+  const { features } = useCoachFeatures();
+  const canCreateKidsCourses = !!features?.kids_courses_access;
 
   const [form, setForm] = useState({
     title: "",
     description: "",
     category: "",
+    course_type: "regular" as "regular" | "ai_kids_pro",
     level: "Beginner",
     language: "English",
     duration_hours: "",

@@ -45,7 +45,7 @@ const CoursesSection = () => {
   };
 
   useEffect(() => {
-    supabase.from("courses").select("*").eq("is_published", true).limit(8).then(({ data }) => {
+    (supabase.from("courses") as any).select("*").eq("is_published", true).neq("course_type", "ai_kids_pro").limit(8).then(({ data }: any) => {
       setCourses(data || []);
       setLoading(false);
     });

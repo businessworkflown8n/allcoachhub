@@ -99,11 +99,12 @@ const Courses = () => {
   const [allCounts, setAllCounts] = useState<Record<string, number>>({});
   useEffect(() => {
     const fetchCounts = async () => {
-      let q = supabase
-        .from("courses")
+      let q = (supabase
+        .from("courses") as any)
         .select("category", { count: "exact" })
         .eq("is_published", true)
-        .eq("approval_status", "approved");
+        .eq("approval_status", "approved")
+        .neq("course_type", "ai_kids_pro");
       if (activeLevel !== "All") q = q.eq("level", activeLevel);
       const { data } = await q;
       const counts: Record<string, number> = { All: data?.length || 0 };

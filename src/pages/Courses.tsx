@@ -57,11 +57,12 @@ const Courses = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       setLoading(true);
-      let query = supabase
-        .from("courses")
+      let query = (supabase
+        .from("courses") as any)
         .select("*")
         .eq("is_published", true)
         .eq("approval_status", "approved")
+        .neq("course_type", "ai_kids_pro")
         .order("created_at", { ascending: false });
 
       if (activeCategory !== "All") query = query.eq("category", activeCategory);

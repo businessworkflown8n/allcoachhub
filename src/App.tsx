@@ -167,6 +167,7 @@ const App = () => (
             <Route path="/install" element={<Suspense fallback={<PageFallback />}><Install /></Suspense>} />
             <Route path="/sitemap" element={<Suspense fallback={<PageFallback />}><Sitemap /></Suspense>} />
             <Route path="/courses" element={<Suspense fallback={<PageFallback />}><Courses /></Suspense>} />
+            <Route path="/courses/ai-kids-pro" element={<Suspense fallback={<PageFallback />}><AIKidsProCourses /></Suspense>} />
             <Route path="/courses/:slug" element={<Suspense fallback={<PageFallback />}><CategoryPage /></Suspense>} />
             <Route path="/categories" element={<Suspense fallback={<PageFallback />}><Categories /></Suspense>} />
             <Route path="/categories/:slug" element={<Suspense fallback={<PageFallback />}><CoachCategoryPage /></Suspense>} />

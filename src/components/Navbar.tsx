@@ -253,6 +253,9 @@ const Navbar = ({ customLogo, customName, customHomeLink }: NavbarProps = {}) =>
                   <Link to="/courses" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground">
                     Regular Classes
                   </Link>
+                  <Link to="/courses/ai-kids-pro" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground">
+                    🚀 AI Kids Pro
+                  </Link>
                   <div>
                     <button
                       onClick={() => setMobileDemoOpen(!mobileDemoOpen)}

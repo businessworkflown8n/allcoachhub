@@ -57,11 +57,12 @@ const Courses = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       setLoading(true);
-      let query = supabase
-        .from("courses")
+      let query = (supabase
+        .from("courses") as any)
         .select("*")
         .eq("is_published", true)
         .eq("approval_status", "approved")
+        .neq("course_type", "ai_kids_pro")
         .order("created_at", { ascending: false });
 
       if (activeCategory !== "All") query = query.eq("category", activeCategory);
@@ -98,11 +99,12 @@ const Courses = () => {
   const [allCounts, setAllCounts] = useState<Record<string, number>>({});
   useEffect(() => {
     const fetchCounts = async () => {
-      let q = supabase
-        .from("courses")
+      let q = (supabase
+        .from("courses") as any)
         .select("category", { count: "exact" })
         .eq("is_published", true)
-        .eq("approval_status", "approved");
+        .eq("approval_status", "approved")
+        .neq("course_type", "ai_kids_pro");
       if (activeLevel !== "All") q = q.eq("level", activeLevel);
       const { data } = await q;
       const counts: Record<string, number> = { All: data?.length || 0 };

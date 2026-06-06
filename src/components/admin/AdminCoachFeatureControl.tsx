@@ -33,6 +33,7 @@ interface CoachFlags {
   copilot_access: boolean;
   content_studio_access: boolean;
   external_materials_access: boolean;
+  kids_courses_access: boolean;
 }
 
 const FEATURES = [
@@ -54,6 +55,7 @@ const FEATURES = [
   { key: "copilot_access", label: "AI Copilot" },
   { key: "content_studio_access", label: "Content Studio" },
   { key: "external_materials_access", label: "Material Links (External Only)" },
+  { key: "kids_courses_access", label: "🚀 AI Kids Pro Courses" },
 ] as const;
 
 const AdminCoachFeatureControl = () => {
@@ -96,6 +98,7 @@ const AdminCoachFeatureControl = () => {
           copilot_access: f?.copilot_access ?? false,
           content_studio_access: f?.content_studio_access ?? false,
           external_materials_access: f?.external_materials_access ?? false,
+          kids_courses_access: f?.kids_courses_access ?? false,
         };
       });
     setCoaches(list);

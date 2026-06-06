@@ -114,6 +114,13 @@ const Navbar = ({ customLogo, customName, customHomeLink }: NavbarProps = {}) =>
                 >
                   Regular Classes
                 </Link>
+                <Link
+                  to="/courses/ai-kids-pro"
+                  className="block rounded-md px-3 py-2 text-sm text-popover-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  onClick={() => { setCoursesOpen(false); }}
+                >
+                  <span className="mr-1">🚀</span> AI Kids Pro
+                </Link>
                 <div
                   className="relative"
                   onMouseEnter={() => setDemoOpen(true)}
@@ -245,6 +252,9 @@ const Navbar = ({ customLogo, customName, customHomeLink }: NavbarProps = {}) =>
                 <div className="ml-3 flex flex-col gap-1 border-l border-border pl-3">
                   <Link to="/courses" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground">
                     Regular Classes
+                  </Link>
+                  <Link to="/courses/ai-kids-pro" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground">
+                    🚀 AI Kids Pro
                   </Link>
                   <div>
                     <button

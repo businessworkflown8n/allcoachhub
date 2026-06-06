@@ -98,7 +98,7 @@ const AIKidsProSection = () => {
         </div>
 
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link to="/courses?category=AI%20Kids%20Pro" className="cta-3d primary">
+          <Link to="/courses/ai-kids-pro" className="cta-3d primary">
             Explore AI Kids Pro <span className="cta-arrow">→</span>
           </Link>
           <Link to="/ai-kids/enrollment" className="cta-3d secondary">

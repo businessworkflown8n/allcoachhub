@@ -1590,6 +1590,7 @@ export type Database = {
           external_materials_access: boolean
           feed_access: boolean
           id: string
+          kids_courses_access: boolean
           leads_access: boolean
           materials_access: boolean
           messaging_access: boolean
@@ -1619,6 +1620,7 @@ export type Database = {
           external_materials_access?: boolean
           feed_access?: boolean
           id?: string
+          kids_courses_access?: boolean
           leads_access?: boolean
           materials_access?: boolean
           messaging_access?: boolean
@@ -1648,6 +1650,7 @@ export type Database = {
           external_materials_access?: boolean
           feed_access?: boolean
           id?: string
+          kids_courses_access?: boolean
           leads_access?: boolean
           materials_access?: boolean
           messaging_access?: boolean
@@ -3340,7 +3343,9 @@ export type Database = {
           approval_status: string
           category: string
           category_request_id: string | null
+          certificate_included: boolean | null
           coach_id: string
+          course_type: string
           created_at: string
           curriculum: Json | null
           description: string | null
@@ -3349,19 +3354,25 @@ export type Database = {
           id: string
           intro_video_url: string | null
           is_published: boolean
+          kids_friendly_badge: boolean | null
           language: string
           learning_outcomes: string | null
           level: string
+          live_sessions: number | null
           original_price_inr: number | null
           original_price_usd: number | null
+          parent_involvement: string | null
           prerequisites: string | null
           price_inr: number
           price_usd: number
+          project_count: number | null
           rejection_reason: string | null
           requires_category_approval: boolean
+          safety_compliance: boolean | null
           slug: string | null
           status: string
           subtitle: string | null
+          target_class: string | null
           thumbnail_approved_at: string | null
           thumbnail_approved_by: string | null
           thumbnail_status: string
@@ -3377,7 +3388,9 @@ export type Database = {
           approval_status?: string
           category?: string
           category_request_id?: string | null
+          certificate_included?: boolean | null
           coach_id: string
+          course_type?: string
           created_at?: string
           curriculum?: Json | null
           description?: string | null
@@ -3386,19 +3399,25 @@ export type Database = {
           id?: string
           intro_video_url?: string | null
           is_published?: boolean
+          kids_friendly_badge?: boolean | null
           language?: string
           learning_outcomes?: string | null
           level?: string
+          live_sessions?: number | null
           original_price_inr?: number | null
           original_price_usd?: number | null
+          parent_involvement?: string | null
           prerequisites?: string | null
           price_inr?: number
           price_usd?: number
+          project_count?: number | null
           rejection_reason?: string | null
           requires_category_approval?: boolean
+          safety_compliance?: boolean | null
           slug?: string | null
           status?: string
           subtitle?: string | null
+          target_class?: string | null
           thumbnail_approved_at?: string | null
           thumbnail_approved_by?: string | null
           thumbnail_status?: string
@@ -3414,7 +3433,9 @@ export type Database = {
           approval_status?: string
           category?: string
           category_request_id?: string | null
+          certificate_included?: boolean | null
           coach_id?: string
+          course_type?: string
           created_at?: string
           curriculum?: Json | null
           description?: string | null
@@ -3423,19 +3444,25 @@ export type Database = {
           id?: string
           intro_video_url?: string | null
           is_published?: boolean
+          kids_friendly_badge?: boolean | null
           language?: string
           learning_outcomes?: string | null
           level?: string
+          live_sessions?: number | null
           original_price_inr?: number | null
           original_price_usd?: number | null
+          parent_involvement?: string | null
           prerequisites?: string | null
           price_inr?: number
           price_usd?: number
+          project_count?: number | null
           rejection_reason?: string | null
           requires_category_approval?: boolean
+          safety_compliance?: boolean | null
           slug?: string | null
           status?: string
           subtitle?: string | null
+          target_class?: string | null
           thumbnail_approved_at?: string | null
           thumbnail_approved_by?: string | null
           thumbnail_status?: string

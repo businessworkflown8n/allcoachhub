@@ -37,16 +37,17 @@ const AIKidsProCourses = () => {
   useEffect(() => {
     const run = async () => {
       setLoading(true);
-      let query = supabase
-        .from("courses")
+      const filters: Record<string, any> = {
+        is_published: true,
+        approval_status: "approved",
+        course_type: "ai_kids_pro",
+      };
+      if (targetClass !== "All") filters.target_class = targetClass;
+      if (level !== "All") filters.level = level;
+      const { data } = await (supabase.from("courses") as any)
         .select("*")
-        .eq("is_published", true)
-        .eq("approval_status", "approved")
-        .eq("course_type" as any, "ai_kids_pro")
+        .match(filters)
         .order("created_at", { ascending: false });
-      if (targetClass !== "All") query = query.eq("target_class" as any, targetClass);
-      if (level !== "All") query = query.eq("level", level);
-      const { data } = await query;
       setCourses((data as any[]) || []);
       setLoading(false);
     };

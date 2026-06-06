@@ -60,6 +60,7 @@ const KnowledgeQuestion = lazy(() => import("./pages/KnowledgeQuestion"));
 const AiMastermindLearning = lazy(() => import("./pages/AiMastermindLearning"));
 const AiJobsNewsLinkedInPost = lazy(() => import("./pages/AiJobsNewsLinkedInPost"));
 const AIKidsEnrollment = lazy(() => import("./pages/AIKidsEnrollment"));
+const AIKidsProCourses = lazy(() => import("./pages/AIKidsProCourses"));
 
 // Lazy-loaded global widgets (non-critical)
 

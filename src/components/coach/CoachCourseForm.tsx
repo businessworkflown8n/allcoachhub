@@ -11,6 +11,7 @@ import { ArrowLeft, Plus, Upload, X, ImageIcon, AlertTriangle } from "lucide-rea
 import { useCoachCategoryPermissions } from "@/hooks/useCoachCategoryPermissions";
 import { useCoachCategories } from "@/hooks/useCoachCategories";
 import { useThumbnailAccess } from "@/hooks/useThumbnailAccess";
+import { useCoachFeatures } from "@/hooks/useCoachFeatures";
 import CategoryRequestModal from "@/components/coach/CategoryRequestModal";
 
 const AIThumbnailGenerator = lazy(() => import("@/components/coach/AIThumbnailGenerator"));

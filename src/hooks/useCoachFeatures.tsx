@@ -22,6 +22,7 @@ export interface CoachFeatures {
   content_studio_access: boolean;
   external_materials_access: boolean;
   assignments_access: boolean;
+  kids_courses_access: boolean;
   status: string;
 }
 

@@ -231,6 +231,7 @@ const CoachCourseForm = () => {
       original_price_usd: form.original_price_usd ? Number(form.original_price_usd) : null,
       original_price_inr: form.original_price_inr ? Number(form.original_price_inr) : null,
       discount_percent: form.discount_percent ? Number(form.discount_percent) : 0,
+      course_type: canCreateKidsCourses && form.course_type === "ai_kids_pro" ? "ai_kids_pro" : "regular",
     };
 
     // If unapproved category, force draft and tag

@@ -98,6 +98,7 @@ const AdminCoachFeatureControl = () => {
           copilot_access: f?.copilot_access ?? false,
           content_studio_access: f?.content_studio_access ?? false,
           external_materials_access: f?.external_materials_access ?? false,
+          kids_courses_access: f?.kids_courses_access ?? false,
         };
       });
     setCoaches(list);

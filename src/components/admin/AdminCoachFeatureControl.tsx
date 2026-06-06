@@ -55,6 +55,7 @@ const FEATURES = [
   { key: "copilot_access", label: "AI Copilot" },
   { key: "content_studio_access", label: "Content Studio" },
   { key: "external_materials_access", label: "Material Links (External Only)" },
+  { key: "kids_courses_access", label: "🚀 AI Kids Pro Courses" },
 ] as const;
 
 const AdminCoachFeatureControl = () => {

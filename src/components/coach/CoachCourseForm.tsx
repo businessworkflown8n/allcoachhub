@@ -66,6 +66,7 @@ const CoachCourseForm = () => {
             title: data.title,
             description: data.description || "",
             category: data.category,
+            course_type: ((data as any).course_type === "ai_kids_pro" ? "ai_kids_pro" : "regular") as "regular" | "ai_kids_pro",
             level: data.level,
             language: data.language,
             duration_hours: String(data.duration_hours),

@@ -33,6 +33,7 @@ interface CoachFlags {
   copilot_access: boolean;
   content_studio_access: boolean;
   external_materials_access: boolean;
+  kids_courses_access: boolean;
 }
 
 const FEATURES = [

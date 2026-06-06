@@ -32,8 +32,8 @@ const CoachCourseForm = () => {
   const { approvedCategories, requests, loading: permLoading, refetch: refetchPerms } = useCoachCategoryPermissions(user?.id);
   const { categories: allCategories } = useCoachCategories(true);
   const { hasAccess: hasThumbnailAccess } = useThumbnailAccess();
-  const { features } = useCoachFeatures();
-  const canCreateKidsCourses = !!features?.kids_courses_access;
+  const { kids_courses_access } = useCoachFeatures();
+  const canCreateKidsCourses = !!kids_courses_access;
 
   const [form, setForm] = useState({
     title: "",

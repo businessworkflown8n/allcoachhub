@@ -32,11 +32,14 @@ const CoachCourseForm = () => {
   const { approvedCategories, requests, loading: permLoading, refetch: refetchPerms } = useCoachCategoryPermissions(user?.id);
   const { categories: allCategories } = useCoachCategories(true);
   const { hasAccess: hasThumbnailAccess } = useThumbnailAccess();
+  const { kids_courses_access } = useCoachFeatures();
+  const canCreateKidsCourses = !!kids_courses_access;
 
   const [form, setForm] = useState({
     title: "",
     description: "",
     category: "",
+    course_type: "regular" as "regular" | "ai_kids_pro",
     level: "Beginner",
     language: "English",
     duration_hours: "",
@@ -63,6 +66,7 @@ const CoachCourseForm = () => {
             title: data.title,
             description: data.description || "",
             category: data.category,
+            course_type: ((data as any).course_type === "ai_kids_pro" ? "ai_kids_pro" : "regular") as "regular" | "ai_kids_pro",
             level: data.level,
             language: data.language,
             duration_hours: String(data.duration_hours),
@@ -227,6 +231,7 @@ const CoachCourseForm = () => {
       original_price_usd: form.original_price_usd ? Number(form.original_price_usd) : null,
       original_price_inr: form.original_price_inr ? Number(form.original_price_inr) : null,
       discount_percent: form.discount_percent ? Number(form.discount_percent) : 0,
+      course_type: canCreateKidsCourses && form.course_type === "ai_kids_pro" ? "ai_kids_pro" : "regular",
     };
 
     // If unapproved category, force draft and tag
@@ -287,6 +292,50 @@ const CoachCourseForm = () => {
       <h2 className="text-xl font-bold text-foreground">{isEdit ? "Edit Course" : "Create New Course"}</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Course Type Selector */}
+        <div className="space-y-2 rounded-xl border border-border bg-card/40 p-4">
+          <Label className="text-foreground">Create Course For *</Label>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => updateField("course_type", "regular")}
+              className={`rounded-lg border p-3 text-left text-sm transition-all ${
+                form.course_type === "regular"
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border bg-secondary text-muted-foreground hover:border-primary/40"
+              }`}
+            >
+              <div className="font-semibold">🎓 Regular Course</div>
+              <div className="text-xs opacity-80">Standard adult / professional learners</div>
+            </button>
+            <button
+              type="button"
+              disabled={!canCreateKidsCourses}
+              onClick={() => canCreateKidsCourses && updateField("course_type", "ai_kids_pro")}
+              className={`rounded-lg border p-3 text-left text-sm transition-all ${
+                !canCreateKidsCourses
+                  ? "cursor-not-allowed border-border bg-secondary/40 text-muted-foreground/60"
+                  : form.course_type === "ai_kids_pro"
+                  ? "border-primary bg-gradient-to-br from-green-500/15 to-blue-500/15 text-foreground"
+                  : "border-border bg-secondary text-muted-foreground hover:border-primary/40"
+              }`}
+              title={canCreateKidsCourses ? "" : "Requires admin approval"}
+            >
+              <div className="font-semibold">🚀 AI Kids Pro (Class 5–12)</div>
+              <div className="text-xs opacity-80">
+                {canCreateKidsCourses
+                  ? "Shown only in AI Kids Pro section"
+                  : "Locked — request access from admin"}
+              </div>
+            </button>
+          </div>
+          {form.course_type === "ai_kids_pro" && (
+            <p className="text-xs text-primary">
+              This course will appear exclusively under /courses/ai-kids-pro and not in the regular courses listing.
+            </p>
+          )}
+        </div>
+
         <div className="space-y-2">
           <Label className="text-foreground">Course Title *</Label>
           <Input value={form.title} onChange={(e) => updateField("title", e.target.value)} required className="bg-secondary border-border" />

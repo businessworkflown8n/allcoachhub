@@ -46,6 +46,7 @@ const DEFAULT_FEATURES: CoachFeatures = {
   content_studio_access: false,
   external_materials_access: false,
   assignments_access: true,
+  kids_courses_access: false,
   status: "pending",
 };
 

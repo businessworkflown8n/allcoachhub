@@ -24,7 +24,9 @@ const AdminCommunicationSettings = () => {
   // Role-based visibility
   const [showToLearners, setShowToLearners] = useState(true);
   const [showToCoaches, setShowToCoaches] = useState(true);
+  const [promptButtonEnabled, setPromptButtonEnabled] = useState(false);
   const [savingVisibility, setSavingVisibility] = useState(false);
+
 
   useEffect(() => {
     fetchSettings();

@@ -1,13 +1,27 @@
-import { useState } from "react";
-import { Sparkles, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Sparkles } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { supabase } from "@/integrations/supabase/client";
 import PromptGeneratorForm from "./PromptGeneratorForm";
 
 const FloatingPromptButton = () => {
   const [open, setOpen] = useState(false);
+  const [enabled, setEnabled] = useState(false);
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    supabase
+      .from("platform_settings")
+      .select("value")
+      .eq("key", "prompt_button_enabled")
+      .maybeSingle()
+      .then(({ data }) => setEnabled(data?.value === "true"));
+  }, []);
+
+  if (!enabled) return null;
+
 
   const trigger = (
     <button

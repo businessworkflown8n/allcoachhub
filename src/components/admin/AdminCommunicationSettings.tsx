@@ -24,7 +24,9 @@ const AdminCommunicationSettings = () => {
   // Role-based visibility
   const [showToLearners, setShowToLearners] = useState(true);
   const [showToCoaches, setShowToCoaches] = useState(true);
+  const [promptButtonEnabled, setPromptButtonEnabled] = useState(false);
   const [savingVisibility, setSavingVisibility] = useState(false);
+
 
   useEffect(() => {
     fetchSettings();
@@ -33,7 +35,7 @@ const AdminCommunicationSettings = () => {
   const fetchSettings = async () => {
     const [commRes, platformRes] = await Promise.all([
       supabase.from("communication_settings" as any).select("key, value"),
-      supabase.from("platform_settings").select("key, value").in("key", ["show_comm_buttons_learners", "show_comm_buttons_coaches"]),
+      supabase.from("platform_settings").select("key, value").in("key", ["show_comm_buttons_learners", "show_comm_buttons_coaches", "prompt_button_enabled"]),
     ]);
     if (commRes.data) {
       const map: Record<string, string> = {};
@@ -44,8 +46,10 @@ const AdminCommunicationSettings = () => {
       platformRes.data.forEach((r: any) => {
         if (r.key === "show_comm_buttons_learners") setShowToLearners(r.value === "true");
         if (r.key === "show_comm_buttons_coaches") setShowToCoaches(r.value === "true");
+        if (r.key === "prompt_button_enabled") setPromptButtonEnabled(r.value === "true");
       });
     }
+
     setLoading(false);
   };
 
@@ -73,7 +77,9 @@ const AdminCommunicationSettings = () => {
     await Promise.all([
       upsert("show_comm_buttons_learners", String(showToLearners)),
       upsert("show_comm_buttons_coaches", String(showToCoaches)),
+      upsert("prompt_button_enabled", String(promptButtonEnabled)),
     ]);
+
     setSavingVisibility(false);
     toast({ title: "Visibility settings saved", description: "Communication visibility updated for Learners & Coaches." });
   };
@@ -177,7 +183,15 @@ const AdminCommunicationSettings = () => {
             </div>
             <Switch checked={showToCoaches} onCheckedChange={setShowToCoaches} />
           </div>
+          <div className="flex items-center justify-between rounded-lg border border-border p-4">
+            <div>
+              <Label className="text-foreground font-medium">✨ Floating Prompt Generator Button</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">When ON, shows the floating Quick Prompt Generator button (sparkle icon) on all public pages</p>
+            </div>
+            <Switch checked={promptButtonEnabled} onCheckedChange={setPromptButtonEnabled} />
+          </div>
         </div>
+
         <Button onClick={saveVisibility} disabled={savingVisibility}>
           {savingVisibility ? "Saving..." : "Save Visibility Settings"}
         </Button>

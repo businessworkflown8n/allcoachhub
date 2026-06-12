@@ -77,7 +77,9 @@ const AdminCommunicationSettings = () => {
     await Promise.all([
       upsert("show_comm_buttons_learners", String(showToLearners)),
       upsert("show_comm_buttons_coaches", String(showToCoaches)),
+      upsert("prompt_button_enabled", String(promptButtonEnabled)),
     ]);
+
     setSavingVisibility(false);
     toast({ title: "Visibility settings saved", description: "Communication visibility updated for Learners & Coaches." });
   };

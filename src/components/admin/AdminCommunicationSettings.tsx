@@ -183,7 +183,15 @@ const AdminCommunicationSettings = () => {
             </div>
             <Switch checked={showToCoaches} onCheckedChange={setShowToCoaches} />
           </div>
+          <div className="flex items-center justify-between rounded-lg border border-border p-4">
+            <div>
+              <Label className="text-foreground font-medium">✨ Floating Prompt Generator Button</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">When ON, shows the floating Quick Prompt Generator button (sparkle icon) on all public pages</p>
+            </div>
+            <Switch checked={promptButtonEnabled} onCheckedChange={setPromptButtonEnabled} />
+          </div>
         </div>
+
         <Button onClick={saveVisibility} disabled={savingVisibility}>
           {savingVisibility ? "Saving..." : "Save Visibility Settings"}
         </Button>

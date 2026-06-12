@@ -35,7 +35,7 @@ const AdminCommunicationSettings = () => {
   const fetchSettings = async () => {
     const [commRes, platformRes] = await Promise.all([
       supabase.from("communication_settings" as any).select("key, value"),
-      supabase.from("platform_settings").select("key, value").in("key", ["show_comm_buttons_learners", "show_comm_buttons_coaches"]),
+      supabase.from("platform_settings").select("key, value").in("key", ["show_comm_buttons_learners", "show_comm_buttons_coaches", "prompt_button_enabled"]),
     ]);
     if (commRes.data) {
       const map: Record<string, string> = {};
@@ -46,8 +46,10 @@ const AdminCommunicationSettings = () => {
       platformRes.data.forEach((r: any) => {
         if (r.key === "show_comm_buttons_learners") setShowToLearners(r.value === "true");
         if (r.key === "show_comm_buttons_coaches") setShowToCoaches(r.value === "true");
+        if (r.key === "prompt_button_enabled") setPromptButtonEnabled(r.value === "true");
       });
     }
+
     setLoading(false);
   };
 

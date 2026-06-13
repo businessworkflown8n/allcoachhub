@@ -113,6 +113,28 @@ const AdminCoachFeatureControl = () => {
   useEffect(() => { fetchCoaches(); }, []);
 
   const toggleFeature = async (coachId: string, field: string, current: boolean) => {
+    if (field === "whatsapp_dashboard_access") {
+      const newVal = !current;
+      const { data: existingWA } = await supabase.from("whatsapp_access").select("id").eq("coach_id", coachId).maybeSingle();
+      if (existingWA) {
+        await supabase.from("whatsapp_access").update({ is_active: newVal, updated_at: new Date().toISOString() }).eq("coach_id", coachId);
+      } else {
+        await supabase.from("whatsapp_access").insert({ coach_id: coachId, is_active: newVal });
+      }
+      // Notify coach
+      await supabase.from("learner_notifications").insert({
+        learner_id: coachId,
+        coach_id: coachId,
+        title: newVal ? "WhatsApp Dashboard Access Enabled" : "WhatsApp Dashboard Access Disabled",
+        message: newVal
+          ? "Congratulations! WhatsApp Dashboard access has been enabled for your account."
+          : "Your WhatsApp Dashboard access has been disabled by the administrator.",
+        cta_link: newVal ? "/coach/whatsapp" : null,
+      });
+      setCoaches((prev) => prev.map((c) => c.coach_id === coachId ? { ...c, whatsapp_dashboard_access: newVal } : c));
+      toast({ title: `WhatsApp Dashboard ${newVal ? "enabled" : "disabled"}` });
+      return;
+    }
     const { data: existing } = await supabase.from("coach_feature_flags").select("id").eq("coach_id", coachId).maybeSingle();
     if (existing) {
       await supabase.from("coach_feature_flags").update({ [field]: !current, updated_at: new Date().toISOString() }).eq("coach_id", coachId);

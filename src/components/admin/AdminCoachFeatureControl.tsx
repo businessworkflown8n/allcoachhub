@@ -57,6 +57,7 @@ const FEATURES = [
   { key: "content_studio_access", label: "Content Studio" },
   { key: "external_materials_access", label: "Material Links (External Only)" },
   { key: "kids_courses_access", label: "🚀 AI Kids Pro Courses" },
+  { key: "whatsapp_dashboard_access", label: "📱 WhatsApp Dashboard" },
 ] as const;
 
 const AdminCoachFeatureControl = () => {

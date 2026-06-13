@@ -202,7 +202,7 @@ const AIKidsProCourses = () => {
                       key={c.id}
                       className="group flex flex-col overflow-hidden rounded-xl border border-border/60 bg-card/40 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50"
                     >
-                      <CourseThumbnail src={c.thumbnail_url} alt={c.title} priority={index < 3} imgClassName="group-hover:scale-105" />
+                      <CourseThumbnail src={c.thumbnail_url} alt={c.title} title={c.title} priority={index < 3} imgClassName="group-hover:scale-105" />
                       <div className="flex h-full flex-col p-5">
                         <div className="mb-3 flex flex-wrap items-center gap-1.5">
                           <span className="rounded-md bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">AI Kids Pro</span>

@@ -85,6 +85,7 @@ const CoursesSection = () => {
                 <CourseThumbnail
                   src={course.thumbnail_url}
                   alt={course.title}
+                  title={course.title}
                   imgClassName="group-hover:scale-105"
                 />
 

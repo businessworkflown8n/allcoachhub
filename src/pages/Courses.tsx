@@ -299,6 +299,7 @@ const Courses = () => {
                       <CourseThumbnail
                         src={course.thumbnail_url}
                         alt={course.title}
+                        title={course.title}
                         priority={index < 3}
                         imgClassName="group-hover:scale-105"
                       />

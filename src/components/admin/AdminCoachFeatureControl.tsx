@@ -34,6 +34,7 @@ interface CoachFlags {
   content_studio_access: boolean;
   external_materials_access: boolean;
   kids_courses_access: boolean;
+  whatsapp_dashboard_access: boolean;
 }
 
 const FEATURES = [

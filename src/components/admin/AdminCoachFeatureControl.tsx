@@ -103,6 +103,7 @@ const AdminCoachFeatureControl = () => {
           content_studio_access: f?.content_studio_access ?? false,
           external_materials_access: f?.external_materials_access ?? false,
           kids_courses_access: f?.kids_courses_access ?? false,
+          whatsapp_dashboard_access: waMap.get(p.user_id) ?? false,
         };
       });
     setCoaches(list);

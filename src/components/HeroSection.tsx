@@ -159,9 +159,10 @@ const HeroSection = () => {
             <button
               key={stat.labelKey}
               onClick={() => setActiveModal(stat.key)}
-              className="flex flex-col items-center gap-1 rounded-lg px-3 py-2 transition-all hover:bg-secondary/80 hover:scale-105 cursor-pointer sm:flex-row sm:gap-2"
+              aria-label={`View ${stat.value} ${t(stat.labelKey)} details`}
+              className="flex flex-col items-center gap-1 rounded-lg px-3 py-2 transition-all hover:bg-secondary/80 hover:scale-105 cursor-pointer sm:flex-row sm:gap-2 min-h-11"
             >
-              <stat.icon className="h-5 w-5 text-muted-foreground" />
+              <stat.icon className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
               <span className="text-lg font-bold text-foreground sm:text-xl">{stat.value}</span>
               <span className="text-xs text-muted-foreground sm:text-sm">{t(stat.labelKey)}</span>
             </button>

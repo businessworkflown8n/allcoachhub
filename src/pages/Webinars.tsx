@@ -200,9 +200,11 @@ const Webinars = () => {
                   <div className="pt-3 border-t border-border mt-auto">
                     {registered ? (
                       live && w.webinar_link_status === "approved" ? (
-                        <a href={w.webinar_link} target="_blank" rel="noopener noreferrer">
-                          <Button size="sm" className="w-full">Join Now</Button>
-                        </a>
+                        <Button size="sm" className="w-full" onClick={async () => {
+                          const { data: link } = await supabase.rpc("get_webinar_join_link", { _webinar_id: w.id });
+                          if (link) window.open(link as string, "_blank", "noopener,noreferrer");
+                          else toast({ title: "Link unavailable", description: "Please refresh and try again." });
+                        }}>Join Now</Button>
                       ) : live && w.webinar_link_status !== "approved" ? (
                         <p className="text-sm text-yellow-400">Webinar link is under admin approval. Please wait.</p>
                       ) : (

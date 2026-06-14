@@ -55,10 +55,10 @@ const HeroSection = () => {
     const titles: Record<string, string> = { students: "6,000+ " + t("hero.students") + " Enrolled", courses: "200+ " + t("hero.coursesLabel") + " Available", coaches: "50+ " + t("hero.expertCoaches") };
     
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={() => setActiveModal(null)}>
+      <div role="dialog" aria-modal="true" aria-label={titles[activeModal]} className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={() => setActiveModal(null)}>
         <div className="relative mx-4 max-h-[80vh] w-full max-w-lg overflow-auto rounded-xl border border-border bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-          <button onClick={() => setActiveModal(null)} className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <X className="h-5 w-5" />
+          <button onClick={() => setActiveModal(null)} aria-label="Close dialog" className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground hover:bg-secondary hover:text-foreground">
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
           <h3 className="mb-1 text-lg font-bold text-foreground">{titles[activeModal]}</h3>
           <p className="mb-4 text-xs text-muted-foreground">{t("hero.privacyNote")}</p>
@@ -159,9 +159,10 @@ const HeroSection = () => {
             <button
               key={stat.labelKey}
               onClick={() => setActiveModal(stat.key)}
-              className="flex flex-col items-center gap-1 rounded-lg px-3 py-2 transition-all hover:bg-secondary/80 hover:scale-105 cursor-pointer sm:flex-row sm:gap-2"
+              aria-label={`View ${stat.value} ${t(stat.labelKey)} details`}
+              className="flex flex-col items-center gap-1 rounded-lg px-3 py-2 transition-all hover:bg-secondary/80 hover:scale-105 cursor-pointer sm:flex-row sm:gap-2 min-h-11"
             >
-              <stat.icon className="h-5 w-5 text-muted-foreground" />
+              <stat.icon className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
               <span className="text-lg font-bold text-foreground sm:text-xl">{stat.value}</span>
               <span className="text-xs text-muted-foreground sm:text-sm">{t(stat.labelKey)}</span>
             </button>

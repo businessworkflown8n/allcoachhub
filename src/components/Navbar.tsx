@@ -229,14 +229,20 @@ const Navbar = ({ customLogo, customName, customHomeLink }: NavbarProps = {}) =>
               </Link>
             </>
           )}
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-muted-foreground">
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="md:hidden text-muted-foreground min-h-11 min-w-11 inline-flex items-center justify-center"
+            aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav"
+          >
+            {mobileOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
           </button>
         </div>
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-border bg-background px-4 pb-4 md:hidden">
+        <div id="mobile-nav" className="border-t border-border bg-background px-4 pb-4 md:hidden">
           <div className="flex flex-col gap-1 pt-3">
             <Link to="/browse-coaches" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent">{t("nav.browseCoaches")}</Link>
             

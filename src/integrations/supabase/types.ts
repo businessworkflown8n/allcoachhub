@@ -9779,6 +9779,7 @@ export type Database = {
           sort_order: number
         }[]
       }
+      get_webinar_join_link: { Args: { _webinar_id: string }; Returns: string }
       grade_quiz_attempt: {
         Args: { _answers: Json; _quiz_id: string }
         Returns: Json

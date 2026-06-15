@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import Footer from "@/components/Footer";
 import MobileStickyCTA from "@/components/MobileStickyCTA";
+import LazyMount from "@/components/LazyMount";
 import { useSEO } from "@/hooks/useSEO";
 
 // Lazy load below-fold sections
@@ -90,39 +91,61 @@ const Index = () => {
         <HeroSection />
       </header>
       <main>
+        {/* First below-fold section loads eagerly so hash anchors / scroll-into-view stay snappy */}
         <Suspense fallback={<SectionFallback />}>
           <section id="categories"><CategoriesSection /></section>
         </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <section id="coaches"><CoachesSection /></section>
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <section id="ai-kids-pro"><AIKidsProSection /></section>
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <section id="courses"><CoursesSection /></section>
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <section id="how-it-works"><HowItWorksSection /></section>
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <section id="testimonials"><TestimonialsSection /></section>
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <section id="why-coaches"><WhyCoachesJoinSection /></section>
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <section id="earnings-calculator"><EarningsCalculator /></section>
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <section id="blogs"><HomeBlogSection /></section>
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <section id="about-platform"><AIDiscoverySection /></section>
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <section id="cta"><CTASection /></section>
-        </Suspense>
+        {/* Remaining sections mount only when near viewport — cuts mobile JS work */}
+        <LazyMount fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionFallback />}>
+            <section id="coaches"><CoachesSection /></section>
+          </Suspense>
+        </LazyMount>
+        <LazyMount fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionFallback />}>
+            <section id="ai-kids-pro"><AIKidsProSection /></section>
+          </Suspense>
+        </LazyMount>
+        <LazyMount fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionFallback />}>
+            <section id="courses"><CoursesSection /></section>
+          </Suspense>
+        </LazyMount>
+        <LazyMount fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionFallback />}>
+            <section id="how-it-works"><HowItWorksSection /></section>
+          </Suspense>
+        </LazyMount>
+        <LazyMount fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionFallback />}>
+            <section id="testimonials"><TestimonialsSection /></section>
+          </Suspense>
+        </LazyMount>
+        <LazyMount fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionFallback />}>
+            <section id="why-coaches"><WhyCoachesJoinSection /></section>
+          </Suspense>
+        </LazyMount>
+        <LazyMount fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionFallback />}>
+            <section id="earnings-calculator"><EarningsCalculator /></section>
+          </Suspense>
+        </LazyMount>
+        <LazyMount fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionFallback />}>
+            <section id="blogs"><HomeBlogSection /></section>
+          </Suspense>
+        </LazyMount>
+        <LazyMount fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionFallback />}>
+            <section id="about-platform"><AIDiscoverySection /></section>
+          </Suspense>
+        </LazyMount>
+        <LazyMount fallback={<SectionFallback />}>
+          <Suspense fallback={<SectionFallback />}>
+            <section id="cta"><CTASection /></section>
+          </Suspense>
+        </LazyMount>
       </main>
       <Footer />
       <MobileStickyCTA />

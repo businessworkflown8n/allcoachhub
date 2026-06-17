@@ -103,11 +103,59 @@ const CoachCampaigns = () => {
 
   useEffect(() => { fetchAll(); }, [user]);
 
+  const openWhatsAppDashboard = async () => {
+    if (!user) return;
+    setWaDialogOpen(true);
+    setWaLoading(true);
+    setWaShowPwd(false);
+    try {
+      const [accessRes, credRes] = await Promise.all([
+        supabase.from("whatsapp_access").select("is_active").eq("coach_id", user.id).maybeSingle(),
+        supabase.from("whatsapp_credentials").select("login_url, user_id, password").eq("coach_id", user.id).maybeSingle(),
+      ]);
+      const enabled = !!accessRes.data?.is_active;
+      setWaAccess(enabled);
+      setWaCreds(credRes.data as any);
+    } finally {
+      setWaLoading(false);
+    }
+  };
+
+  const requestWhatsAppAccess = async () => {
+    if (!user) return;
+    setWaRequesting(true);
+    const { error } = await supabase.from("whatsapp_credential_requests").insert({
+      coach_id: user.id,
+      status: "pending",
+      note: "Coach requested WhatsApp Dashboard access from Campaigns page",
+    });
+    setWaRequesting(false);
+    if (error) toast.error("Failed to send request");
+    else toast.success("Request sent to admin");
+  };
+
+  const copyCredentials = () => {
+    if (!waCreds) return;
+    const text = `Login URL: ${waCreds.login_url}\nUser ID: ${waCreds.user_id}\nPassword: ${waCreds.password}`;
+    navigator.clipboard.writeText(text);
+    toast.success("Credentials copied");
+  };
+
+  const launchWhatsAppDashboard = () => {
+    const url = waCreds?.login_url || "https://login.digitalsms.biz/signin.php";
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const openCreate = (channel = "email") => {
+    if (channel === "whatsapp") {
+      openWhatsAppDashboard();
+      return;
+    }
     setEditing(null);
     setForm({ ...emptyForm, channel, sender_name: profile?.full_name || "", sender_email: profile?.email || "" });
     setDialogOpen(true);
   };
+
 
   const openEdit = (c: Campaign) => {
     setEditing(c.id);

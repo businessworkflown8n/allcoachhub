@@ -15,8 +15,10 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import {
   Mail, Send, Plus, Pencil, Trash2, Eye, Clock, MessageCircle, Phone,
-  Megaphone, Instagram, Facebook, Linkedin, Twitter, Youtube, Globe, UserCheck
+  Megaphone, Instagram, Facebook, Linkedin, Twitter, Youtube, Globe, UserCheck,
+  ExternalLink, Copy, Eye as EyeIcon, EyeOff, Lock
 } from "lucide-react";
+
 
 type Campaign = {
   id: string;
@@ -79,6 +81,13 @@ const CoachCampaigns = () => {
   const [sending, setSending] = useState(false);
   const [profile, setProfile] = useState<{ full_name: string; email: string } | null>(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [waDialogOpen, setWaDialogOpen] = useState(false);
+  const [waLoading, setWaLoading] = useState(false);
+  const [waAccess, setWaAccess] = useState(false);
+  const [waCreds, setWaCreds] = useState<{ login_url: string; user_id: string; password: string } | null>(null);
+  const [waShowPwd, setWaShowPwd] = useState(false);
+  const [waRequesting, setWaRequesting] = useState(false);
+
 
   const fetchAll = async () => {
     if (!user) return;
@@ -94,11 +103,59 @@ const CoachCampaigns = () => {
 
   useEffect(() => { fetchAll(); }, [user]);
 
+  const openWhatsAppDashboard = async () => {
+    if (!user) return;
+    setWaDialogOpen(true);
+    setWaLoading(true);
+    setWaShowPwd(false);
+    try {
+      const [accessRes, credRes] = await Promise.all([
+        supabase.from("whatsapp_access").select("is_active").eq("coach_id", user.id).maybeSingle(),
+        supabase.from("whatsapp_credentials").select("login_url, user_id, password").eq("coach_id", user.id).maybeSingle(),
+      ]);
+      const enabled = !!accessRes.data?.is_active;
+      setWaAccess(enabled);
+      setWaCreds(credRes.data as any);
+    } finally {
+      setWaLoading(false);
+    }
+  };
+
+  const requestWhatsAppAccess = async () => {
+    if (!user) return;
+    setWaRequesting(true);
+    const { error } = await supabase.from("whatsapp_credential_requests").insert({
+      coach_id: user.id,
+      status: "pending",
+      note: "Coach requested WhatsApp Dashboard access from Campaigns page",
+    });
+    setWaRequesting(false);
+    if (error) toast.error("Failed to send request");
+    else toast.success("Request sent to admin");
+  };
+
+  const copyCredentials = () => {
+    if (!waCreds) return;
+    const text = `Login URL: ${waCreds.login_url}\nUser ID: ${waCreds.user_id}\nPassword: ${waCreds.password}`;
+    navigator.clipboard.writeText(text);
+    toast.success("Credentials copied");
+  };
+
+  const launchWhatsAppDashboard = () => {
+    const url = waCreds?.login_url || "https://login.digitalsms.biz/signin.php";
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const openCreate = (channel = "email") => {
+    if (channel === "whatsapp") {
+      openWhatsAppDashboard();
+      return;
+    }
     setEditing(null);
     setForm({ ...emptyForm, channel, sender_name: profile?.full_name || "", sender_email: profile?.email || "" });
     setDialogOpen(true);
   };
+
 
   const openEdit = (c: Campaign) => {
     setEditing(c.id);
@@ -345,7 +402,80 @@ const CoachCampaigns = () => {
           <div className="bg-muted rounded-lg p-4 whitespace-pre-wrap text-sm max-h-[60vh] overflow-y-auto">{previewContent}</div>
         </DialogContent>
       </Dialog>
+
+      {/* WhatsApp Dashboard Access Dialog */}
+      <Dialog open={waDialogOpen} onOpenChange={setWaDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-green-500" />
+              WhatsApp Dashboard Access
+            </DialogTitle>
+          </DialogHeader>
+          {waLoading ? (
+            <div className="flex justify-center py-10">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+          ) : !waAccess || !waCreds ? (
+            <div className="space-y-4 py-2">
+              <div className="flex flex-col items-center text-center gap-3 p-6 rounded-lg border border-dashed bg-muted/30">
+                <div className="rounded-full bg-muted p-3"><Lock className="h-6 w-6 text-muted-foreground" /></div>
+                <div>
+                  <h3 className="font-semibold">WhatsApp Access Not Enabled</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {waAccess && !waCreds
+                      ? "Your access is enabled, but credentials haven't been assigned yet."
+                      : "Your account doesn't have WhatsApp Dashboard access. Request access from the admin to get started."}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                <Button onClick={requestWhatsAppAccess} disabled={waRequesting} className="gap-2">
+                  <Send className="h-4 w-4" /> {waRequesting ? "Sending..." : "Request Access"}
+                </Button>
+                <Button variant="outline" asChild>
+                  <a href="mailto:support@aicoachportal.com?subject=WhatsApp%20Access%20Request">Contact Admin</a>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4 py-2">
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">Login URL</Label>
+                  <Input readOnly value={waCreds.login_url} className="mt-1 font-mono text-sm" />
+                </div>
+                <div>
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">User ID</Label>
+                  <Input readOnly value={waCreds.user_id} className="mt-1 font-mono text-sm" />
+                </div>
+                <div>
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">Password</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input readOnly type={waShowPwd ? "text" : "password"} value={waCreds.password} className="font-mono text-sm" />
+                    <Button variant="outline" size="icon" onClick={() => setWaShowPwd(s => !s)} aria-label={waShowPwd ? "Hide password" : "Show password"}>
+                      {waShowPwd ? <EyeOff className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                <Button variant="outline" onClick={copyCredentials} className="gap-2 flex-1">
+                  <Copy className="h-4 w-4" /> Copy Credentials
+                </Button>
+                <Button onClick={launchWhatsAppDashboard} className="gap-2 flex-1 bg-green-600 hover:bg-green-700 text-white">
+                  <ExternalLink className="h-4 w-4" /> Launch WhatsApp Dashboard
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground text-center">
+                Use these credentials to sign in to the Digital SMS WhatsApp Dashboard.
+              </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 };
 

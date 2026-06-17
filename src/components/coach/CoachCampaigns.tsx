@@ -81,6 +81,13 @@ const CoachCampaigns = () => {
   const [sending, setSending] = useState(false);
   const [profile, setProfile] = useState<{ full_name: string; email: string } | null>(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [waDialogOpen, setWaDialogOpen] = useState(false);
+  const [waLoading, setWaLoading] = useState(false);
+  const [waAccess, setWaAccess] = useState(false);
+  const [waCreds, setWaCreds] = useState<{ login_url: string; user_id: string; password: string } | null>(null);
+  const [waShowPwd, setWaShowPwd] = useState(false);
+  const [waRequesting, setWaRequesting] = useState(false);
+
 
   const fetchAll = async () => {
     if (!user) return;

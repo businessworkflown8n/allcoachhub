@@ -15,8 +15,10 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import {
   Mail, Send, Plus, Pencil, Trash2, Eye, Clock, MessageCircle, Phone,
-  Megaphone, Instagram, Facebook, Linkedin, Twitter, Youtube, Globe, UserCheck
+  Megaphone, Instagram, Facebook, Linkedin, Twitter, Youtube, Globe, UserCheck,
+  ExternalLink, Copy, Eye as EyeIcon, EyeOff, Lock
 } from "lucide-react";
+
 
 type Campaign = {
   id: string;

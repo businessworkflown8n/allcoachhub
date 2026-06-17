@@ -177,6 +177,9 @@ const CoachWhatsApp = () => {
           </div>
         </div>
 
+        {dashboardPanel}
+
+
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>

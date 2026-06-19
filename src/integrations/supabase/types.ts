@@ -905,39 +905,99 @@ export type Database = {
         }
         Relationships: []
       }
+      certificate_settings: {
+        Row: {
+          ai_kids_certificates_enabled: boolean
+          certificates_enabled: boolean
+          course_wise_templates_enabled: boolean
+          created_at: string
+          default_template_id: string | null
+          id: string
+          qr_verification_enabled: boolean
+          revocation_enabled: boolean
+          signature_upload_enabled: boolean
+          singleton: boolean
+          updated_at: string
+          workshop_certificates_enabled: boolean
+        }
+        Insert: {
+          ai_kids_certificates_enabled?: boolean
+          certificates_enabled?: boolean
+          course_wise_templates_enabled?: boolean
+          created_at?: string
+          default_template_id?: string | null
+          id?: string
+          qr_verification_enabled?: boolean
+          revocation_enabled?: boolean
+          signature_upload_enabled?: boolean
+          singleton?: boolean
+          updated_at?: string
+          workshop_certificates_enabled?: boolean
+        }
+        Update: {
+          ai_kids_certificates_enabled?: boolean
+          certificates_enabled?: boolean
+          course_wise_templates_enabled?: boolean
+          created_at?: string
+          default_template_id?: string | null
+          id?: string
+          qr_verification_enabled?: boolean
+          revocation_enabled?: boolean
+          signature_upload_enabled?: boolean
+          singleton?: boolean
+          updated_at?: string
+          workshop_certificates_enabled?: boolean
+        }
+        Relationships: []
+      }
       certificate_templates: {
         Row: {
-          coach_id: string
+          background_url: string | null
+          coach_id: string | null
           course_id: string | null
           created_at: string
           description: string | null
           id: string
           is_active: boolean
+          is_default: boolean
           template_design: Json
+          template_kind: string
+          tier: string
           title: string
           updated_at: string
+          workshop_id: string | null
         }
         Insert: {
-          coach_id: string
+          background_url?: string | null
+          coach_id?: string | null
           course_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean
+          is_default?: boolean
           template_design?: Json
+          template_kind?: string
+          tier?: string
           title: string
           updated_at?: string
+          workshop_id?: string | null
         }
         Update: {
-          coach_id?: string
+          background_url?: string | null
+          coach_id?: string | null
           course_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean
+          is_default?: boolean
           template_design?: Json
+          template_kind?: string
+          tier?: string
           title?: string
           updated_at?: string
+          workshop_id?: string | null
         }
         Relationships: [
           {
@@ -1384,6 +1444,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      coach_certificate_counters: {
+        Row: {
+          coach_id: string
+          last_number: number
+          year: number
+        }
+        Insert: {
+          coach_id: string
+          last_number?: number
+          year: number
+        }
+        Update: {
+          coach_id?: string
+          last_number?: number
+          year?: number
+        }
+        Relationships: []
+      }
+      coach_certificate_signatures: {
+        Row: {
+          coach_id: string
+          created_at: string
+          designation: string | null
+          full_name: string
+          id: string
+          organization: string | null
+          signature_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          designation?: string | null
+          full_name: string
+          id?: string
+          organization?: string | null
+          signature_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          designation?: string | null
+          full_name?: string
+          id?: string
+          organization?: string | null
+          signature_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       coach_clients: {
         Row: {
@@ -5424,34 +5535,100 @@ export type Database = {
       }
       issued_certificates: {
         Row: {
+          blockchain_hash: string | null
           certificate_number: string
+          coach_designation: string | null
+          coach_id: string | null
+          coach_name: string | null
+          coach_organization: string | null
+          coach_signature_url: string | null
+          completion_date: string | null
           course_id: string | null
+          course_name: string | null
+          created_at: string
+          duration_text: string | null
+          email_sent_at: string | null
           id: string
           is_valid: boolean
           issued_at: string
+          learner_email: string | null
+          learner_name: string | null
+          linkedin_share_url: string | null
           pdf_url: string | null
-          template_id: string
+          revoked_at: string | null
+          revoked_by: string | null
+          revoked_reason: string | null
+          source_id: string | null
+          source_type: string
+          status: string
+          template_id: string | null
+          updated_at: string
           user_id: string
+          verification_token: string
         }
         Insert: {
+          blockchain_hash?: string | null
           certificate_number: string
+          coach_designation?: string | null
+          coach_id?: string | null
+          coach_name?: string | null
+          coach_organization?: string | null
+          coach_signature_url?: string | null
+          completion_date?: string | null
           course_id?: string | null
+          course_name?: string | null
+          created_at?: string
+          duration_text?: string | null
+          email_sent_at?: string | null
           id?: string
           is_valid?: boolean
           issued_at?: string
+          learner_email?: string | null
+          learner_name?: string | null
+          linkedin_share_url?: string | null
           pdf_url?: string | null
-          template_id: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          revoked_reason?: string | null
+          source_id?: string | null
+          source_type?: string
+          status?: string
+          template_id?: string | null
+          updated_at?: string
           user_id: string
+          verification_token?: string
         }
         Update: {
+          blockchain_hash?: string | null
           certificate_number?: string
+          coach_designation?: string | null
+          coach_id?: string | null
+          coach_name?: string | null
+          coach_organization?: string | null
+          coach_signature_url?: string | null
+          completion_date?: string | null
           course_id?: string | null
+          course_name?: string | null
+          created_at?: string
+          duration_text?: string | null
+          email_sent_at?: string | null
           id?: string
           is_valid?: boolean
           issued_at?: string
+          learner_email?: string | null
+          learner_name?: string | null
+          linkedin_share_url?: string | null
           pdf_url?: string | null
-          template_id?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          revoked_reason?: string | null
+          source_id?: string | null
+          source_type?: string
+          status?: string
+          template_id?: string | null
+          updated_at?: string
           user_id?: string
+          verification_token?: string
         }
         Relationships: [
           {
@@ -9878,6 +10055,10 @@ export type Database = {
         }
         Returns: number
       }
+      next_certificate_number: {
+        Args: { _coach_id: string; _year: number }
+        Returns: string
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
@@ -9899,11 +10080,16 @@ export type Database = {
         Args: { _action: string; _coach_id: string; _reason?: string }
         Returns: Json
       }
+      revoke_certificate: {
+        Args: { _certificate_id: string; _reason: string }
+        Returns: Json
+      }
       update_learner_streak: { Args: { _user_id: string }; Returns: Json }
       user_has_course_access: {
         Args: { _course_id: string; _user_id: string }
         Returns: boolean
       }
+      verify_certificate_public: { Args: { _token: string }; Returns: Json }
       wa_admin_grant_credits: {
         Args: {
           _amount: number

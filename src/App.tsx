@@ -61,6 +61,7 @@ const AiMastermindLearning = lazy(() => import("./pages/AiMastermindLearning"));
 const AiJobsNewsLinkedInPost = lazy(() => import("./pages/AiJobsNewsLinkedInPost"));
 const AIKidsEnrollment = lazy(() => import("./pages/AIKidsEnrollment"));
 const AIKidsProCourses = lazy(() => import("./pages/AIKidsProCourses"));
+const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
 
 // Lazy-loaded global widgets (non-critical)
 
@@ -166,6 +167,7 @@ const App = () => (
             <Route path="/unsubscribe" element={<Suspense fallback={<PageFallback />}><Unsubscribe /></Suspense>} />
             <Route path="/install" element={<Suspense fallback={<PageFallback />}><Install /></Suspense>} />
             <Route path="/sitemap" element={<Suspense fallback={<PageFallback />}><Sitemap /></Suspense>} />
+            <Route path="/verify-certificate/:token" element={<Suspense fallback={<PageFallback />}><VerifyCertificate /></Suspense>} />
             <Route path="/courses" element={<Suspense fallback={<PageFallback />}><Courses /></Suspense>} />
             <Route path="/courses/ai-kids-pro" element={<Suspense fallback={<PageFallback />}><AIKidsProCourses /></Suspense>} />
             <Route path="/courses/:slug" element={<Suspense fallback={<PageFallback />}><CategoryPage /></Suspense>} />

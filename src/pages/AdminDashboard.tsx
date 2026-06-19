@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSEO } from "@/hooks/useSEO";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { BarChart3, Users, GraduationCap, DollarSign, Settings, Star, Shield, BookOpen, Video, ClipboardList, TrendingUp, Globe, Bot, MessageSquare, Gamepad2, Mail, Share2, Megaphone, UserCheck, MousePointerClick, FolderOpen, Plug, FileCheck, Search, KeyRound, LayoutGrid, MessageCircle, ImageIcon, ScrollText, ShieldCheck, Image, Bell, CreditCard, Package, Inbox, HelpCircle, Link as LinkIcon, Coins } from "lucide-react";
+import { BarChart3, Users, GraduationCap, DollarSign, Settings, Star, Shield, BookOpen, Video, ClipboardList, TrendingUp, Globe, Bot, MessageSquare, Gamepad2, Mail, Share2, Megaphone, UserCheck, MousePointerClick, FolderOpen, Plug, FileCheck, Search, KeyRound, LayoutGrid, MessageCircle, ImageIcon, ScrollText, ShieldCheck, Image, Bell, CreditCard, Package, Inbox, HelpCircle, Link as LinkIcon, Coins, Award } from "lucide-react";
 
 import AdminMarqueeManager from "@/components/admin/AdminMarqueeManager";
 import AdminOverview from "@/components/admin/AdminOverview";
@@ -59,6 +59,7 @@ import AdminAssignments from "@/components/admin/AdminAssignments";
 import AdminLMSOverview from "@/components/admin/AdminLMSOverview";
 import AdminCourseCategories from "@/components/admin/AdminCourseCategories";
 import AdminAIKidsEnrollments from "@/components/admin/AdminAIKidsEnrollments";
+import AdminCertificateSettings from "@/components/admin/AdminCertificateSettings";
 
 
 const navItems = [
@@ -118,6 +119,7 @@ const navItems = [
   { label: "Currency Management", path: "/admin/currencies", icon: <Coins className="h-4 w-4" /> },
   { label: "Assignments", path: "/admin/assignments", icon: <ClipboardList className="h-4 w-4" /> },
   { label: "LMS Oversight", path: "/admin/lms-overview", icon: <TrendingUp className="h-4 w-4" /> },
+  { label: "Certificate Settings", path: "/admin/certificate-settings", icon: <Award className="h-4 w-4" /> },
 ];
 
 
@@ -189,6 +191,7 @@ const AdminDashboard = () => {
         <Route path="currencies" element={<AdminCurrencyManagement />} />
         <Route path="assignments" element={<AdminAssignments />} />
         <Route path="lms-overview" element={<AdminLMSOverview />} />
+        <Route path="certificate-settings" element={<AdminCertificateSettings />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
 
       </Routes>

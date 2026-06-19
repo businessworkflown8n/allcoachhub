@@ -46,7 +46,8 @@ import { useExternalLinkControl } from "@/hooks/useExternalLinkControl";
 import CoachSubscription from "@/components/coach/CoachSubscription";
 import CoachCurrencySettings from "@/components/coach/CoachCurrencySettings";
 import CoachAIKidsLeads from "@/components/coach/CoachAIKidsLeads";
-import { CreditCard, Coins } from "lucide-react";
+import CoachCertificates from "@/components/coach/CoachCertificates";
+import { CreditCard, Coins, Award } from "lucide-react";
 
 
 const CoachDashboard = () => {
@@ -107,6 +108,7 @@ const CoachDashboard = () => {
     ...(aiJobsLinkedInEnabled ? [{ label: "AI Jobs & News – LinkedIn Post", path: "/ai-jobs-news/linkedin-post", icon: <Share2 className="h-4 w-4" /> }] : []),
     { label: "SEO & Indexing", path: "/coach/seo", icon: <Search className="h-4 w-4" /> },
     { label: "Profile", path: "/coach/profile", icon: <User className="h-4 w-4" /> },
+    { label: "Certificates", path: "/coach/certificates", icon: <Award className="h-4 w-4" /> },
     { label: "Subscription", path: "/coach/subscription", icon: <CreditCard className="h-4 w-4" /> },
     { label: "Currency Settings", path: "/coach/currency", icon: <Coins className="h-4 w-4" /> },
   ];
@@ -144,6 +146,7 @@ const CoachDashboard = () => {
         <Route path="invite-coaches" element={<CoachReferrals />} />
         <Route path="daily-zip" element={<DailyZip />} />
         <Route path="profile" element={<CoachProfile />} />
+        <Route path="certificates" element={<CoachCertificates />} />
         <Route path="prompt-generator" element={<div className="space-y-4"><h2 className="text-xl font-bold text-foreground">Prompt Generator</h2><div className="rounded-xl border border-border bg-card p-6"><PromptGeneratorForm showSave userRole="coach" /></div></div>} />
         <Route path="website" element={<CoachWebsiteManager />} />
         <Route path="seo" element={<CoachSEOPanel />} />

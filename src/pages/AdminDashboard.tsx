@@ -191,6 +191,7 @@ const AdminDashboard = () => {
         <Route path="currencies" element={<AdminCurrencyManagement />} />
         <Route path="assignments" element={<AdminAssignments />} />
         <Route path="lms-overview" element={<AdminLMSOverview />} />
+        <Route path="certificate-settings" element={<AdminCertificateSettings />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
 
       </Routes>

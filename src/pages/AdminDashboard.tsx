@@ -59,6 +59,7 @@ import AdminAssignments from "@/components/admin/AdminAssignments";
 import AdminLMSOverview from "@/components/admin/AdminLMSOverview";
 import AdminCourseCategories from "@/components/admin/AdminCourseCategories";
 import AdminAIKidsEnrollments from "@/components/admin/AdminAIKidsEnrollments";
+import AdminCertificateSettings from "@/components/admin/AdminCertificateSettings";
 
 
 const navItems = [

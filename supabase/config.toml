@@ -1,6 +1,10 @@
 project_id = "iipxwwrzkdkestikxcpg"
 
 [functions]
+  [functions.issue-certificate]
+    verify_jwt = true
+  [functions.verify-certificate]
+    verify_jwt = false
   [functions.ai-agent-engine]
     verify_jwt = true
   [functions.auth-email-hook]

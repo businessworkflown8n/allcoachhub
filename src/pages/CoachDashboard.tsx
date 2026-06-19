@@ -46,7 +46,8 @@ import { useExternalLinkControl } from "@/hooks/useExternalLinkControl";
 import CoachSubscription from "@/components/coach/CoachSubscription";
 import CoachCurrencySettings from "@/components/coach/CoachCurrencySettings";
 import CoachAIKidsLeads from "@/components/coach/CoachAIKidsLeads";
-import { CreditCard, Coins } from "lucide-react";
+import CoachCertificates from "@/components/coach/CoachCertificates";
+import { CreditCard, Coins, Award } from "lucide-react";
 
 
 const CoachDashboard = () => {

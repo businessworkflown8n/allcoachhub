@@ -146,6 +146,7 @@ const CoachDashboard = () => {
         <Route path="invite-coaches" element={<CoachReferrals />} />
         <Route path="daily-zip" element={<DailyZip />} />
         <Route path="profile" element={<CoachProfile />} />
+        <Route path="certificates" element={<CoachCertificates />} />
         <Route path="prompt-generator" element={<div className="space-y-4"><h2 className="text-xl font-bold text-foreground">Prompt Generator</h2><div className="rounded-xl border border-border bg-card p-6"><PromptGeneratorForm showSave userRole="coach" /></div></div>} />
         <Route path="website" element={<CoachWebsiteManager />} />
         <Route path="seo" element={<CoachSEOPanel />} />

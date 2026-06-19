@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Camera, Upload, Trash2, Loader2 } from "lucide-react";
 import CoachCategoryManager from "./CoachCategoryManager";
+import CoachCertificateSignature from "./CoachCertificateSignature";
 
 const CoachProfile = () => {
   const { user } = useAuth();

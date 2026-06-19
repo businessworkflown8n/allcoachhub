@@ -119,6 +119,7 @@ const navItems = [
   { label: "Currency Management", path: "/admin/currencies", icon: <Coins className="h-4 w-4" /> },
   { label: "Assignments", path: "/admin/assignments", icon: <ClipboardList className="h-4 w-4" /> },
   { label: "LMS Oversight", path: "/admin/lms-overview", icon: <TrendingUp className="h-4 w-4" /> },
+  { label: "Certificate Settings", path: "/admin/certificate-settings", icon: <Award className="h-4 w-4" /> },
 ];
 
 

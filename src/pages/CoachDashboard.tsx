@@ -108,6 +108,7 @@ const CoachDashboard = () => {
     ...(aiJobsLinkedInEnabled ? [{ label: "AI Jobs & News – LinkedIn Post", path: "/ai-jobs-news/linkedin-post", icon: <Share2 className="h-4 w-4" /> }] : []),
     { label: "SEO & Indexing", path: "/coach/seo", icon: <Search className="h-4 w-4" /> },
     { label: "Profile", path: "/coach/profile", icon: <User className="h-4 w-4" /> },
+    { label: "Certificates", path: "/coach/certificates", icon: <Award className="h-4 w-4" /> },
     { label: "Subscription", path: "/coach/subscription", icon: <CreditCard className="h-4 w-4" /> },
     { label: "Currency Settings", path: "/coach/currency", icon: <Coins className="h-4 w-4" /> },
   ];

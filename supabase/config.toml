@@ -33,6 +33,8 @@ project_id = "iipxwwrzkdkestikxcpg"
     verify_jwt = true
   [functions.generate-thumbnail]
     verify_jwt = true
+  [functions.auto-generate-course-thumbnail]
+    verify_jwt = true
   [functions.google-oauth-callback]
     verify_jwt = false
   [functions.gsc-oauth]

@@ -18,8 +18,31 @@ const AdminThumbnailAccess = () => {
   const [coaches, setCoaches] = useState<CoachRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
+  const [autoEnabled, setAutoEnabled] = useState(true);
+  const [savingAuto, setSavingAuto] = useState(false);
 
-  useEffect(() => { loadCoaches(); }, []);
+  useEffect(() => { loadCoaches(); loadAutoSetting(); }, []);
+
+  const loadAutoSetting = async () => {
+    const { data } = await supabase
+      .from("platform_settings")
+      .select("value")
+      .eq("key", "auto_thumbnail_enabled")
+      .maybeSingle();
+    setAutoEnabled(data?.value !== "false");
+  };
+
+  const toggleAuto = async (v: boolean) => {
+    setSavingAuto(true);
+    const { error } = await (supabase.from("platform_settings") as any).upsert(
+      { key: "auto_thumbnail_enabled", value: v ? "true" : "false", updated_at: new Date().toISOString() },
+      { onConflict: "key" }
+    );
+    setSavingAuto(false);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    setAutoEnabled(v);
+    toast({ title: v ? "Auto-generation enabled" : "Auto-generation disabled" });
+  };
 
   const loadCoaches = async () => {
     setLoading(true);
@@ -76,6 +99,14 @@ const AdminThumbnailAccess = () => {
           <h2 className="text-xl font-bold text-foreground">AI Thumbnail Generator Access</h2>
           <p className="text-sm text-muted-foreground">Control which coaches can generate AI thumbnails for their courses.</p>
         </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card p-4 flex items-center justify-between">
+        <div>
+          <div className="font-semibold text-foreground">Auto-generate thumbnails on course creation</div>
+          <p className="text-xs text-muted-foreground">When enabled, courses created without a thumbnail get one generated automatically.</p>
+        </div>
+        {savingAuto ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Switch checked={autoEnabled} onCheckedChange={toggleAuto} />}
       </div>
 
       <div className="rounded-xl border border-border bg-card overflow-hidden">

@@ -266,6 +266,11 @@ const CoachCourseForm = () => {
         await supabase.from("courses").update({ thumbnail_url: thumbUrl, thumbnail_status: "pending" } as any).eq("id", courseId);
       }
       setUploadingThumb(false);
+    } else if (!thumbnailFile && !thumbnailPreview && courseId) {
+      // No thumbnail provided → fire-and-forget AI auto-generation
+      supabase.functions
+        .invoke("auto-generate-course-thumbnail", { body: { courseId } })
+        .catch((err) => console.warn("auto-thumbnail failed", err));
     }
 
     setSaving(false);

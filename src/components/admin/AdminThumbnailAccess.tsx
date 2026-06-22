@@ -101,6 +101,14 @@ const AdminThumbnailAccess = () => {
         </div>
       </div>
 
+      <div className="rounded-xl border border-border bg-card p-4 flex items-center justify-between">
+        <div>
+          <div className="font-semibold text-foreground">Auto-generate thumbnails on course creation</div>
+          <p className="text-xs text-muted-foreground">When enabled, courses created without a thumbnail get one generated automatically.</p>
+        </div>
+        {savingAuto ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Switch checked={autoEnabled} onCheckedChange={toggleAuto} />}
+      </div>
+
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <Table>
           <TableHeader>

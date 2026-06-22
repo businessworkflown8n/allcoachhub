@@ -18,8 +18,31 @@ const AdminThumbnailAccess = () => {
   const [coaches, setCoaches] = useState<CoachRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
+  const [autoEnabled, setAutoEnabled] = useState(true);
+  const [savingAuto, setSavingAuto] = useState(false);
 
-  useEffect(() => { loadCoaches(); }, []);
+  useEffect(() => { loadCoaches(); loadAutoSetting(); }, []);
+
+  const loadAutoSetting = async () => {
+    const { data } = await supabase
+      .from("platform_settings")
+      .select("value")
+      .eq("key", "auto_thumbnail_enabled")
+      .maybeSingle();
+    setAutoEnabled(data?.value !== "false");
+  };
+
+  const toggleAuto = async (v: boolean) => {
+    setSavingAuto(true);
+    const { error } = await (supabase.from("platform_settings") as any).upsert(
+      { key: "auto_thumbnail_enabled", value: v ? "true" : "false", updated_at: new Date().toISOString() },
+      { onConflict: "key" }
+    );
+    setSavingAuto(false);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    setAutoEnabled(v);
+    toast({ title: v ? "Auto-generation enabled" : "Auto-generation disabled" });
+  };
 
   const loadCoaches = async () => {
     setLoading(true);

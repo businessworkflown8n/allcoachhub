@@ -1,83 +1,79 @@
-## Dynamic Certificate System — Full Build
+# Webinar Certification & AI LinkedIn Sharing
 
-A platform-wide Certificate of Completion system matching the attached neon-green AI design. Coaches manually issue certificates; learners download/share/verify; admins configure templates and toggles.
+Extend the existing certificate system (courses) to webinars, reusing the `issued_certificates`, `certificate_templates`, `coach_certificate_signatures`, `coach_certificate_counters`, and `certificate_settings` tables. Add per-webinar certification config and AI-generated LinkedIn posts.
 
-### 1. Database changes (one migration)
+## 1. Database (migration)
 
-Extend existing `issued_certificates` and `certificate_templates`, add new tables:
+**Extend `webinars`** with certification config columns:
+- `cert_enabled` (bool, default false)
+- `cert_title`, `cert_description` (text)
+- `cert_template_id` (uuid → certificate_templates)
+- `cert_signature_id` (uuid → coach_certificate_signatures)
+- `cert_completion_criteria` (text: `attended` | `manual` | `quiz_pass`)
+- `cert_validity_months` (int, nullable)
+- `cert_qr_enabled` (bool, default true)
 
-- **`coach_certificate_signatures`** (per-coach signature profile)
-  - `coach_id` (FK profiles, unique), `signature_url` (PNG transparent in `certificate-assets` bucket), `full_name`, `designation`, `organization`
-- **`certificate_settings`** (single-row admin config)
-  - `certificates_enabled`, `signature_upload_enabled`, `qr_verification_enabled`, `revocation_enabled`, `workshop_certificates_enabled`, `ai_kids_certificates_enabled`, `default_template_id`
-- **Extend `certificate_templates`**: `tier` enum (`standard|gold|silver|platinum`), `is_default`, `course_id` (nullable, for course-specific override), `workshop_id` (nullable)
-- **Extend `issued_certificates`**:
-  - `certificate_number` (text, unique, format `ACP-{coach-slug}-{YYYY}-{6digit}`)
-  - `verification_token` (uuid)
-  - `status` (`valid|revoked`), `revoked_at`, `revoked_reason`
-  - `source_type` (`course|workshop|ai_kids`), `source_id`
-  - `learner_name`, `course_name`, `coach_name`, `coach_designation`, `coach_organization`, `coach_signature_url` (denormalized snapshot for tamper-resistant verification)
-  - `duration_text`, `issued_on`, `pdf_url`
-- **Per-coach sequence**: `coach_certificate_counters(coach_id, year, last_number)` + SECURITY DEFINER function `next_certificate_number(coach_id, year)` that atomically increments and returns the formatted ID
-- **Storage buckets**: `certificate-signatures` (private, coach + admin RW; public read via signed URL in PDFs), `certificates` (private, learner read own)
-- **RLS**:
-  - Signatures: coach manages own; admins all; service_role all
-  - Settings: admin RW; authenticated read
-  - Issued: learner reads own; coach reads own-issued; admins all; public lookup by `verification_token` via SECURITY DEFINER RPC only (no direct anon SELECT)
+**Extend `issued_certificates`** (already supports courses) to allow webinar source:
+- Add `webinar_id` (uuid, nullable, FK webinars), `source_type` (text: `course` | `webinar`, default `course`).
+- Update `next_certificate_number` to accept a source slug (`COURSE` vs `WEB`) → format `ACP-WEB-{YYYY}-{000000}`.
 
-### 2. Edge functions
+**Extend `certificate_settings`** (admin global toggles):
+- `webinar_cert_enabled`, `linkedin_sharing_enabled`, `ai_post_generation_enabled`, `qr_verification_enabled`, `public_verification_enabled`, `monthly_cert_limit` (int).
 
-- **`issue-certificate`** (replaces/extends `generate-certificate`): input `{ source_type, source_id, learner_id }`; validates coach owns the source; snapshots coach signature + learner/course data; calls `next_certificate_number`; renders PDF (A4 landscape, 300dpi via `pdf-lib` + embedded SVG QR from `qrcode`); uploads to `certificates` bucket; updates row; fires email via existing Resend integration.
-- **`verify-certificate`** (public, no JWT): input `{ token }`; returns sanitized public fields only (learner name, course, coach, dates, status). Backed by SECURITY DEFINER RPC.
-- **`revoke-certificate`**: coach/admin only.
+**Extend `coach_feature_flags`**: `webinar_certification_access` (bool, default true) for admin per-coach toggle.
 
-### 3. Certificate PDF design
+RLS: webinar certs inherit existing `issued_certificates` policies (learner reads own, coach reads issued, admin all). Add GRANTs unchanged (existing table).
 
-Matches attached image:
-- Background `#050A0F`, neon `#C7FF3D`, white text; circuit pattern SVG corners; AI head silhouette left; robot + nodes right
-- Header "CERTIFICATE OF COMPLETION" in neon
-- Center: learner name (script font), "has successfully completed the course", course name (large)
-- Footer band: Issued on • Laurel + medal • Certificate No.
-- Coach signature PNG + name + designation + organization
-- QR code bottom-right linking to `/verify-certificate/{token}`
-- `www.aicoachportal.com` footer ribbon
-- Generated server-side with `pdf-lib`; assets embedded from `/supabase/functions/_shared/cert-assets/`
+## 2. Edge Functions
 
-### 4. UI surfaces
+- **`issue-webinar-certificate`** — input `{ webinar_id, learner_id }`. Verifies attendance (`webinar_registrations.attended=true`), checks coach `cert_enabled` + admin flags + monthly limit, calls `next_certificate_number(coach, year)` with WEB prefix, renders PDF (reuse PDF code from `issue-certificate`), uploads to `certificate-pdfs` bucket at `webinars/{coach}/{cert_number}.pdf`, inserts `issued_certificates` with `source_type='webinar'` and `webinar_id`.
+- **`generate-linkedin-post`** — input `{ certificate_id }`. Loads cert + webinar (title, description, learning_outcomes, skills) + coach profile, calls Lovable AI (`google/gemini-3-flash-preview`) with strict positive-only system prompt, returns post text + hashtags. Handles 429/402.
+- **`verify-certificate`** — already exists; extend to return `source_type`, `webinar_name` when applicable.
 
-- **`/verify-certificate/:token`** (new public page) — neon-themed verification card showing learner, course, coach, dates, Valid/Revoked badge.
-- **Learner → `/learner/certificates`** (rewrite existing): grid of certificate cards with preview thumbnail, Download PDF, Share, "Add to LinkedIn" (uses LinkedIn certification URL pattern), Verify (opens public page).
-- **Coach → `/coach/certificates`** (new tab in CoachDashboard): stats (total issued, this month), table with search, filter by course, actions: Download, Resend, Revoke. "Issue Certificate" button on each completed enrollment.
-- **Coach → Profile → Certificate Signature** card: upload PNG, fields for full name / designation / organization, live preview.
-- **Admin → `/admin/certificate-settings`** (new): all enable/disable toggles, default template selector, template gallery (Standard/Gold/Silver/Platinum) with upload, course-wise template assignment, revocation log.
-- **Coach Enrollment view**: "Issue Certificate" button appears once learner hits 100% (visual indicator only; coach still confirms — matches "Manual coach approval" trigger).
+All use `npm:@supabase/supabase-js@2/cors`, manual JWT validate where needed.
 
-### 5. Integration points
+## 3. Coach UI
 
-- Hook into existing `lesson_progress` to compute completion % (no auto-issue — manual only per your choice).
-- Reuse `course-completion-email` template; add certificate attachment + verification link.
-- Add `useCoachFeatures` flag `certificates_enabled` so admins can per-coach disable.
+- **`CoachWebinarForm.tsx`** (edit `src/components/coach/...`): add "🎓 Certification Settings" card — toggle, template picker (reuse `certificate_templates`), signature picker (reuse `coach_certificate_signatures`), title/description/criteria/validity/QR toggle, live preview reusing existing preview component.
+- **`CoachCertificates.tsx`**: add tab/filter to switch between Course and Webinar certificates; bulk issue button for a webinar's attendees.
 
-### Technical notes
+## 4. Learner UI
 
-- Certificate ID format per coach: `ACP-{slug}-{YYYY}-{NNNNNN}` where slug = first 6 chars of coach username/profile slug, uppercased.
-- Verification uses a separate UUID token (not the certificate number) so IDs can be shared publicly without enabling enumeration.
-- PDF generation runs in edge function with `pdf-lib` (Deno-compatible) + `qrcode` from `npm:`.
-- Signatures stored as transparent PNG; rendered at 180px wide on PDF (≈1.2 inches).
-- Snapshotting coach data on issuance ensures revoked/changed signatures don't retroactively alter old certificates.
-- LinkedIn integration uses the "Add to Profile" URL pattern (`https://www.linkedin.com/profile/add?...`) — no API needed.
-- WhatsApp delivery deferred to a follow-up (uses existing Digital SMS integration; only a stub button included).
-- Blockchain/NFT noted as "future" — schema includes `blockchain_hash` nullable column but no on-chain integration yet.
+- **`LearnerWebinars.tsx`**: in "Completed Webinars" list, when `cert_enabled` + attended, show **🎓 Generate Certificate** button → invokes `issue-webinar-certificate`, then opens share modal.
+- **`LearnerCertificates.tsx`**: unify course + webinar certs in a single list (filter chip). Each card: View / Download PDF / Verify / Share on LinkedIn / Copy link.
+- **New `CertificateShareModal.tsx`**: Download, Copy verification URL, **Generate AI LinkedIn Post** (calls edge function, shows editable textarea), **Share on LinkedIn** (deep link to LinkedIn share with prefilled text + cert URL).
 
-### Build order
+## 5. Public verification
 
-1. Migration (schema + RPC + buckets + RLS)
-2. `issue-certificate` + `verify-certificate` edge functions
-3. Public `/verify-certificate/:token` page
-4. Coach signature upload UI
-5. Coach `/coach/certificates` dashboard + issuance flow
-6. Learner certificates rewrite
-7. Admin certificate settings page
-8. Multi-template gallery (Gold/Silver/Platinum)
+- `/verify-certificate/:token` already exists — update to render webinar name + coach when `source_type='webinar'`.
+- Short URL alias `/certificate/:number` → resolves number to token and renders same page.
 
-Given the size, I'll implement in this order across the next turns. This first turn will deliver steps 1–4.
+## 6. Admin UI
+
+- **`AdminCertificateSettings.tsx`**: add Webinar Certification section with toggles for: webinar_cert_enabled, linkedin_sharing_enabled, ai_post_generation_enabled, qr_verification_enabled, public_verification_enabled, monthly_cert_limit. Add per-coach feature flag override (existing pattern via `coach_feature_flags`).
+
+## 7. AI Content Rules
+
+System prompt for `generate-linkedin-post` enforces: positive only, no comparisons, no false claims, no negative/controversial content, include webinar title + coach name + cert ID + 5–7 professional hashtags, 150–220 words, unique per learner (include learner first name + timestamp seed).
+
+## Files
+
+**New**
+- `supabase/functions/issue-webinar-certificate/index.ts`
+- `supabase/functions/generate-linkedin-post/index.ts`
+- `src/components/learner/CertificateShareModal.tsx`
+- Migration SQL
+
+**Edited**
+- `supabase/functions/verify-certificate/index.ts`
+- `supabase/config.toml`
+- `src/components/coach/CoachWebinarForm.tsx` (or webinar create/edit component — verify exact filename first)
+- `src/components/coach/CoachCertificates.tsx`
+- `src/components/learner/LearnerWebinars.tsx`
+- `src/components/learner/LearnerCertificates.tsx`
+- `src/components/admin/AdminCertificateSettings.tsx`
+- `src/pages/VerifyCertificate.tsx`
+- `src/App.tsx` (add `/certificate/:number` route)
+
+## Out of scope (defer)
+WhatsApp delivery, bulk-generate UI polish, analytics dashboard, badges, expiry auto-revocation, multi-template marketplace — flagged as Premium follow-ups.

@@ -116,8 +116,11 @@ serve(async (req) => {
     const learnerName = learnerProfile?.full_name || learnerProfile?.email || "Learner";
     const learnerEmail = learnerProfile?.email || null;
 
-    // Coach signature
-    const { data: sig } = await admin.from("coach_certificate_signatures").select("*").eq("coach_id", coachId).maybeSingle();
+    // Coach signature — prefer webinar-specific signature if set, else coach default
+    const sigQuery = certSignatureId
+      ? admin.from("coach_certificate_signatures").select("*").eq("id", certSignatureId).maybeSingle()
+      : admin.from("coach_certificate_signatures").select("*").eq("coach_id", coachId).maybeSingle();
+    const { data: sig } = await sigQuery;
     const { data: coachProfile } = await admin.from("profiles").select("full_name").eq("user_id", coachId).maybeSingle();
     const coachName = sig?.full_name || coachProfile?.full_name || "Authorized Signatory";
     const designation = sig?.designation || "Coach";

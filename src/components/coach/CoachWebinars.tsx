@@ -93,6 +93,16 @@ const CoachWebinars = () => {
   const [registrationRequired, setRegistrationRequired] = useState(true);
   const [waitingRoom, setWaitingRoom] = useState(false);
   const [autoRecord, setAutoRecord] = useState(false);
+  const [certEnabled, setCertEnabled] = useState(false);
+  const [certTitle, setCertTitle] = useState("");
+  const [certDescription, setCertDescription] = useState("");
+  const [certCriteria, setCertCriteria] = useState("attended");
+  const [certValidity, setCertValidity] = useState("");
+  const [certQrEnabled, setCertQrEnabled] = useState(true);
+  const [learningOutcomes, setLearningOutcomes] = useState("");
+  const [skillsCovered, setSkillsCovered] = useState("");
+  const [coachSignatures, setCoachSignatures] = useState<any[]>([]);
+  const [certSignatureId, setCertSignatureId] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
   const fetchWebinars = async () => {

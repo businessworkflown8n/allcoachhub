@@ -201,6 +201,15 @@ const CoachWebinars = () => {
       waiting_room: waitingRoom,
       auto_record: autoRecord,
       webinar_type: isPaid ? "paid" : "free",
+      cert_enabled: certEnabled,
+      cert_title: certEnabled ? (certTitle.trim() || null) : null,
+      cert_description: certEnabled ? (certDescription.trim() || null) : null,
+      cert_completion_criteria: certCriteria,
+      cert_validity_months: certEnabled && certValidity ? parseInt(certValidity) : null,
+      cert_qr_enabled: certQrEnabled,
+      cert_signature_id: certEnabled && certSignatureId ? certSignatureId : null,
+      learning_outcomes: learningOutcomes.trim() || null,
+      skills_covered: skillsCovered.trim() || null,
     };
 
     if (editing) {

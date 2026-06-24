@@ -9,8 +9,12 @@ const FLAGS: Array<[string, string, string]> = [
   ["qr_verification_enabled", "QR Verification", "Embed QR code linking to public verification page on PDFs."],
   ["revocation_enabled", "Certificate Revocation", "Allow coaches and admins to revoke certificates."],
   ["workshop_certificates_enabled", "Workshop Certificates", "Issue certificates for completed workshops."],
+  ["webinar_cert_enabled", "Webinar Certificates", "Allow coaches to issue certificates for webinar attendees."],
   ["ai_kids_certificates_enabled", "AI Kids Pro Certificates", "Issue certificates for AI Kids Pro enrollments."],
   ["course_wise_templates_enabled", "Per-Course Templates", "Allow coaches to assign different templates to specific courses."],
+  ["linkedin_sharing_enabled", "LinkedIn Sharing", "Show LinkedIn share buttons on certificates."],
+  ["ai_post_generation_enabled", "AI LinkedIn Post Generation", "Allow learners to generate AI-written LinkedIn celebration posts."],
+  ["public_verification_enabled", "Public Verification Pages", "Allow anyone to verify a certificate via its public URL."],
 ];
 
 const AdminCertificateSettings = () => {
@@ -80,6 +84,20 @@ const AdminCertificateSettings = () => {
               />
             </label>
           ))}
+        </div>
+        <div className="pt-2 border-t border-border">
+          <label className="block">
+            <span className="text-sm font-semibold text-foreground">Monthly Certificate Limit per Coach</span>
+            <span className="block text-xs text-muted-foreground">Leave empty for unlimited.</span>
+            <input
+              type="number"
+              min="0"
+              value={settings?.monthly_cert_limit ?? ""}
+              onChange={(e) => setSettings({ ...settings, monthly_cert_limit: e.target.value === "" ? null : parseInt(e.target.value) })}
+              placeholder="Unlimited"
+              className="mt-2 w-40 rounded-md border border-border bg-background px-3 py-1.5 text-sm"
+            />
+          </label>
         </div>
         <button onClick={save} disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save

@@ -93,6 +93,16 @@ const CoachWebinars = () => {
   const [registrationRequired, setRegistrationRequired] = useState(true);
   const [waitingRoom, setWaitingRoom] = useState(false);
   const [autoRecord, setAutoRecord] = useState(false);
+  const [certEnabled, setCertEnabled] = useState(false);
+  const [certTitle, setCertTitle] = useState("");
+  const [certDescription, setCertDescription] = useState("");
+  const [certCriteria, setCertCriteria] = useState("attended");
+  const [certValidity, setCertValidity] = useState("");
+  const [certQrEnabled, setCertQrEnabled] = useState(true);
+  const [learningOutcomes, setLearningOutcomes] = useState("");
+  const [skillsCovered, setSkillsCovered] = useState("");
+  const [coachSignatures, setCoachSignatures] = useState<any[]>([]);
+  const [certSignatureId, setCertSignatureId] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
   const fetchWebinars = async () => {
@@ -120,12 +130,20 @@ const CoachWebinars = () => {
 
   useEffect(() => { fetchWebinars(); }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("coach_certificate_signatures").select("id, full_name, designation").eq("coach_id", user.id)
+      .then(({ data }) => setCoachSignatures(data || []));
+  }, [user]);
+
   const resetForm = () => {
     setTitle(""); setDescription(""); setWebinarDate(""); setWebinarTime("");
     setDuration("60"); setWebinarLink(""); setIsPaid(false); setPriceUsd("0");
     setPriceInr("0"); setMaxAttendees(""); setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata");
     setIsRecurring(false); setRecurringPattern("weekly"); setRegistrationRequired(true);
     setWaitingRoom(false); setAutoRecord(false); setEditing(null);
+    setCertEnabled(false); setCertTitle(""); setCertDescription(""); setCertCriteria("attended");
+    setCertValidity(""); setCertQrEnabled(true); setLearningOutcomes(""); setSkillsCovered(""); setCertSignatureId("");
   };
 
   const openEdit = (w: Webinar) => {
@@ -146,6 +164,16 @@ const CoachWebinars = () => {
     setRegistrationRequired(w.registration_required);
     setWaitingRoom(w.waiting_room);
     setAutoRecord(w.auto_record);
+    const wAny = w as any;
+    setCertEnabled(!!wAny.cert_enabled);
+    setCertTitle(wAny.cert_title || "");
+    setCertDescription(wAny.cert_description || "");
+    setCertCriteria(wAny.cert_completion_criteria || "attended");
+    setCertValidity(wAny.cert_validity_months ? String(wAny.cert_validity_months) : "");
+    setCertQrEnabled(wAny.cert_qr_enabled !== false);
+    setLearningOutcomes(wAny.learning_outcomes || "");
+    setSkillsCovered(wAny.skills_covered || "");
+    setCertSignatureId(wAny.cert_signature_id || "");
     setShowForm(true);
   };
 
@@ -173,6 +201,15 @@ const CoachWebinars = () => {
       waiting_room: waitingRoom,
       auto_record: autoRecord,
       webinar_type: isPaid ? "paid" : "free",
+      cert_enabled: certEnabled,
+      cert_title: certEnabled ? (certTitle.trim() || null) : null,
+      cert_description: certEnabled ? (certDescription.trim() || null) : null,
+      cert_completion_criteria: certCriteria,
+      cert_validity_months: certEnabled && certValidity ? parseInt(certValidity) : null,
+      cert_qr_enabled: certQrEnabled,
+      cert_signature_id: certEnabled && certSignatureId ? certSignatureId : null,
+      learning_outcomes: learningOutcomes.trim() || null,
+      skills_covered: skillsCovered.trim() || null,
     };
 
     if (editing) {
@@ -396,6 +433,73 @@ const CoachWebinars = () => {
                 <div className="flex items-center gap-3"><Switch checked={autoRecord} onCheckedChange={setAutoRecord} /><Label>Auto Record</Label></div>
               </div>
             </div>
+
+            {/* Certification */}
+            <div className="space-y-3 rounded-lg border border-primary/30 bg-primary/5 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">🎓 Certification Settings</h3>
+                  <p className="text-xs text-muted-foreground">Issue verifiable certificates to attendees of this webinar.</p>
+                </div>
+                <Switch checked={certEnabled} onCheckedChange={setCertEnabled} />
+              </div>
+              {certEnabled && (
+                <div className="space-y-3 pt-2">
+                  <div>
+                    <Label>Certificate Title (optional)</Label>
+                    <Input value={certTitle} onChange={(e) => setCertTitle(e.target.value)} placeholder={title || "Defaults to webinar title"} />
+                  </div>
+                  <div>
+                    <Label>Certificate Description</Label>
+                    <Textarea value={certDescription} onChange={(e) => setCertDescription(e.target.value)} rows={2} placeholder="What this certificate recognizes…" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Completion Criteria</Label>
+                      <Select value={certCriteria} onValueChange={setCertCriteria}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="attended">Attended the webinar</SelectItem>
+                          <SelectItem value="manual">Manual coach approval</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Validity (months, optional)</Label>
+                      <Input type="number" min="1" placeholder="Lifetime" value={certValidity} onChange={(e) => setCertValidity(e.target.value)} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Authorized Signature</Label>
+                    <Select value={certSignatureId || "default"} onValueChange={(v) => setCertSignatureId(v === "default" ? "" : v)}>
+                      <SelectTrigger><SelectValue placeholder="Use my default signature" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">Use my default signature</SelectItem>
+                        {coachSignatures.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>{s.full_name} {s.designation ? `· ${s.designation}` : ""}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {coachSignatures.length === 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">Upload a signature in your Coach Profile to personalize the certificate.</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label>Learning Outcomes</Label>
+                    <Textarea value={learningOutcomes} onChange={(e) => setLearningOutcomes(e.target.value)} rows={2} placeholder="Comma-separated key takeaways used by the AI LinkedIn post." />
+                  </div>
+                  <div>
+                    <Label>Skills Covered</Label>
+                    <Input value={skillsCovered} onChange={(e) => setSkillsCovered(e.target.value)} placeholder="e.g., AI marketing, automation, prompt engineering" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Switch checked={certQrEnabled} onCheckedChange={setCertQrEnabled} />
+                    <Label>Embed QR verification code on certificate</Label>
+                  </div>
+                </div>
+              )}
+            </div>
+
 
             <div className="flex justify-end gap-2 pt-2 border-t border-border">
               <Button type="button" variant="outline" onClick={() => { setShowForm(false); resetForm(); }}>Cancel</Button>

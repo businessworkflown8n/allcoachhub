@@ -34,19 +34,21 @@ serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const { source_type = "course", source_id, learner_id } = body as {
-      source_type?: "course" | "workshop" | "ai_kids";
+      source_type?: "course" | "workshop" | "ai_kids" | "webinar";
       source_id?: string;
       learner_id?: string;
     };
     if (!source_id || !learner_id) return json({ error: "source_id and learner_id required" }, 400);
 
-    // Authorize issuer: must be admin OR own the source
+    // Authorize issuer: must be admin OR own the source OR learner self-issuing for webinars
     const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", u.id);
     const isAdmin = (roles || []).some((r: any) => r.role === "admin");
 
     let courseTitle = "";
     let coachId = "";
     let durationText = "";
+    let webinarRowId: string | null = null;
+    let certSignatureId: string | null = null;
     if (source_type === "course") {
       const { data: c } = await admin.from("courses").select("title, coach_id, duration").eq("id", source_id).maybeSingle();
       if (!c) return json({ error: "Course not found" }, 404);
@@ -59,6 +61,35 @@ serve(async (req) => {
       courseTitle = w.title;
       coachId = w.coach_id;
       durationText = w.duration_minutes ? `${w.duration_minutes} min` : "";
+    } else if (source_type === "webinar") {
+      const { data: w } = await admin.from("webinars")
+        .select("id, title, coach_id, duration_minutes, cert_enabled, cert_title, cert_signature_id")
+        .eq("id", source_id).maybeSingle();
+      if (!w) return json({ error: "Webinar not found" }, 404);
+      if (!w.cert_enabled) return json({ error: "Certification is not enabled for this webinar" }, 403);
+      courseTitle = w.cert_title || w.title;
+      coachId = w.coach_id;
+      durationText = w.duration_minutes ? `${w.duration_minutes} min` : "";
+      webinarRowId = w.id;
+      certSignatureId = w.cert_signature_id;
+
+      // Learner self-issue: must have attended
+      if (!isAdmin && coachId !== u.id) {
+        if (u.id !== learner_id) return json({ error: "Forbidden" }, 403);
+        const { data: reg } = await admin.from("webinar_registrations")
+          .select("attended").eq("webinar_id", source_id).eq("learner_id", learner_id).maybeSingle();
+        if (!reg?.attended) return json({ error: "Attendance not recorded for this webinar" }, 403);
+      }
+
+      // Admin global toggle check
+      const { data: certCfg } = await admin.from("certificate_settings").select("webinar_cert_enabled, certificates_enabled").limit(1).maybeSingle();
+      if (certCfg && (certCfg.certificates_enabled === false || certCfg.webinar_cert_enabled === false)) {
+        return json({ error: "Webinar certificates are currently disabled by admin" }, 403);
+      }
+      const { data: cff } = await admin.from("coach_feature_flags").select("webinar_certification_access").eq("coach_id", coachId).maybeSingle();
+      if (cff && cff.webinar_certification_access === false) {
+        return json({ error: "Webinar certification disabled for this coach" }, 403);
+      }
     } else {
       const { data: k } = await admin.from("ai_kids_enrollments").select("course_title, coach_id").eq("id", source_id).maybeSingle();
       if (!k) return json({ error: "Enrollment not found" }, 404);
@@ -85,8 +116,11 @@ serve(async (req) => {
     const learnerName = learnerProfile?.full_name || learnerProfile?.email || "Learner";
     const learnerEmail = learnerProfile?.email || null;
 
-    // Coach signature
-    const { data: sig } = await admin.from("coach_certificate_signatures").select("*").eq("coach_id", coachId).maybeSingle();
+    // Coach signature — prefer webinar-specific signature if set, else coach default
+    const sigQuery = certSignatureId
+      ? admin.from("coach_certificate_signatures").select("*").eq("id", certSignatureId).maybeSingle()
+      : admin.from("coach_certificate_signatures").select("*").eq("coach_id", coachId).maybeSingle();
+    const { data: sig } = await sigQuery;
     const { data: coachProfile } = await admin.from("profiles").select("full_name").eq("user_id", coachId).maybeSingle();
     const coachName = sig?.full_name || coachProfile?.full_name || "Authorized Signatory";
     const designation = sig?.designation || "Coach";
@@ -229,6 +263,7 @@ serve(async (req) => {
       source_type,
       source_id,
       course_id: source_type === "course" ? source_id : null,
+      webinar_id: webinarRowId,
       certificate_number: certNumber,
       verification_token: verificationToken,
       pdf_url: pdfUrl,

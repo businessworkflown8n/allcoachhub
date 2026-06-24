@@ -130,12 +130,20 @@ const CoachWebinars = () => {
 
   useEffect(() => { fetchWebinars(); }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("coach_certificate_signatures").select("id, full_name, designation").eq("coach_id", user.id)
+      .then(({ data }) => setCoachSignatures(data || []));
+  }, [user]);
+
   const resetForm = () => {
     setTitle(""); setDescription(""); setWebinarDate(""); setWebinarTime("");
     setDuration("60"); setWebinarLink(""); setIsPaid(false); setPriceUsd("0");
     setPriceInr("0"); setMaxAttendees(""); setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata");
     setIsRecurring(false); setRecurringPattern("weekly"); setRegistrationRequired(true);
     setWaitingRoom(false); setAutoRecord(false); setEditing(null);
+    setCertEnabled(false); setCertTitle(""); setCertDescription(""); setCertCriteria("attended");
+    setCertValidity(""); setCertQrEnabled(true); setLearningOutcomes(""); setSkillsCovered(""); setCertSignatureId("");
   };
 
   const openEdit = (w: Webinar) => {

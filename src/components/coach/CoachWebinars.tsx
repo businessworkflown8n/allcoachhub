@@ -164,6 +164,16 @@ const CoachWebinars = () => {
     setRegistrationRequired(w.registration_required);
     setWaitingRoom(w.waiting_room);
     setAutoRecord(w.auto_record);
+    const wAny = w as any;
+    setCertEnabled(!!wAny.cert_enabled);
+    setCertTitle(wAny.cert_title || "");
+    setCertDescription(wAny.cert_description || "");
+    setCertCriteria(wAny.cert_completion_criteria || "attended");
+    setCertValidity(wAny.cert_validity_months ? String(wAny.cert_validity_months) : "");
+    setCertQrEnabled(wAny.cert_qr_enabled !== false);
+    setLearningOutcomes(wAny.learning_outcomes || "");
+    setSkillsCovered(wAny.skills_covered || "");
+    setCertSignatureId(wAny.cert_signature_id || "");
     setShowForm(true);
   };
 

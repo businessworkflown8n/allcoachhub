@@ -434,6 +434,73 @@ const CoachWebinars = () => {
               </div>
             </div>
 
+            {/* Certification */}
+            <div className="space-y-3 rounded-lg border border-primary/30 bg-primary/5 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">🎓 Certification Settings</h3>
+                  <p className="text-xs text-muted-foreground">Issue verifiable certificates to attendees of this webinar.</p>
+                </div>
+                <Switch checked={certEnabled} onCheckedChange={setCertEnabled} />
+              </div>
+              {certEnabled && (
+                <div className="space-y-3 pt-2">
+                  <div>
+                    <Label>Certificate Title (optional)</Label>
+                    <Input value={certTitle} onChange={(e) => setCertTitle(e.target.value)} placeholder={title || "Defaults to webinar title"} />
+                  </div>
+                  <div>
+                    <Label>Certificate Description</Label>
+                    <Textarea value={certDescription} onChange={(e) => setCertDescription(e.target.value)} rows={2} placeholder="What this certificate recognizes…" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Completion Criteria</Label>
+                      <Select value={certCriteria} onValueChange={setCertCriteria}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="attended">Attended the webinar</SelectItem>
+                          <SelectItem value="manual">Manual coach approval</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Validity (months, optional)</Label>
+                      <Input type="number" min="1" placeholder="Lifetime" value={certValidity} onChange={(e) => setCertValidity(e.target.value)} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Authorized Signature</Label>
+                    <Select value={certSignatureId || "default"} onValueChange={(v) => setCertSignatureId(v === "default" ? "" : v)}>
+                      <SelectTrigger><SelectValue placeholder="Use my default signature" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">Use my default signature</SelectItem>
+                        {coachSignatures.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>{s.full_name} {s.designation ? `· ${s.designation}` : ""}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {coachSignatures.length === 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">Upload a signature in your Coach Profile to personalize the certificate.</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label>Learning Outcomes</Label>
+                    <Textarea value={learningOutcomes} onChange={(e) => setLearningOutcomes(e.target.value)} rows={2} placeholder="Comma-separated key takeaways used by the AI LinkedIn post." />
+                  </div>
+                  <div>
+                    <Label>Skills Covered</Label>
+                    <Input value={skillsCovered} onChange={(e) => setSkillsCovered(e.target.value)} placeholder="e.g., AI marketing, automation, prompt engineering" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Switch checked={certQrEnabled} onCheckedChange={setCertQrEnabled} />
+                    <Label>Embed QR verification code on certificate</Label>
+                  </div>
+                </div>
+              )}
+            </div>
+
+
             <div className="flex justify-end gap-2 pt-2 border-t border-border">
               <Button type="button" variant="outline" onClick={() => { setShowForm(false); resetForm(); }}>Cancel</Button>
               <Button type="submit" disabled={saving}>{saving ? "Saving..." : editing ? "Update" : "Create Webinar"}</Button>

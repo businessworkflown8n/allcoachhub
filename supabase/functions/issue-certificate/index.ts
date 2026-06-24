@@ -263,6 +263,7 @@ serve(async (req) => {
       source_type,
       source_id,
       course_id: source_type === "course" ? source_id : null,
+      webinar_id: webinarRowId,
       certificate_number: certNumber,
       verification_token: verificationToken,
       pdf_url: pdfUrl,

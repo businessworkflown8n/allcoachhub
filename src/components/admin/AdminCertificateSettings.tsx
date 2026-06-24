@@ -85,6 +85,20 @@ const AdminCertificateSettings = () => {
             </label>
           ))}
         </div>
+        <div className="pt-2 border-t border-border">
+          <label className="block">
+            <span className="text-sm font-semibold text-foreground">Monthly Certificate Limit per Coach</span>
+            <span className="block text-xs text-muted-foreground">Leave empty for unlimited.</span>
+            <input
+              type="number"
+              min="0"
+              value={settings?.monthly_cert_limit ?? ""}
+              onChange={(e) => setSettings({ ...settings, monthly_cert_limit: e.target.value === "" ? null : parseInt(e.target.value) })}
+              placeholder="Unlimited"
+              className="mt-2 w-40 rounded-md border border-border bg-background px-3 py-1.5 text-sm"
+            />
+          </label>
+        </div>
         <button onClick={save} disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save
         </button>

@@ -9,8 +9,12 @@ const FLAGS: Array<[string, string, string]> = [
   ["qr_verification_enabled", "QR Verification", "Embed QR code linking to public verification page on PDFs."],
   ["revocation_enabled", "Certificate Revocation", "Allow coaches and admins to revoke certificates."],
   ["workshop_certificates_enabled", "Workshop Certificates", "Issue certificates for completed workshops."],
+  ["webinar_cert_enabled", "Webinar Certificates", "Allow coaches to issue certificates for webinar attendees."],
   ["ai_kids_certificates_enabled", "AI Kids Pro Certificates", "Issue certificates for AI Kids Pro enrollments."],
   ["course_wise_templates_enabled", "Per-Course Templates", "Allow coaches to assign different templates to specific courses."],
+  ["linkedin_sharing_enabled", "LinkedIn Sharing", "Show LinkedIn share buttons on certificates."],
+  ["ai_post_generation_enabled", "AI LinkedIn Post Generation", "Allow learners to generate AI-written LinkedIn celebration posts."],
+  ["public_verification_enabled", "Public Verification Pages", "Allow anyone to verify a certificate via its public URL."],
 ];
 
 const AdminCertificateSettings = () => {

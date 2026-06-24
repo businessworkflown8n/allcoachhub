@@ -908,44 +908,59 @@ export type Database = {
       certificate_settings: {
         Row: {
           ai_kids_certificates_enabled: boolean
+          ai_post_generation_enabled: boolean
           certificates_enabled: boolean
           course_wise_templates_enabled: boolean
           created_at: string
           default_template_id: string | null
           id: string
+          linkedin_sharing_enabled: boolean
+          monthly_cert_limit: number | null
+          public_verification_enabled: boolean
           qr_verification_enabled: boolean
           revocation_enabled: boolean
           signature_upload_enabled: boolean
           singleton: boolean
           updated_at: string
+          webinar_cert_enabled: boolean
           workshop_certificates_enabled: boolean
         }
         Insert: {
           ai_kids_certificates_enabled?: boolean
+          ai_post_generation_enabled?: boolean
           certificates_enabled?: boolean
           course_wise_templates_enabled?: boolean
           created_at?: string
           default_template_id?: string | null
           id?: string
+          linkedin_sharing_enabled?: boolean
+          monthly_cert_limit?: number | null
+          public_verification_enabled?: boolean
           qr_verification_enabled?: boolean
           revocation_enabled?: boolean
           signature_upload_enabled?: boolean
           singleton?: boolean
           updated_at?: string
+          webinar_cert_enabled?: boolean
           workshop_certificates_enabled?: boolean
         }
         Update: {
           ai_kids_certificates_enabled?: boolean
+          ai_post_generation_enabled?: boolean
           certificates_enabled?: boolean
           course_wise_templates_enabled?: boolean
           created_at?: string
           default_template_id?: string | null
           id?: string
+          linkedin_sharing_enabled?: boolean
+          monthly_cert_limit?: number | null
+          public_verification_enabled?: boolean
           qr_verification_enabled?: boolean
           revocation_enabled?: boolean
           signature_upload_enabled?: boolean
           singleton?: boolean
           updated_at?: string
+          webinar_cert_enabled?: boolean
           workshop_certificates_enabled?: boolean
         }
         Relationships: []
@@ -1713,6 +1728,7 @@ export type Database = {
           sessions_access: boolean
           status: string
           updated_at: string
+          webinar_certification_access: boolean
           workshops_access: boolean
         }
         Insert: {
@@ -1743,6 +1759,7 @@ export type Database = {
           sessions_access?: boolean
           status?: string
           updated_at?: string
+          webinar_certification_access?: boolean
           workshops_access?: boolean
         }
         Update: {
@@ -1773,6 +1790,7 @@ export type Database = {
           sessions_access?: boolean
           status?: string
           updated_at?: string
+          webinar_certification_access?: boolean
           workshops_access?: boolean
         }
         Relationships: []
@@ -5565,6 +5583,7 @@ export type Database = {
           updated_at: string
           user_id: string
           verification_token: string
+          webinar_id: string | null
         }
         Insert: {
           blockchain_hash?: string | null
@@ -5597,6 +5616,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           verification_token?: string
+          webinar_id?: string | null
         }
         Update: {
           blockchain_hash?: string | null
@@ -5629,6 +5649,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           verification_token?: string
+          webinar_id?: string | null
         }
         Relationships: [
           {
@@ -5643,6 +5664,13 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "issued_certificates_webinar_id_fkey"
+            columns: ["webinar_id"]
+            isOneToOne: false
+            referencedRelation: "webinars"
             referencedColumns: ["id"]
           },
         ]
@@ -8867,6 +8895,14 @@ export type Database = {
       webinars: {
         Row: {
           auto_record: boolean
+          cert_completion_criteria: string
+          cert_description: string | null
+          cert_enabled: boolean
+          cert_qr_enabled: boolean
+          cert_signature_id: string | null
+          cert_template_id: string | null
+          cert_title: string | null
+          cert_validity_months: number | null
           coach_id: string
           coupon_code: string | null
           created_at: string
@@ -8876,12 +8912,14 @@ export type Database = {
           is_paid: boolean
           is_published: boolean
           is_recurring: boolean
+          learning_outcomes: string | null
           max_attendees: number | null
           meeting_type: string
           price_inr: number
           price_usd: number
           recurring_pattern: string | null
           registration_required: boolean
+          skills_covered: string | null
           timezone: string
           title: string
           total_revenue: number
@@ -8895,6 +8933,14 @@ export type Database = {
         }
         Insert: {
           auto_record?: boolean
+          cert_completion_criteria?: string
+          cert_description?: string | null
+          cert_enabled?: boolean
+          cert_qr_enabled?: boolean
+          cert_signature_id?: string | null
+          cert_template_id?: string | null
+          cert_title?: string | null
+          cert_validity_months?: number | null
           coach_id: string
           coupon_code?: string | null
           created_at?: string
@@ -8904,12 +8950,14 @@ export type Database = {
           is_paid?: boolean
           is_published?: boolean
           is_recurring?: boolean
+          learning_outcomes?: string | null
           max_attendees?: number | null
           meeting_type?: string
           price_inr?: number
           price_usd?: number
           recurring_pattern?: string | null
           registration_required?: boolean
+          skills_covered?: string | null
           timezone?: string
           title: string
           total_revenue?: number
@@ -8923,6 +8971,14 @@ export type Database = {
         }
         Update: {
           auto_record?: boolean
+          cert_completion_criteria?: string
+          cert_description?: string | null
+          cert_enabled?: boolean
+          cert_qr_enabled?: boolean
+          cert_signature_id?: string | null
+          cert_template_id?: string | null
+          cert_title?: string | null
+          cert_validity_months?: number | null
           coach_id?: string
           coupon_code?: string | null
           created_at?: string
@@ -8932,12 +8988,14 @@ export type Database = {
           is_paid?: boolean
           is_published?: boolean
           is_recurring?: boolean
+          learning_outcomes?: string | null
           max_attendees?: number | null
           meeting_type?: string
           price_inr?: number
           price_usd?: number
           recurring_pattern?: string | null
           registration_required?: boolean
+          skills_covered?: string | null
           timezone?: string
           title?: string
           total_revenue?: number
@@ -8949,7 +9007,22 @@ export type Database = {
           webinar_time?: string
           webinar_type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "webinars_cert_signature_id_fkey"
+            columns: ["cert_signature_id"]
+            isOneToOne: false
+            referencedRelation: "coach_certificate_signatures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webinars_cert_template_id_fkey"
+            columns: ["cert_template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       whatsapp_access: {
         Row: {

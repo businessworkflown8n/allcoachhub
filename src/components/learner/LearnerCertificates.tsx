@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Award, Download, ShieldCheck, Share2, Linkedin, Loader2 } from "lucide-react";
+import { Award, Download, ShieldCheck, Share2, Linkedin, Loader2, Sparkles } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import CertificateShareModal from "./CertificateShareModal";
 
 const LearnerCertificates = () => {
   const { user } = useAuth();
   const [certs, setCerts] = useState<any[]>([]);
+  const [filter, setFilter] = useState<"all" | "course" | "webinar">("all");
+  const [shareCert, setShareCert] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

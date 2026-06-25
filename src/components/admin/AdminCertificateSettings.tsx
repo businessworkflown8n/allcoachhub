@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Settings, Loader2, ShieldOff, Save } from "lucide-react";
+import AdminCertificateTemplateManager from "@/components/admin/AdminCertificateTemplateManager";
 
 const FLAGS: Array<[string, string, string]> = [
   ["certificates_enabled", "Certificates Enabled", "Master switch — disables certificate issuance platform-wide."],
@@ -104,26 +105,9 @@ const AdminCertificateSettings = () => {
         </button>
       </section>
 
-      {/* Templates */}
+      {/* Template Library Manager */}
       <section className="rounded-xl border border-border bg-card p-6">
-        <h3 className="text-sm font-bold text-foreground mb-3">Templates</h3>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {templates.map((t) => (
-            <div key={t.id} className="rounded-lg border border-border p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs uppercase tracking-wider text-primary font-bold">{t.tier}</span>
-                {t.is_default && <span className="text-[10px] bg-primary/15 text-primary px-2 py-0.5 rounded-full font-bold">DEFAULT</span>}
-              </div>
-              <p className="mt-2 text-sm font-semibold text-foreground">{t.title}</p>
-              <p className="text-xs text-muted-foreground">{t.template_kind}</p>
-              {!t.is_default && (
-                <button onClick={() => setDefault(t.id, t.template_kind)} className="mt-3 text-xs text-primary hover:underline">
-                  Set as default for {t.template_kind}
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
+        <AdminCertificateTemplateManager />
       </section>
 
       {/* Revoked log */}

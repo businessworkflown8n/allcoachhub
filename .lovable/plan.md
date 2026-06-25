@@ -1,79 +1,91 @@
-# Webinar Certification & AI LinkedIn Sharing
+# Professional Certificate Template Library
 
-Extend the existing certificate system (courses) to webinars, reusing the `issued_certificates`, `certificate_templates`, `coach_certificate_signatures`, `coach_certificate_counters`, and `certificate_settings` tables. Add per-webinar certification config and AI-generated LinkedIn posts.
+Extend the existing `certificate_templates` table and `issue-certificate` flow into a full template library: a coach-facing gallery with previews/favorites/customization, an admin manager to seed and curate 30+ designs across 10 categories, and seamless attachment to Courses, Webinars, Workshops, Masterclasses, Challenges, Memberships, and Events.
 
-## 1. Database (migration)
+## Scope
 
-**Extend `webinars`** with certification config columns:
-- `cert_enabled` (bool, default false)
-- `cert_title`, `cert_description` (text)
-- `cert_template_id` (uuid → certificate_templates)
-- `cert_signature_id` (uuid → coach_certificate_signatures)
-- `cert_completion_criteria` (text: `attended` | `manual` | `quiz_pass`)
-- `cert_validity_months` (int, nullable)
-- `cert_qr_enabled` (bool, default true)
+In scope
+- Coach Dashboard → **Certificate Templates** section (gallery, preview, favorite, use, duplicate & customize).
+- Customization editor (colors, fonts, border, background, logo/signature/QR positions, title, footer, watermark).
+- Admin → **Template Manager** (CRUD, categories, premium flag, enable/disable, assign to coaches, set default, upload backgrounds).
+- Seed library: 30+ templates spanning the 10 categories (Professional Corporate, AI Certification, Modern Minimal, Luxury, Education, Creative, Webinar Participation, Course Completion, Workshop, Premium Dark).
+- Wire selected template into existing `issue-certificate` PDF rendering for all source types (course, webinar, workshop, masterclass, challenge, membership, event).
+- Auto-populate all listed personalization fields (learner, coach, date, cert ID, QR, etc.).
 
-**Extend `issued_certificates`** (already supports courses) to allow webinar source:
-- Add `webinar_id` (uuid, nullable, FK webinars), `source_type` (text: `course` | `webinar`, default `course`).
-- Update `next_certificate_number` to accept a source slug (`COURSE` vs `WEB`) → format `ACP-WEB-{YYYY}-{000000}`.
+Out of scope (defer)
+- True 300 DPI vector PDF engine (current HTML-to-PDF renderer kept; design assets prepared print-ready).
+- Drag-and-drop visual editor (form-based customization only this pass).
+- Marketplace pricing / per-template billing.
 
-**Extend `certificate_settings`** (admin global toggles):
-- `webinar_cert_enabled`, `linkedin_sharing_enabled`, `ai_post_generation_enabled`, `qr_verification_enabled`, `public_verification_enabled`, `monthly_cert_limit` (int).
+## Data model (one migration)
 
-**Extend `coach_feature_flags`**: `webinar_certification_access` (bool, default true) for admin per-coach toggle.
+Extend `certificate_templates`:
+- `category` (enum: `corporate | ai | minimal | luxury | education | creative | webinar | course | workshop | dark`)
+- `orientation` (`landscape | portrait`)
+- `style_tags` (text[])
+- `is_premium` (bool), `is_active` (bool), `is_system` (bool — seed templates)
+- `preview_image_url`, `background_image_url`
+- `design_config` (jsonb: colors, fonts, border, positions, watermark, title, footer)
+- `supported_sources` (text[]: course, webinar, workshop, masterclass, challenge, membership, event)
+- `created_by` (nullable — null for system templates)
 
-RLS: webinar certs inherit existing `issued_certificates` policies (learner reads own, coach reads issued, admin all). Add GRANTs unchanged (existing table).
+New tables
+- `coach_template_favorites` (coach_id, template_id) — RLS: coach owns rows.
+- `coach_template_customizations` (coach_id, base_template_id, name, design_config, created_at) — duplicated/customized copies. RLS: coach owns.
+- `coach_template_assignments` (admin grants premium templates to specific coaches) — RLS: admin write, coach read own.
 
-## 2. Edge Functions
+Add to `courses`, `webinars`, `workshops` (and any other source tables that exist): `certificate_template_id` FK (nullable). If a source table lacks cert columns, add the same `cert_*` columns the webinars table already has.
 
-- **`issue-webinar-certificate`** — input `{ webinar_id, learner_id }`. Verifies attendance (`webinar_registrations.attended=true`), checks coach `cert_enabled` + admin flags + monthly limit, calls `next_certificate_number(coach, year)` with WEB prefix, renders PDF (reuse PDF code from `issue-certificate`), uploads to `certificate-pdfs` bucket at `webinars/{coach}/{cert_number}.pdf`, inserts `issued_certificates` with `source_type='webinar'` and `webinar_id`.
-- **`generate-linkedin-post`** — input `{ certificate_id }`. Loads cert + webinar (title, description, learning_outcomes, skills) + coach profile, calls Lovable AI (`google/gemini-3-flash-preview`) with strict positive-only system prompt, returns post text + hashtags. Handles 429/402.
-- **`verify-certificate`** — already exists; extend to return `source_type`, `webinar_name` when applicable.
+All public tables get GRANTs + RLS (authenticated read for active system templates; coach r/w own customizations & favorites; admin full).
 
-All use `npm:@supabase/supabase-js@2/cors`, manual JWT validate where needed.
+## Edge functions
 
-## 3. Coach UI
+- Extend `issue-certificate`: resolve template (course/webinar/etc. → `certificate_template_id` → merged `design_config` with coach customization overrides) → render PDF using template HTML + auto-populated fields.
+- New `seed-certificate-templates` (admin-only): inserts the 30+ system templates with `design_config` + generated preview thumbnails (via Lovable AI image gen for AI/luxury backgrounds; static SVG for minimal/corporate).
 
-- **`CoachWebinarForm.tsx`** (edit `src/components/coach/...`): add "🎓 Certification Settings" card — toggle, template picker (reuse `certificate_templates`), signature picker (reuse `coach_certificate_signatures`), title/description/criteria/validity/QR toggle, live preview reusing existing preview component.
-- **`CoachCertificates.tsx`**: add tab/filter to switch between Course and Webinar certificates; bulk issue button for a webinar's attendees.
+## UI
 
-## 4. Learner UI
+Coach
+- `src/pages/CoachCertificateTemplates.tsx` — gallery page with category tabs, orientation filter, search, favorites filter.
+- `src/components/coach/templates/TemplateCard.tsx` — thumbnail, name, category, orientation, style tag, Preview / Use / Favorite / Duplicate buttons.
+- `src/components/coach/templates/TemplatePreviewModal.tsx` — large preview with sample data.
+- `src/components/coach/templates/TemplateCustomizeDialog.tsx` — form editor for `design_config`.
+- `CoachCourseForm.tsx`, `CoachWebinars.tsx` (+ workshop forms if present) — add "Choose Template" picker in existing Certification settings.
+- Add nav entry under `CoachDashboard.tsx`.
 
-- **`LearnerWebinars.tsx`**: in "Completed Webinars" list, when `cert_enabled` + attended, show **🎓 Generate Certificate** button → invokes `issue-webinar-certificate`, then opens share modal.
-- **`LearnerCertificates.tsx`**: unify course + webinar certs in a single list (filter chip). Each card: View / Download PDF / Verify / Share on LinkedIn / Copy link.
-- **New `CertificateShareModal.tsx`**: Download, Copy verification URL, **Generate AI LinkedIn Post** (calls edge function, shows editable textarea), **Share on LinkedIn** (deep link to LinkedIn share with prefilled text + cert URL).
+Admin
+- `src/components/admin/AdminCertificateTemplateManager.tsx` — table with CRUD, premium/active toggles, category management, coach assignment dialog, background upload.
+- Tab inside existing `AdminCertificateSettings.tsx`.
 
-## 5. Public verification
-
-- `/verify-certificate/:token` already exists — update to render webinar name + coach when `source_type='webinar'`.
-- Short URL alias `/certificate/:number` → resolves number to token and renders same page.
-
-## 6. Admin UI
-
-- **`AdminCertificateSettings.tsx`**: add Webinar Certification section with toggles for: webinar_cert_enabled, linkedin_sharing_enabled, ai_post_generation_enabled, qr_verification_enabled, public_verification_enabled, monthly_cert_limit. Add per-coach feature flag override (existing pattern via `coach_feature_flags`).
-
-## 7. AI Content Rules
-
-System prompt for `generate-linkedin-post` enforces: positive only, no comparisons, no false claims, no negative/controversial content, include webinar title + coach name + cert ID + 5–7 professional hashtags, 150–220 words, unique per learner (include learner first name + timestamp seed).
+Learner
+- No new UI; existing `LearnerCertificates.tsx` + share modal already render whatever PDF is produced.
 
 ## Files
 
-**New**
-- `supabase/functions/issue-webinar-certificate/index.ts`
-- `supabase/functions/generate-linkedin-post/index.ts`
-- `src/components/learner/CertificateShareModal.tsx`
-- Migration SQL
+New
+- `supabase/migrations/<ts>_certificate_template_library.sql`
+- `supabase/functions/seed-certificate-templates/index.ts`
+- `src/pages/CoachCertificateTemplates.tsx`
+- `src/components/coach/templates/TemplateCard.tsx`
+- `src/components/coach/templates/TemplatePreviewModal.tsx`
+- `src/components/coach/templates/TemplateCustomizeDialog.tsx`
+- `src/components/coach/templates/TemplateGalleryFilters.tsx`
+- `src/components/coach/templates/CertificateTemplatePicker.tsx` (reusable picker for course/webinar forms)
+- `src/components/admin/AdminCertificateTemplateManager.tsx`
+- `src/hooks/useCertificateTemplates.tsx`
+- `src/lib/certificateRenderer.ts` (shared HTML renderer used by edge fn + preview)
 
-**Edited**
-- `supabase/functions/verify-certificate/index.ts`
-- `supabase/config.toml`
-- `src/components/coach/CoachWebinarForm.tsx` (or webinar create/edit component — verify exact filename first)
-- `src/components/coach/CoachCertificates.tsx`
-- `src/components/learner/LearnerWebinars.tsx`
-- `src/components/learner/LearnerCertificates.tsx`
-- `src/components/admin/AdminCertificateSettings.tsx`
-- `src/pages/VerifyCertificate.tsx`
-- `src/App.tsx` (add `/certificate/:number` route)
+Edited
+- `supabase/functions/issue-certificate/index.ts` (template-aware rendering)
+- `supabase/config.toml` (register seeder)
+- `src/App.tsx` (route)
+- `src/pages/CoachDashboard.tsx` (nav)
+- `src/components/admin/AdminCertificateSettings.tsx` (manager tab)
+- `src/components/coach/CoachCourseForm.tsx`, `src/components/coach/CoachWebinars.tsx` (template picker)
+- `src/integrations/supabase/types.ts` (auto-regenerated after migration)
 
-## Out of scope (defer)
-WhatsApp delivery, bulk-generate UI polish, analytics dashboard, badges, expiry auto-revocation, multi-template marketplace — flagged as Premium follow-ups.
+## Notes
+
+- Seed thumbnails: generate ~10 AI-themed backgrounds via Lovable AI image gen during seeding, store under `certificate-backgrounds` bucket (create if missing); reuse across multiple templates with different overlays.
+- Customization is per-coach: edits to a system template create a row in `coach_template_customizations` rather than mutating the system row.
+- Permission gating reuses existing `coach_feature_flags` (`certificate_access` etc.) — no new feature flag this pass.

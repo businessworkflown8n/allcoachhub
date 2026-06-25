@@ -967,14 +967,24 @@ export type Database = {
       }
       certificate_templates: {
         Row: {
+          background_image_url: string | null
           background_url: string | null
+          category: string | null
           coach_id: string | null
           course_id: string | null
           created_at: string
+          created_by: string | null
           description: string | null
+          design_config: Json | null
           id: string
           is_active: boolean
           is_default: boolean
+          is_premium: boolean | null
+          is_system: boolean | null
+          orientation: string | null
+          preview_image_url: string | null
+          style_tags: string[] | null
+          supported_sources: string[] | null
           template_design: Json
           template_kind: string
           tier: string
@@ -983,14 +993,24 @@ export type Database = {
           workshop_id: string | null
         }
         Insert: {
+          background_image_url?: string | null
           background_url?: string | null
+          category?: string | null
           coach_id?: string | null
           course_id?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
+          design_config?: Json | null
           id?: string
           is_active?: boolean
           is_default?: boolean
+          is_premium?: boolean | null
+          is_system?: boolean | null
+          orientation?: string | null
+          preview_image_url?: string | null
+          style_tags?: string[] | null
+          supported_sources?: string[] | null
           template_design?: Json
           template_kind?: string
           tier?: string
@@ -999,14 +1019,24 @@ export type Database = {
           workshop_id?: string | null
         }
         Update: {
+          background_image_url?: string | null
           background_url?: string | null
+          category?: string | null
           coach_id?: string | null
           course_id?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
+          design_config?: Json | null
           id?: string
           is_active?: boolean
           is_default?: boolean
+          is_premium?: boolean | null
+          is_system?: boolean | null
+          orientation?: string | null
+          preview_image_url?: string | null
+          style_tags?: string[] | null
+          supported_sources?: string[] | null
           template_design?: Json
           template_kind?: string
           tier?: string
@@ -2315,6 +2345,114 @@ export type Database = {
           },
         ]
       }
+      coach_template_assignments: {
+        Row: {
+          assigned_by: string | null
+          coach_id: string
+          created_at: string
+          id: string
+          template_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          coach_id: string
+          created_at?: string
+          id?: string
+          template_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          coach_id?: string
+          created_at?: string
+          id?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_template_assignments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_template_customizations: {
+        Row: {
+          background_image_url: string | null
+          base_template_id: string | null
+          coach_id: string
+          created_at: string
+          design_config: Json
+          id: string
+          name: string
+          orientation: string | null
+          preview_image_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          background_image_url?: string | null
+          base_template_id?: string | null
+          coach_id: string
+          created_at?: string
+          design_config?: Json
+          id?: string
+          name: string
+          orientation?: string | null
+          preview_image_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          background_image_url?: string | null
+          base_template_id?: string | null
+          coach_id?: string
+          created_at?: string
+          design_config?: Json
+          id?: string
+          name?: string
+          orientation?: string | null
+          preview_image_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_template_customizations_base_template_id_fkey"
+            columns: ["base_template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_template_favorites: {
+        Row: {
+          coach_id: string
+          created_at: string
+          id: string
+          template_id: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          id?: string
+          template_id: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          id?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_template_favorites_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_webinar_commissions: {
         Row: {
           coach_id: string
@@ -3472,7 +3610,9 @@ export type Database = {
           approval_status: string
           category: string
           category_request_id: string | null
+          certificate_customization_id: string | null
           certificate_included: boolean | null
+          certificate_template_id: string | null
           coach_id: string
           course_type: string
           created_at: string
@@ -3517,7 +3657,9 @@ export type Database = {
           approval_status?: string
           category?: string
           category_request_id?: string | null
+          certificate_customization_id?: string | null
           certificate_included?: boolean | null
+          certificate_template_id?: string | null
           coach_id: string
           course_type?: string
           created_at?: string
@@ -3562,7 +3704,9 @@ export type Database = {
           approval_status?: string
           category?: string
           category_request_id?: string | null
+          certificate_customization_id?: string | null
           certificate_included?: boolean | null
+          certificate_template_id?: string | null
           coach_id?: string
           course_type?: string
           created_at?: string
@@ -3608,6 +3752,20 @@ export type Database = {
             columns: ["category_request_id"]
             isOneToOne: false
             referencedRelation: "coach_category_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_certificate_customization_id_fkey"
+            columns: ["certificate_customization_id"]
+            isOneToOne: false
+            referencedRelation: "coach_template_customizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_certificate_template_id_fkey"
+            columns: ["certificate_template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -8903,6 +9061,8 @@ export type Database = {
           cert_template_id: string | null
           cert_title: string | null
           cert_validity_months: number | null
+          certificate_customization_id: string | null
+          certificate_template_id: string | null
           coach_id: string
           coupon_code: string | null
           created_at: string
@@ -8941,6 +9101,8 @@ export type Database = {
           cert_template_id?: string | null
           cert_title?: string | null
           cert_validity_months?: number | null
+          certificate_customization_id?: string | null
+          certificate_template_id?: string | null
           coach_id: string
           coupon_code?: string | null
           created_at?: string
@@ -8979,6 +9141,8 @@ export type Database = {
           cert_template_id?: string | null
           cert_title?: string | null
           cert_validity_months?: number | null
+          certificate_customization_id?: string | null
+          certificate_template_id?: string | null
           coach_id?: string
           coupon_code?: string | null
           created_at?: string
@@ -9018,6 +9182,20 @@ export type Database = {
           {
             foreignKeyName: "webinars_cert_template_id_fkey"
             columns: ["cert_template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webinars_certificate_customization_id_fkey"
+            columns: ["certificate_customization_id"]
+            isOneToOne: false
+            referencedRelation: "coach_template_customizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webinars_certificate_template_id_fkey"
+            columns: ["certificate_template_id"]
             isOneToOne: false
             referencedRelation: "certificate_templates"
             referencedColumns: ["id"]
@@ -9761,6 +9939,11 @@ export type Database = {
       }
       workshops: {
         Row: {
+          cert_description: string | null
+          cert_enabled: boolean | null
+          cert_title: string | null
+          certificate_customization_id: string | null
+          certificate_template_id: string | null
           coach_id: string
           created_at: string
           description: string | null
@@ -9778,6 +9961,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cert_description?: string | null
+          cert_enabled?: boolean | null
+          cert_title?: string | null
+          certificate_customization_id?: string | null
+          certificate_template_id?: string | null
           coach_id: string
           created_at?: string
           description?: string | null
@@ -9795,6 +9983,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cert_description?: string | null
+          cert_enabled?: boolean | null
+          cert_title?: string | null
+          certificate_customization_id?: string | null
+          certificate_template_id?: string | null
           coach_id?: string
           created_at?: string
           description?: string | null
@@ -9811,7 +10004,22 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "workshops_certificate_customization_id_fkey"
+            columns: ["certificate_customization_id"]
+            isOneToOne: false
+            referencedRelation: "coach_template_customizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workshops_certificate_template_id_fkey"
+            columns: ["certificate_template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       xp_events: {
         Row: {

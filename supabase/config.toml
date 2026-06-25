@@ -77,3 +77,5 @@ project_id = "iipxwwrzkdkestikxcpg"
     verify_jwt = false
   [functions.create-portal-session]
     verify_jwt = false
+  [functions.seed-certificate-templates]
+    verify_jwt = true

@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { maskName, maskField } from "@/lib/learnerPrivacy";
+import { CertificateTemplatePicker } from "@/components/coach/templates/CertificateTemplatePicker";
 
 interface Webinar {
   id: string;
@@ -104,6 +105,7 @@ const CoachWebinars = () => {
   const [coachSignatures, setCoachSignatures] = useState<any[]>([]);
   const [certSignatureId, setCertSignatureId] = useState<string>("");
   const [saving, setSaving] = useState(false);
+  const [certificateTemplateId, setCertificateTemplateId] = useState<string | null>(null);
 
   const fetchWebinars = async () => {
     if (!user) return;
@@ -143,7 +145,7 @@ const CoachWebinars = () => {
     setIsRecurring(false); setRecurringPattern("weekly"); setRegistrationRequired(true);
     setWaitingRoom(false); setAutoRecord(false); setEditing(null);
     setCertEnabled(false); setCertTitle(""); setCertDescription(""); setCertCriteria("attended");
-    setCertValidity(""); setCertQrEnabled(true); setLearningOutcomes(""); setSkillsCovered(""); setCertSignatureId("");
+    setCertValidity(""); setCertQrEnabled(true); setLearningOutcomes(""); setSkillsCovered(""); setCertSignatureId(""); setCertificateTemplateId(null);
   };
 
   const openEdit = (w: Webinar) => {
@@ -174,6 +176,7 @@ const CoachWebinars = () => {
     setLearningOutcomes(wAny.learning_outcomes || "");
     setSkillsCovered(wAny.skills_covered || "");
     setCertSignatureId(wAny.cert_signature_id || "");
+    setCertificateTemplateId(wAny.certificate_template_id || null);
     setShowForm(true);
   };
 
@@ -210,6 +213,7 @@ const CoachWebinars = () => {
       cert_signature_id: certEnabled && certSignatureId ? certSignatureId : null,
       learning_outcomes: learningOutcomes.trim() || null,
       skills_covered: skillsCovered.trim() || null,
+      certificate_template_id: certEnabled ? certificateTemplateId : null,
     };
 
     if (editing) {
@@ -495,6 +499,14 @@ const CoachWebinars = () => {
                   <div className="flex items-center gap-3">
                     <Switch checked={certQrEnabled} onCheckedChange={setCertQrEnabled} />
                     <Label>Embed QR verification code on certificate</Label>
+                  </div>
+                  <div className="space-y-2 pt-3 border-t border-border">
+                    <Label>🎨 Certificate Template</Label>
+                    <CertificateTemplatePicker
+                      value={certificateTemplateId}
+                      onChange={(id) => setCertificateTemplateId(id)}
+                      sourceType="webinar"
+                    />
                   </div>
                 </div>
               )}

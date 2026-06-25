@@ -13,6 +13,7 @@ import { useCoachCategories } from "@/hooks/useCoachCategories";
 import { useThumbnailAccess } from "@/hooks/useThumbnailAccess";
 import { useCoachFeatures } from "@/hooks/useCoachFeatures";
 import CategoryRequestModal from "@/components/coach/CategoryRequestModal";
+import { CertificateTemplatePicker } from "@/components/coach/templates/CertificateTemplatePicker";
 
 const AIThumbnailGenerator = lazy(() => import("@/components/coach/AIThumbnailGenerator"));
 const CoachCourseForm = () => {
@@ -49,6 +50,7 @@ const CoachCourseForm = () => {
     original_price_inr: "",
     discount_percent: "",
   });
+  const [certificateTemplateId, setCertificateTemplateId] = useState<string | null>(null);
 
   // Set default category to primary approved category
   useEffect(() => {
@@ -77,6 +79,7 @@ const CoachCourseForm = () => {
             discount_percent: data.discount_percent ? String(data.discount_percent) : "",
           });
           if (data.thumbnail_url) setThumbnailPreview(data.thumbnail_url);
+          setCertificateTemplateId(((data as any).certificate_template_id as string) ?? null);
         }
       });
     }
@@ -232,6 +235,7 @@ const CoachCourseForm = () => {
       original_price_inr: form.original_price_inr ? Number(form.original_price_inr) : null,
       discount_percent: form.discount_percent ? Number(form.discount_percent) : 0,
       course_type: canCreateKidsCourses && form.course_type === "ai_kids_pro" ? "ai_kids_pro" : "regular",
+      certificate_template_id: certificateTemplateId,
     };
 
     // If unapproved category, force draft and tag
@@ -494,6 +498,16 @@ const CoachCourseForm = () => {
             <Label className="text-foreground">Discount %</Label>
             <Input type="number" value={form.discount_percent} onChange={(e) => updateField("discount_percent", e.target.value)} className="bg-secondary border-border" />
           </div>
+        </div>
+
+        <div className="space-y-2 pt-2 border-t border-border">
+          <Label className="text-foreground">🎓 Certificate Template</Label>
+          <p className="text-xs text-muted-foreground">Choose the design issued to learners who complete this course. Leave blank to use the platform default.</p>
+          <CertificateTemplatePicker
+            value={certificateTemplateId}
+            onChange={(id) => setCertificateTemplateId(id)}
+            sourceType="course"
+          />
         </div>
 
         <button type="submit" disabled={saving || uploadingThumb} className="glow-lime rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:brightness-110 disabled:opacity-50">

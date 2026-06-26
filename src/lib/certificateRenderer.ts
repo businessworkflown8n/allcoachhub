@@ -103,6 +103,10 @@ export function renderCertificateHTML(
     ? `<img src="${data.platformLogoUrl}" alt="Logo" style="position:absolute;top:40px;${c.logoPosition === "top-right" ? "right:48px" : c.logoPosition === "top-center" ? "left:50%;transform:translateX(-50%)" : "left:48px"};height:46px;"/>`
     : "";
 
+  const coachLogo = data.coachLogoUrl
+    ? `<img src="${data.coachLogoUrl}" alt="Coach Logo" style="position:absolute;top:40px;right:48px;height:64px;max-width:160px;object-fit:contain;background:rgba(255,255,255,0.6);padding:6px;border-radius:8px;"/>`
+    : "";
+
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 </head><body style="margin:0;padding:0;font-family:${c.fontFamily};">

@@ -70,7 +70,12 @@ export function renderCertificateHTML(
   data: CertificateData,
   orientation: CertificateOrientation = "landscape",
 ): string {
-  const c = { ...DEFAULTS, ...config };
+  const c = {
+    ...DEFAULTS,
+    ...config,
+    ...(data.coachPrimaryColor ? { primaryColor: data.coachPrimaryColor, borderColor: data.coachPrimaryColor } : {}),
+    ...(data.coachAccentColor ? { accentColor: data.coachAccentColor, secondaryColor: data.coachAccentColor } : {}),
+  };
   const w = orientation === "landscape" ? 1123 : 794;
   const h = orientation === "landscape" ? 794 : 1123;
 

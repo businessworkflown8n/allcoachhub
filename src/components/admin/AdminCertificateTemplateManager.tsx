@@ -79,7 +79,7 @@ export default function AdminCertificateTemplateManager() {
   };
 
   const toggle = async (id: string, field: "is_active" | "is_premium", value: boolean) => {
-    await supabase.from("certificate_templates").update({ [field]: value }).eq("id", id);
+    await supabase.from("certificate_templates").update({ [field]: value } as any).eq("id", id);
     void load();
   };
 

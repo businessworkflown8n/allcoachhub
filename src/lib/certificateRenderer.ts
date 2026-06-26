@@ -114,6 +114,7 @@ export function renderCertificateHTML(
   ${border}
   ${watermark}
   ${platformLogo}
+  ${coachLogo}
   <div style="position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:96px 72px 120px;text-align:center;">
     ${c.badgeText ? `<div style="display:inline-block;padding:6px 18px;border:1.5px solid ${c.accentColor};color:${c.accentColor};font-size:12px;letter-spacing:.3em;font-weight:600;text-transform:uppercase;border-radius:999px;margin-bottom:18px;">${escape(c.badgeText)}</div>` : ""}
     <h1 style="font-family:${c.titleFontFamily};font-size:54px;margin:0 0 6px;color:${c.primaryColor};letter-spacing:.02em;">${escape(c.certificateTitle)}</h1>

@@ -47,6 +47,17 @@ export default function AdminCertificateTemplateManager() {
   };
   useEffect(() => { void load(); }, []);
 
+  const uploadAsset = async (file: File, kind: "preview" | "background"): Promise<string | null> => {
+    if (!file.type.startsWith("image/")) { toast.error("Image files only"); return null; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return null; }
+    const ext = file.name.split(".").pop() || "png";
+    const path = `${kind}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("certificate-templates").upload(path, file, { upsert: false, contentType: file.type });
+    if (error) { toast.error(error.message); return null; }
+    const { data } = await supabase.storage.from("certificate-templates").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+    return data?.signedUrl ?? null;
+  };
+
   const save = async () => {
     if (!editing?.name) { toast.error("Name is required"); return; }
     const payload: any = {

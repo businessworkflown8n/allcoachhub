@@ -40,6 +40,11 @@ export interface CertificateData {
   signatureUrl?: string;
   organizationName?: string;
   platformLogoUrl?: string;
+  coachLogoUrl?: string;
+  /** Overrides design_config.primaryColor when present (coach branding). */
+  coachPrimaryColor?: string;
+  /** Overrides design_config.accentColor when present (coach branding). */
+  coachAccentColor?: string;
 }
 
 const DEFAULTS: Required<Pick<CertificateDesignConfig,

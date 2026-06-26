@@ -1510,32 +1510,41 @@ export type Database = {
       }
       coach_certificate_signatures: {
         Row: {
+          accent_color: string | null
           coach_id: string
           created_at: string
           designation: string | null
           full_name: string
           id: string
+          logo_url: string | null
           organization: string | null
+          primary_color: string | null
           signature_url: string | null
           updated_at: string
         }
         Insert: {
+          accent_color?: string | null
           coach_id: string
           created_at?: string
           designation?: string | null
           full_name: string
           id?: string
+          logo_url?: string | null
           organization?: string | null
+          primary_color?: string | null
           signature_url?: string | null
           updated_at?: string
         }
         Update: {
+          accent_color?: string | null
           coach_id?: string
           created_at?: string
           designation?: string | null
           full_name?: string
           id?: string
+          logo_url?: string | null
           organization?: string | null
+          primary_color?: string | null
           signature_url?: string | null
           updated_at?: string
         }

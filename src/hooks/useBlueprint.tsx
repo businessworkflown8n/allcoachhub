@@ -29,7 +29,7 @@ export const useBlueprint = () => {
     if (saveTimer.current) window.clearTimeout(saveTimer.current);
     saveTimer.current = window.setTimeout(async () => {
       if (!user) return;
-      await supabase.from("coach_blueprints").update(patch).eq("coach_id", user.id);
+      await supabase.from("coach_blueprints").update(patch as any).eq("coach_id", user.id);
     }, 600);
   }, [user]);
 

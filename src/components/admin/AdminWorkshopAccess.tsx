@@ -58,9 +58,9 @@ const AdminWorkshopAccess = () => {
     const { data: existing } = await supabase.from("workshop_access").select("id").eq("coach_id", coachId).maybeSingle();
 
     if (existing) {
-      await supabase.from("workshop_access").update({ [field]: newValue, updated_at: new Date().toISOString() }).eq("coach_id", coachId);
+      await supabase.from("workshop_access").update({ [field]: newValue, updated_at: new Date().toISOString() } as any).eq("coach_id", coachId);
     } else {
-      await supabase.from("workshop_access").insert({ coach_id: coachId, [field]: newValue, is_active: field === "is_active" ? newValue : false });
+      await supabase.from("workshop_access").insert({ coach_id: coachId, [field]: newValue, is_active: field === "is_active" ? newValue : false } as any);
     }
 
     setCoaches((prev) => prev.map((c) => c.user_id === coachId ? { ...c, [field]: newValue } : c));

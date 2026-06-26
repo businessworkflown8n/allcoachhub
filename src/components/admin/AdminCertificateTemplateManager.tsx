@@ -47,6 +47,17 @@ export default function AdminCertificateTemplateManager() {
   };
   useEffect(() => { void load(); }, []);
 
+  const uploadAsset = async (file: File, kind: "preview" | "background"): Promise<string | null> => {
+    if (!file.type.startsWith("image/")) { toast.error("Image files only"); return null; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return null; }
+    const ext = file.name.split(".").pop() || "png";
+    const path = `${kind}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("certificate-templates").upload(path, file, { upsert: false, contentType: file.type });
+    if (error) { toast.error(error.message); return null; }
+    const { data } = await supabase.storage.from("certificate-templates").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+    return data?.signedUrl ?? null;
+  };
+
   const save = async () => {
     if (!editing?.name) { toast.error("Name is required"); return; }
     const payload: any = {
@@ -79,7 +90,7 @@ export default function AdminCertificateTemplateManager() {
   };
 
   const toggle = async (id: string, field: "is_active" | "is_premium", value: boolean) => {
-    await supabase.from("certificate_templates").update({ [field]: value }).eq("id", id);
+    await supabase.from("certificate_templates").update({ [field]: value } as any).eq("id", id);
     void load();
   };
 
@@ -172,8 +183,28 @@ export default function AdminCertificateTemplateManager() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="sm:col-span-2"><Label>Preview Image URL</Label><Input value={editing.preview_image_url ?? ""} onChange={(e) => setEditing({ ...editing, preview_image_url: e.target.value })} /></div>
-              <div className="sm:col-span-2"><Label>Background Image URL</Label><Input value={editing.background_image_url ?? ""} onChange={(e) => setEditing({ ...editing, background_image_url: e.target.value })} /></div>
+              <div className="sm:col-span-2">
+                <Label>Preview Image</Label>
+                <div className="flex gap-2 items-center">
+                  <Input value={editing.preview_image_url ?? ""} onChange={(e) => setEditing({ ...editing, preview_image_url: e.target.value })} placeholder="https:// or upload" />
+                  <input type="file" accept="image/*" className="text-xs" onChange={async (e) => {
+                    const f = e.target.files?.[0]; if (!f) return;
+                    const url = await uploadAsset(f, "preview");
+                    if (url) setEditing((prev) => prev ? { ...prev, preview_image_url: url } : prev);
+                  }} />
+                </div>
+              </div>
+              <div className="sm:col-span-2">
+                <Label>Background Image</Label>
+                <div className="flex gap-2 items-center">
+                  <Input value={editing.background_image_url ?? ""} onChange={(e) => setEditing({ ...editing, background_image_url: e.target.value })} placeholder="https:// or upload" />
+                  <input type="file" accept="image/*" className="text-xs" onChange={async (e) => {
+                    const f = e.target.files?.[0]; if (!f) return;
+                    const url = await uploadAsset(f, "background");
+                    if (url) setEditing((prev) => prev ? { ...prev, background_image_url: url, design_config: { ...(prev.design_config as any), backgroundImageUrl: url } } : prev);
+                  }} />
+                </div>
+              </div>
               <div className="sm:col-span-2">
                 <Label>Design config (JSON)</Label>
                 <textarea

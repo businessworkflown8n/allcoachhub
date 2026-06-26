@@ -137,9 +137,9 @@ const AdminCoachFeatureControl = () => {
     }
     const { data: existing } = await supabase.from("coach_feature_flags").select("id").eq("coach_id", coachId).maybeSingle();
     if (existing) {
-      await supabase.from("coach_feature_flags").update({ [field]: !current, updated_at: new Date().toISOString() }).eq("coach_id", coachId);
+      await supabase.from("coach_feature_flags").update({ [field]: !current, updated_at: new Date().toISOString() } as any).eq("coach_id", coachId);
     } else {
-      await supabase.from("coach_feature_flags").insert({ coach_id: coachId, [field]: !current });
+      await supabase.from("coach_feature_flags").insert({ coach_id: coachId, [field]: !current } as any);
     }
     setCoaches((prev) => prev.map((c) => c.coach_id === coachId ? { ...c, [field]: !current } : c));
     toast({ title: `${field.replace(/_/g, " ")} ${!current ? "enabled" : "disabled"}` });

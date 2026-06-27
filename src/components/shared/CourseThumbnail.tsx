@@ -36,7 +36,7 @@ const buildSupabaseSrc = (url: string, width: number) => {
     );
     u.searchParams.set("width", String(width));
     u.searchParams.set("quality", "75");
-    u.searchParams.set("resize", "cover");
+    u.searchParams.set("resize", "contain");
     return u.toString();
   } catch {
     return null;
@@ -102,6 +102,7 @@ const CourseThumbnail = ({
         rounded,
         className,
       )}
+      style={src ? { background: fallback.bg } : undefined}
     >
       {src ? (
         <img
@@ -116,7 +117,7 @@ const CourseThumbnail = ({
           // @ts-expect-error - valid HTML attribute
           fetchpriority={priority ? "high" : "low"}
           className={cn(
-            "h-full w-full object-cover transition-transform duration-300",
+            "h-full w-full object-contain transition-transform duration-300",
             imgClassName,
           )}
         />

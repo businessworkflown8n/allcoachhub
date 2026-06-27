@@ -29,7 +29,7 @@ const Enroll = () => {
   const [submitting, setSubmitting] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [currency, setCurrency] = useState<SupportedCurrency>("USD");
-  const { openCheckout, loading: payLoading } = useRazorpayCheckout();
+  const { openCheckout } = useRazorpayCheckout();
 
   const [form, setForm] = useState({
     full_name: "",

@@ -12,6 +12,7 @@ import AdminCourses from "@/components/admin/AdminCourses";
 import AdminRevenue from "@/components/admin/AdminRevenue";
 import AdminReviews from "@/components/admin/AdminReviews";
 import AdminSettings from "@/components/admin/AdminSettings";
+import AdminLegalPages from "@/components/admin/AdminLegalPages";
 import AdminWebinars from "@/components/admin/AdminWebinars";
 import AdminEnrollments from "@/components/admin/AdminEnrollments";
 import AdminCoachPerformance from "@/components/admin/AdminCoachPerformance";

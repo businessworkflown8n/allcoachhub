@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useStripeCheckout } from "@/hooks/useStripeCheckout";
+import { useRazorpayCheckout } from "@/hooks/useRazorpayCheckout";
 import { detectCurrency, priceForCurrency, type SupportedCurrency } from "@/lib/currencyRouter";
 import PriceDisplay from "@/components/shared/PriceDisplay";
 
@@ -29,7 +29,7 @@ const Enroll = () => {
   const [submitting, setSubmitting] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [currency, setCurrency] = useState<SupportedCurrency>("USD");
-  const { openCheckout, checkoutDialog } = useStripeCheckout();
+  const { openCheckout } = useRazorpayCheckout();
 
   const [form, setForm] = useState({
     full_name: "",
@@ -93,33 +93,11 @@ const Enroll = () => {
     e.preventDefault();
     if (!user || !course) return;
 
-    setSubmitting(true);
+    const priceInr = Number(course.price_inr ?? 0);
+    const priceUsd = Number(course.price_usd ?? 0);
+    const isFree = priceInr <= 0 && priceUsd <= 0;
 
-    const { error } = await supabase.from("enrollments").insert({
-      learner_id: user.id,
-      course_id: course.id,
-      coach_id: course.coach_id,
-      full_name: form.full_name,
-      email: form.email,
-      contact_number: form.contact_number,
-      whatsapp_number: form.whatsapp_number,
-      education_qualification: form.education_qualification,
-      current_job_title: form.current_job_title,
-      industry: form.industry,
-      experience_level: form.experience_level,
-      country: form.country,
-      city: form.city,
-      linkedin_profile: form.linkedin_profile,
-      learning_objective: form.learning_objective,
-    });
-
-    if (error) {
-      toast({ title: "Enrollment failed", description: error.message, variant: "destructive" });
-      setSubmitting(false);
-      return;
-    }
-
-    // Update profile with enrollment data
+    // Persist profile fields up-front (non-blocking on errors)
     await supabase.from("profiles").update({
       contact_number: form.contact_number,
       whatsapp_number: form.whatsapp_number,
@@ -132,8 +110,53 @@ const Enroll = () => {
       linkedin_profile: form.linkedin_profile,
     }).eq("user_id", user.id);
 
-    toast({ title: "Enrolled successfully!", description: "You can access the course from your dashboard." });
-    navigate("/learner/courses");
+    const enrollmentData = {
+      full_name: form.full_name,
+      email: form.email,
+      contact_number: form.contact_number,
+      whatsapp_number: form.whatsapp_number,
+      education_qualification: form.education_qualification,
+      current_job_title: form.current_job_title,
+      industry: form.industry,
+      experience_level: form.experience_level,
+      country: form.country,
+      city: form.city,
+      linkedin_profile: form.linkedin_profile,
+      learning_objective: form.learning_objective,
+    };
+
+    if (isFree) {
+      setSubmitting(true);
+      const { error } = await supabase.from("enrollments").insert({
+        learner_id: user.id,
+        course_id: course.id,
+        coach_id: course.coach_id,
+        payment_status: "free",
+        ...enrollmentData,
+      });
+      setSubmitting(false);
+      if (error) {
+        toast({ title: "Enrollment failed", description: error.message, variant: "destructive" });
+        return;
+      }
+      toast({ title: "Enrolled successfully!", description: "You can access the course from your dashboard." });
+      navigate("/learner/courses");
+      return;
+    }
+
+    // Paid course: open Razorpay
+    setSubmitting(true);
+    await openCheckout({
+      courseId: course.id,
+      currency: currency === "USD" ? "USD" : "INR",
+      enrollmentData,
+      prefill: { name: form.full_name, email: form.email, contact: form.contact_number },
+      onSuccess: () => {
+        setSubmitting(false);
+        navigate("/learner/courses");
+      },
+      onDismiss: () => setSubmitting(false),
+    });
   };
 
   if (loading || authLoading) {

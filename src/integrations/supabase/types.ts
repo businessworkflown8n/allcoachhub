@@ -4801,6 +4801,8 @@ export type Database = {
           payment_locked: boolean
           payment_status: string
           progress_percent: number | null
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
           whatsapp_number: string
         }
         Insert: {
@@ -4830,6 +4832,8 @@ export type Database = {
           payment_locked?: boolean
           payment_status?: string
           progress_percent?: number | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
           whatsapp_number: string
         }
         Update: {
@@ -4859,6 +4863,8 @@ export type Database = {
           payment_locked?: boolean
           payment_status?: string
           progress_percent?: number | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
           whatsapp_number?: string
         }
         Relationships: [
@@ -6998,104 +7004,6 @@ export type Database = {
         }
         Relationships: []
       }
-      membership_subscriptions: {
-        Row: {
-          billing_cycle: string
-          canceled_at: string | null
-          created_at: string
-          current_period_end: string | null
-          current_period_start: string | null
-          id: string
-          membership_id: string
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          billing_cycle?: string
-          canceled_at?: string | null
-          created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
-          id?: string
-          membership_id: string
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          billing_cycle?: string
-          canceled_at?: string | null
-          created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
-          id?: string
-          membership_id?: string
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "membership_subscriptions_membership_id_fkey"
-            columns: ["membership_id"]
-            isOneToOne: false
-            referencedRelation: "memberships"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      memberships: {
-        Row: {
-          coach_id: string
-          created_at: string
-          current_members: number
-          description: string | null
-          features: Json
-          id: string
-          is_active: boolean
-          max_members: number | null
-          price_monthly_inr: number
-          price_monthly_usd: number
-          price_yearly_inr: number | null
-          price_yearly_usd: number | null
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          coach_id: string
-          created_at?: string
-          current_members?: number
-          description?: string | null
-          features?: Json
-          id?: string
-          is_active?: boolean
-          max_members?: number | null
-          price_monthly_inr?: number
-          price_monthly_usd?: number
-          price_yearly_inr?: number | null
-          price_yearly_usd?: number | null
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          coach_id?: string
-          created_at?: string
-          current_members?: number
-          description?: string | null
-          features?: Json
-          id?: string
-          is_active?: boolean
-          max_members?: number | null
-          price_monthly_inr?: number
-          price_monthly_usd?: number
-          price_yearly_inr?: number | null
-          price_yearly_usd?: number | null
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       messages: {
         Row: {
           content: string
@@ -7292,14 +7200,19 @@ export type Database = {
           created_at: string
           currency: string
           enrollment_id: string | null
+          failure_reason: string | null
           id: string
+          invoice_id: string | null
+          invoice_url: string | null
           kind: string
+          paid_at: string | null
           payment_provider: string
           payment_provider_id: string | null
           platform_commission: number
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          razorpay_signature: string | null
           status: string
-          stripe_session_id: string | null
-          stripe_subscription_id: string | null
           user_id: string
         }
         Insert: {
@@ -7309,14 +7222,19 @@ export type Database = {
           created_at?: string
           currency?: string
           enrollment_id?: string | null
+          failure_reason?: string | null
           id?: string
+          invoice_id?: string | null
+          invoice_url?: string | null
           kind?: string
+          paid_at?: string | null
           payment_provider?: string
           payment_provider_id?: string | null
           platform_commission?: number
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_signature?: string | null
           status?: string
-          stripe_session_id?: string | null
-          stripe_subscription_id?: string | null
           user_id: string
         }
         Update: {
@@ -7326,14 +7244,19 @@ export type Database = {
           created_at?: string
           currency?: string
           enrollment_id?: string | null
+          failure_reason?: string | null
           id?: string
+          invoice_id?: string | null
+          invoice_url?: string | null
           kind?: string
+          paid_at?: string | null
           payment_provider?: string
           payment_provider_id?: string | null
           platform_commission?: number
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_signature?: string | null
           status?: string
-          stripe_session_id?: string | null
-          stripe_subscription_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -7929,6 +7852,77 @@ export type Database = {
             columns: ["lesson_id"]
             isOneToOne: false
             referencedRelation: "course_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      razorpay_orders: {
+        Row: {
+          amount: number
+          coach_id: string | null
+          course_id: string | null
+          created_at: string
+          currency: string
+          enrollment_data: Json | null
+          error_code: string | null
+          error_description: string | null
+          id: string
+          notes: Json | null
+          paid_at: string | null
+          razorpay_order_id: string
+          razorpay_payment_id: string | null
+          receipt: string | null
+          signature_verified: boolean
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          coach_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          currency?: string
+          enrollment_data?: Json | null
+          error_code?: string | null
+          error_description?: string | null
+          id?: string
+          notes?: Json | null
+          paid_at?: string | null
+          razorpay_order_id: string
+          razorpay_payment_id?: string | null
+          receipt?: string | null
+          signature_verified?: boolean
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          coach_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          currency?: string
+          enrollment_data?: Json | null
+          error_code?: string | null
+          error_description?: string | null
+          id?: string
+          notes?: Json | null
+          paid_at?: string | null
+          razorpay_order_id?: string
+          razorpay_payment_id?: string | null
+          receipt?: string | null
+          signature_verified?: boolean
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "razorpay_orders_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]
@@ -8681,54 +8675,6 @@ export type Database = {
           updated_at?: string
           user_id?: string
           video_url?: string | null
-        }
-        Relationships: []
-      }
-      stripe_subscriptions: {
-        Row: {
-          cancel_at_period_end: boolean | null
-          created_at: string
-          current_period_end: string | null
-          current_period_start: string | null
-          environment: string
-          id: string
-          price_id: string
-          product_id: string
-          status: string
-          stripe_customer_id: string
-          stripe_subscription_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          cancel_at_period_end?: boolean | null
-          created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
-          environment?: string
-          id?: string
-          price_id: string
-          product_id: string
-          status?: string
-          stripe_customer_id: string
-          stripe_subscription_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          cancel_at_period_end?: boolean | null
-          created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
-          environment?: string
-          id?: string
-          price_id?: string
-          product_id?: string
-          status?: string
-          stripe_customer_id?: string
-          stripe_subscription_id?: string
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -10316,10 +10262,6 @@ export type Database = {
       grade_quiz_attempt: {
         Args: { _answers: Json; _quiz_id: string }
         Returns: Json
-      }
-      has_active_subscription: {
-        Args: { check_env?: string; user_uuid: string }
-        Returns: boolean
       }
       has_role: {
         Args: {

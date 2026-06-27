@@ -36,7 +36,7 @@ const buildSupabaseSrc = (url: string, width: number) => {
     );
     u.searchParams.set("width", String(width));
     u.searchParams.set("quality", "75");
-    u.searchParams.set("resize", "cover");
+    u.searchParams.set("resize", "contain");
     return u.toString();
   } catch {
     return null;

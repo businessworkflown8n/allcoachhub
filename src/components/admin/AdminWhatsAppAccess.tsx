@@ -67,8 +67,8 @@ const AdminWhatsAppAccess = () => {
           full_name: p.full_name || "Unknown",
           email: p.email || "",
           is_active: access?.is_active ?? false,
-          user_login: cred?.user_id ?? null,
-          password: cred?.password ?? null,
+          user_login: null,
+          password: null,
           login_url: cred?.login_url ?? DEFAULT_LOGIN_URL,
           cred_updated_at: cred?.updated_at ?? null,
         };

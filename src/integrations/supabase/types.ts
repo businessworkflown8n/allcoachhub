@@ -7162,6 +7162,56 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_refunds: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          notes: Json | null
+          payment_id: string
+          razorpay_payment_id: string
+          razorpay_refund_id: string | null
+          reason: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          notes?: Json | null
+          payment_id: string
+          razorpay_payment_id: string
+          razorpay_refund_id?: string | null
+          reason?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          notes?: Json | null
+          payment_id?: string
+          razorpay_payment_id?: string
+          razorpay_refund_id?: string | null
+          reason?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_refunds_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_status_audit: {
         Row: {
           changed_at: string
@@ -7212,6 +7262,9 @@ export type Database = {
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
           razorpay_signature: string | null
+          refund_status: string | null
+          refunded_amount: number
+          refunded_at: string | null
           status: string
           user_id: string
         }
@@ -7234,6 +7287,9 @@ export type Database = {
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           razorpay_signature?: string | null
+          refund_status?: string | null
+          refunded_amount?: number
+          refunded_at?: string | null
           status?: string
           user_id: string
         }
@@ -7256,6 +7312,9 @@ export type Database = {
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           razorpay_signature?: string | null
+          refund_status?: string | null
+          refunded_amount?: number
+          refunded_at?: string | null
           status?: string
           user_id?: string
         }

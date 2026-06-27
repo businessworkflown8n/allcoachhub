@@ -63,6 +63,7 @@ const AIKidsEnrollment = lazy(() => import("./pages/AIKidsEnrollment"));
 const AIKidsProCourses = lazy(() => import("./pages/AIKidsProCourses"));
 const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
 const LegalPage = lazy(() => import("./pages/LegalPage"));
+const Invoice = lazy(() => import("./pages/Invoice"));
 
 // Lazy-loaded global widgets (non-critical)
 
@@ -169,6 +170,7 @@ const App = () => (
             <Route path="/install" element={<Suspense fallback={<PageFallback />}><Install /></Suspense>} />
             <Route path="/sitemap" element={<Suspense fallback={<PageFallback />}><Sitemap /></Suspense>} />
             <Route path="/verify-certificate/:token" element={<Suspense fallback={<PageFallback />}><VerifyCertificate /></Suspense>} />
+            <Route path="/invoice/:paymentId" element={<Suspense fallback={<PageFallback />}><Invoice /></Suspense>} />
             <Route path="/privacy-policy" element={<Suspense fallback={<PageFallback />}><LegalPage slug="privacy-policy" /></Suspense>} />
             <Route path="/refund-policy" element={<Suspense fallback={<PageFallback />}><LegalPage slug="refund-policy" /></Suspense>} />
             <Route path="/cancellation-policy" element={<Suspense fallback={<PageFallback />}><LegalPage slug="cancellation-policy" /></Suspense>} />

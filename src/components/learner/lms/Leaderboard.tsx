@@ -11,15 +11,15 @@ const Leaderboard = () => {
 
   useEffect(() => {
     (async () => {
-      const { data: xpRows } = await supabase.from("learner_xp" as any)
-        .select("user_id, total_xp, level").order("total_xp", { ascending: false }).limit(20);
-      const ids = (xpRows || []).map((r: any) => r.user_id);
-      const { data: profs } = ids.length
-        ? await supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", ids)
-        : { data: [] };
-      const pmap: Record<string, any> = {};
-      (profs || []).forEach((p) => { pmap[p.user_id] = p; });
-      setRows((xpRows || []).map((r: any) => ({ ...r, profile: pmap[r.user_id] })));
+      const { data } = await (supabase as any).rpc("get_xp_leaderboard", { _limit: 20 });
+      setRows(
+        (data || []).map((r: any) => ({
+          user_id: r.user_id,
+          total_xp: r.total_xp,
+          level: r.level,
+          profile: { full_name: r.full_name, avatar_url: r.avatar_url },
+        }))
+      );
       setLoading(false);
     })();
   }, []);

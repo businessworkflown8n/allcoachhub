@@ -62,6 +62,7 @@ const AiJobsNewsLinkedInPost = lazy(() => import("./pages/AiJobsNewsLinkedInPost
 const AIKidsEnrollment = lazy(() => import("./pages/AIKidsEnrollment"));
 const AIKidsProCourses = lazy(() => import("./pages/AIKidsProCourses"));
 const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
 
 // Lazy-loaded global widgets (non-critical)
 
@@ -168,6 +169,12 @@ const App = () => (
             <Route path="/install" element={<Suspense fallback={<PageFallback />}><Install /></Suspense>} />
             <Route path="/sitemap" element={<Suspense fallback={<PageFallback />}><Sitemap /></Suspense>} />
             <Route path="/verify-certificate/:token" element={<Suspense fallback={<PageFallback />}><VerifyCertificate /></Suspense>} />
+            <Route path="/privacy-policy" element={<Suspense fallback={<PageFallback />}><LegalPage slug="privacy-policy" /></Suspense>} />
+            <Route path="/refund-policy" element={<Suspense fallback={<PageFallback />}><LegalPage slug="refund-policy" /></Suspense>} />
+            <Route path="/cancellation-policy" element={<Suspense fallback={<PageFallback />}><LegalPage slug="cancellation-policy" /></Suspense>} />
+            <Route path="/shipping-policy" element={<Suspense fallback={<PageFallback />}><LegalPage slug="shipping-policy" /></Suspense>} />
+            <Route path="/terms" element={<Suspense fallback={<PageFallback />}><LegalPage slug="terms" /></Suspense>} />
+            <Route path="/disclaimer" element={<Suspense fallback={<PageFallback />}><LegalPage slug="disclaimer" /></Suspense>} />
             <Route path="/courses" element={<Suspense fallback={<PageFallback />}><Courses /></Suspense>} />
             <Route path="/courses/ai-kids-pro" element={<Suspense fallback={<PageFallback />}><AIKidsProCourses /></Suspense>} />
             <Route path="/courses/:slug" element={<Suspense fallback={<PageFallback />}><CategoryPage /></Suspense>} />

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
 import { useTranslation } from "@/i18n/TranslationProvider";
 import { trackSocialClick } from "@/lib/analytics";
@@ -13,6 +14,15 @@ const socials = [
   { name: "YouTube", href: "https://www.youtube.com/@AicoachPortal", icon: Youtube },
 ];
 
+const legalLinks = [
+  { label: "Privacy Policy", to: "/privacy-policy" },
+  { label: "Return & Refund Policy", to: "/refund-policy" },
+  { label: "Cancellation Policy", to: "/cancellation-policy" },
+  { label: "Shipping Policy", to: "/shipping-policy" },
+  { label: "Terms & Conditions", to: "/terms" },
+  { label: "Disclaimer", to: "/disclaimer" },
+];
+
 const Footer = () => {
   const { t } = useTranslation();
 
@@ -22,27 +32,55 @@ const Footer = () => {
 
   return (
     <>
-    <MarqueeBar segment="website" position="footer" />
-    <footer className="border-t border-border bg-card py-10">
-      <div className="container mx-auto flex flex-col items-center gap-4 px-4">
-        <div className="flex items-center gap-4">
-          {socials.map((s) => (
-            <a
-              key={s.name}
-              href={s.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={s.name}
-              onClick={() => handleSocialClick(s.name, s.href)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
-            >
-              <s.icon className="h-5 w-5" />
-            </a>
-          ))}
+      <MarqueeBar segment="website" position="footer" />
+      <footer className="border-t border-border bg-card py-10">
+        <div className="container mx-auto px-4">
+          <div className="mb-8 grid gap-8 md:grid-cols-2">
+            <div>
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground">
+                Privacy & Legal
+              </h3>
+              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {legalLinks.map((link) => (
+                  <li key={link.to}>
+                    <Link
+                      to={link.to}
+                      className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex flex-col items-start gap-3 md:items-end">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+                Follow Us
+              </h3>
+              <div className="flex items-center gap-3">
+                {socials.map((s) => (
+                  <a
+                    key={s.name}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.name}
+                    onClick={() => handleSocialClick(s.name, s.href)}
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <s.icon className="h-5 w-5" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-border pt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              {t("footer.copyright", { year: new Date().getFullYear().toString() })}
+            </p>
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground">{t("footer.copyright", { year: new Date().getFullYear().toString() })}</p>
-      </div>
-    </footer>
+      </footer>
     </>
   );
 };

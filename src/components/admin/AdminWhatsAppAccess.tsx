@@ -49,7 +49,7 @@ const AdminWhatsAppAccess = () => {
       supabase.from("profiles").select("user_id, full_name, email"),
       supabase.from("user_roles").select("user_id").eq("role", "coach"),
       supabase.from("whatsapp_access").select("coach_id, is_active"),
-      supabase.from("whatsapp_credentials").select("coach_id, user_id, password, login_url, updated_at"),
+      supabase.from("whatsapp_credentials").select("coach_id, login_url, updated_at"),
       supabase.from("whatsapp_credential_requests").select("id, coach_id, status, created_at").eq("status", "pending").order("created_at", { ascending: false }),
     ]);
 

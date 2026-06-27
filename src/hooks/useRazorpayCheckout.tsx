@@ -30,11 +30,18 @@ function loadScript(src: string): Promise<boolean> {
 }
 
 export interface OpenCheckoutArgs {
-  courseId: string;
+  /** course_id (when kind = 'course') */
+  courseId?: string;
+  /** webinar_id (when kind = 'webinar') */
+  webinarId?: string;
+  kind?: "course" | "webinar";
   currency?: "INR" | "USD";
+  /** enrollment fields for courses */
   enrollmentData?: Record<string, unknown>;
+  /** registration fields for webinars */
+  registrationData?: Record<string, unknown>;
   prefill?: { name?: string; email?: string; contact?: string };
-  onSuccess?: (info: { enrollmentId?: string; paymentId: string }) => void;
+  onSuccess?: (info: { enrollmentId?: string; webinarRegistrationId?: string; paymentId: string; invoiceUrl?: string }) => void;
   onDismiss?: () => void;
 }
 
@@ -50,11 +57,15 @@ export function useRazorpayCheckout() {
         return;
       }
 
+      const kind = args.kind ?? (args.webinarId ? "webinar" : "course");
       const { data, error } = await supabase.functions.invoke("razorpay-create-order", {
         body: {
+          kind,
           course_id: args.courseId,
+          webinar_id: args.webinarId,
           currency: args.currency ?? "INR",
           enrollment_data: args.enrollmentData,
+          registration_data: args.registrationData,
         },
       });
       if (error || !data?.success) {
@@ -67,7 +78,7 @@ export function useRazorpayCheckout() {
         amount: data.amount,
         currency: data.currency,
         name: "AI Coach Portal",
-        description: data.course_title || "Course enrollment",
+        description: data.course_title || data.webinar_title || (kind === "webinar" ? "Webinar registration" : "Course enrollment"),
         order_id: data.order_id,
         prefill: { ...(data.prefill || {}), ...(args.prefill || {}) },
         theme: { color: "#84cc16" },
@@ -79,15 +90,18 @@ export function useRazorpayCheckout() {
         },
         handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
           try {
-            const { data: vData, error: vErr } = await supabase.functions.invoke("razorpay-verify-payment", {
-              body: response,
-            });
+            const { data: vData, error: vErr } = await supabase.functions.invoke("razorpay-verify-payment", { body: response });
             if (vErr || !vData?.success) {
               toast({ title: "Payment verification failed", description: vErr?.message || vData?.error || "Contact support if your card was charged.", variant: "destructive" });
               return;
             }
-            toast({ title: "Payment successful", description: "You are now enrolled in the course." });
-            args.onSuccess?.({ enrollmentId: vData.enrollment_id, paymentId: response.razorpay_payment_id });
+            toast({ title: "Payment successful", description: kind === "webinar" ? "You are now registered for the webinar." : "You are now enrolled in the course." });
+            args.onSuccess?.({
+              enrollmentId: vData.enrollment_id,
+              webinarRegistrationId: vData.webinar_registration_id,
+              paymentId: response.razorpay_payment_id,
+              invoiceUrl: vData.invoice_url,
+            });
           } catch (e: any) {
             toast({ title: "Verification error", description: e?.message ?? "Unknown error", variant: "destructive" });
           } finally {

@@ -71,15 +71,11 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Invalid payment signature' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Idempotent: if already paid, just return success
+    const kind = (orderRow.kind as string) || 'course';
+
+    // Idempotent: if already paid, return success
     if (orderRow.status === 'paid' && orderRow.signature_verified) {
-      const { data: existingEnr } = await admin
-        .from('enrollments')
-        .select('id')
-        .eq('learner_id', userId)
-        .eq('course_id', orderRow.course_id)
-        .maybeSingle();
-      return new Response(JSON.stringify({ success: true, enrollment_id: existingEnr?.id, already_processed: true }), {
+      return new Response(JSON.stringify({ success: true, already_processed: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -91,80 +87,145 @@ Deno.serve(async (req) => {
       paid_at: new Date().toISOString(),
     }).eq('id', orderRow.id);
 
-    // Fetch course for coach_id
-    const { data: course } = await admin
-      .from('courses')
-      .select('coach_id')
-      .eq('id', orderRow.course_id)
-      .maybeSingle();
-
-    const enrollmentData = (orderRow.enrollment_data ?? {}) as Record<string, unknown>;
-
-    const enrollmentPayload: Record<string, unknown> = {
-      learner_id: userId,
-      course_id: orderRow.course_id,
-      coach_id: course?.coach_id ?? orderRow.coach_id,
-      payment_status: 'paid',
-      payment_id: razorpay_payment_id,
-      amount_paid: orderRow.amount,
-      currency: orderRow.currency,
-      payment_locked: true,
-      razorpay_order_id,
-      razorpay_payment_id,
-      ...enrollmentData,
-    };
-
-    // Upsert enrollment (avoid duplicate if user re-pays)
-    const { data: existing } = await admin
-      .from('enrollments')
-      .select('id')
-      .eq('learner_id', userId)
-      .eq('course_id', orderRow.course_id)
-      .maybeSingle();
-
-    let enrollmentId = existing?.id as string | undefined;
-    if (enrollmentId) {
-      await admin.from('enrollments').update(enrollmentPayload).eq('id', enrollmentId);
-    } else {
-      const { data: ins, error: insErr } = await admin
-        .from('enrollments')
-        .insert(enrollmentPayload)
-        .select('id')
-        .single();
-      if (insErr) {
-        console.error('enrollment insert error', insErr);
-        return new Response(JSON.stringify({ error: 'Enrollment failed', details: insErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-      }
-      enrollmentId = ins.id;
-    }
-
-    // Generate invoice number: INV-YYYYMM-<8 chars of payment id>
+    // Invoice number
     const now = new Date();
     const yyyymm = `${now.getUTCFullYear()}${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
     const invoiceId = `INV-${yyyymm}-${razorpay_payment_id.replace(/[^A-Za-z0-9]/g, '').slice(-8).toUpperCase()}`;
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-    const projectRef = supabaseUrl.replace('https://', '').split('.')[0];
     const invoiceUrl = `https://www.aicoachportal.com/invoice/${razorpay_payment_id}`;
 
-    const { data: insertedPayment } = await admin.from('payments').insert({
-      enrollment_id: enrollmentId,
+    let enrollmentId: string | undefined;
+    let webinarRegId: string | undefined;
+    let coachId: string | null = orderRow.coach_id;
+    let itemTitle = '';
+    let learnerEmail = '';
+    let learnerName = '';
+    let learnerPhone = '';
+
+    if (kind === 'course') {
+      const { data: course } = await admin
+        .from('courses').select('coach_id, title').eq('id', orderRow.course_id).maybeSingle();
+      coachId = course?.coach_id ?? orderRow.coach_id;
+      itemTitle = course?.title ?? '';
+
+      const enrollmentData = (orderRow.enrollment_data ?? {}) as Record<string, unknown>;
+      learnerEmail = String(enrollmentData.email ?? '');
+      learnerName = String(enrollmentData.full_name ?? '');
+      learnerPhone = String(enrollmentData.contact_number ?? '');
+
+      const enrollmentPayload: Record<string, unknown> = {
+        learner_id: userId,
+        course_id: orderRow.course_id,
+        coach_id: coachId,
+        payment_status: 'paid',
+        payment_id: razorpay_payment_id,
+        amount_paid: orderRow.amount,
+        currency: orderRow.currency,
+        payment_locked: true,
+        razorpay_order_id,
+        razorpay_payment_id,
+        ...enrollmentData,
+      };
+
+      const { data: existing } = await admin
+        .from('enrollments').select('id').eq('learner_id', userId).eq('course_id', orderRow.course_id).maybeSingle();
+      enrollmentId = existing?.id;
+      if (enrollmentId) {
+        await admin.from('enrollments').update(enrollmentPayload).eq('id', enrollmentId);
+      } else {
+        const { data: ins, error: insErr } = await admin.from('enrollments').insert(enrollmentPayload).select('id').single();
+        if (insErr) {
+          console.error('enrollment insert error', insErr);
+          return new Response(JSON.stringify({ error: 'Enrollment failed', details: insErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+        enrollmentId = ins.id;
+      }
+    } else if (kind === 'webinar') {
+      const { data: webinar } = await admin
+        .from('webinars').select('coach_id, title').eq('id', orderRow.webinar_id).maybeSingle();
+      coachId = webinar?.coach_id ?? orderRow.coach_id;
+      itemTitle = webinar?.title ?? '';
+
+      const regData = (orderRow.enrollment_data ?? {}) as Record<string, unknown>;
+      learnerEmail = String(regData.email ?? regData.registrant_email ?? '');
+      learnerName = String(regData.full_name ?? regData.registrant_name ?? '');
+      learnerPhone = String(regData.contact_number ?? regData.registrant_phone ?? '');
+
+      // Upsert webinar registration
+      const { data: existing } = await admin
+        .from('webinar_registrations').select('id')
+        .eq('webinar_id', orderRow.webinar_id).eq('learner_id', userId).maybeSingle();
+
+      const regPayload = {
+        webinar_id: orderRow.webinar_id,
+        learner_id: userId,
+        registrant_name: learnerName,
+        registrant_email: learnerEmail,
+        registrant_phone: learnerPhone,
+        payment_status: 'paid',
+        amount_paid: orderRow.amount,
+        payment_id: razorpay_payment_id,
+      };
+
+      if (existing?.id) {
+        await admin.from('webinar_registrations').update(regPayload).eq('id', existing.id);
+        webinarRegId = existing.id;
+      } else {
+        const { data: ins, error: insErr } = await admin.from('webinar_registrations').insert(regPayload).select('id').single();
+        if (insErr) {
+          console.error('webinar registration insert error', insErr);
+          return new Response(JSON.stringify({ error: 'Registration failed', details: insErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+        webinarRegId = ins.id;
+      }
+
+      await admin.from('webinar_payments').insert({
+        webinar_id: orderRow.webinar_id,
+        learner_id: userId,
+        amount: orderRow.amount,
+        currency: orderRow.currency,
+        payment_id: razorpay_payment_id,
+        payment_status: 'paid',
+      });
+    }
+
+    await admin.from('payments').insert({
+      enrollment_id: enrollmentId ?? null,
       user_id: userId,
-      coach_id: course?.coach_id ?? orderRow.coach_id,
+      coach_id: coachId,
       amount: orderRow.amount,
       currency: orderRow.currency,
       payment_provider: 'razorpay',
       payment_provider_id: razorpay_payment_id,
       status: 'paid',
-      kind: 'course',
+      kind,
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
       invoice_id: invoiceId,
       invoice_url: invoiceUrl,
       paid_at: new Date().toISOString(),
-    }).select('id').single();
+    });
 
-    return new Response(JSON.stringify({ success: true, enrollment_id: enrollmentId }), {
+    // Fire-and-forget confirmation (email + whatsapp). Don't block payment success.
+    try {
+      await admin.functions.invoke('razorpay-send-confirmation', {
+        body: {
+          payment_id: razorpay_payment_id,
+          kind,
+          recipient_email: learnerEmail,
+          recipient_name: learnerName,
+          recipient_phone: learnerPhone,
+          item_title: itemTitle,
+          amount: orderRow.amount,
+          currency: orderRow.currency,
+          invoice_url: invoiceUrl,
+        },
+      });
+    } catch (e) {
+      console.warn('confirmation invoke failed (non-blocking)', (e as Error).message);
+    }
+
+    return new Response(JSON.stringify({ success: true, enrollment_id: enrollmentId, webinar_registration_id: webinarRegId, invoice_url: invoiceUrl }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {

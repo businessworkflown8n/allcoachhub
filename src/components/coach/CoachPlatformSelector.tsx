@@ -79,7 +79,7 @@ const CoachPlatformSelector = ({ open, onOpenChange }: Props) => {
     if (!user) return;
     const { data } = await supabase
       .from("ad_platform_connections")
-      .select("*")
+      .select("id, coach_id, platform, status, last_sync_at, error_log, account_id, account_name, currency, timezone, sync_frequency, token_expires_at, needs_reconnect, sync_data_scope, created_at, updated_at")
       .eq("coach_id", user.id)
       .order("created_at", { ascending: false });
     if (data) setConnections(data as unknown as Connection[]);

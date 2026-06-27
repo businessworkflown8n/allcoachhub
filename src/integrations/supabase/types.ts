@@ -9615,30 +9615,30 @@ export type Database = {
           created_at: string
           id: string
           login_url: string
-          password: string | null
+          password_enc: string | null
           updated_at: string
           updated_by: string | null
-          user_id: string | null
+          user_id_enc: string | null
         }
         Insert: {
           coach_id: string
           created_at?: string
           id?: string
           login_url?: string
-          password?: string | null
+          password_enc?: string | null
           updated_at?: string
           updated_by?: string | null
-          user_id?: string | null
+          user_id_enc?: string | null
         }
         Update: {
           coach_id?: string
           created_at?: string
           id?: string
           login_url?: string
-          password?: string | null
+          password_enc?: string | null
           updated_at?: string
           updated_by?: string | null
-          user_id?: string | null
+          user_id_enc?: string | null
         }
         Relationships: []
       }
@@ -10309,6 +10309,24 @@ export type Database = {
         Args: { _coach_id: string }
         Returns: Json
       }
+      get_daily_zip_community_stats: {
+        Args: never
+        Returns: {
+          highest_level: number
+          total_players: number
+          total_solved: number
+        }[]
+      }
+      get_daily_zip_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          country: string
+          current_level: number
+          full_name: string
+          total_games_played: number
+          user_id: string
+        }[]
+      }
       get_digital_product_access: { Args: { _coach_id: string }; Returns: Json }
       get_effective_feature: {
         Args: { _coach_id: string; _feature_key: string; _plan?: string }
@@ -10327,6 +10345,24 @@ export type Database = {
         }[]
       }
       get_webinar_join_link: { Args: { _webinar_id: string }; Returns: string }
+      get_whatsapp_credentials: {
+        Args: { _coach_id: string }
+        Returns: {
+          login_url: string
+          password: string
+          user_id: string
+        }[]
+      }
+      get_xp_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          level: number
+          total_xp: number
+          user_id: string
+        }[]
+      }
       grade_quiz_attempt: {
         Args: { _answers: Json; _quiz_id: string }
         Returns: Json
@@ -10383,6 +10419,15 @@ export type Database = {
       revoke_certificate: {
         Args: { _certificate_id: string; _reason: string }
         Returns: Json
+      }
+      set_whatsapp_credentials: {
+        Args: {
+          _coach_id: string
+          _login_url: string
+          _password: string
+          _user_id: string
+        }
+        Returns: undefined
       }
       update_learner_streak: { Args: { _user_id: string }; Returns: Json }
       user_has_course_access: {

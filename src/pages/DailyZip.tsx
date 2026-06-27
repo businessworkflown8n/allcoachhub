@@ -104,18 +104,22 @@ const DailyZip = () => {
   // Load leaderboard
   useEffect(() => {
     const load = async () => {
-      const { data: lb } = await supabase
-        .from("daily_zip_progress")
-        .select("*, profiles:user_id(full_name, country)")
-        .order("current_level", { ascending: false })
-        .limit(20);
-      setLeaderboard(lb || []);
-      const { data: stats } = await supabase.from("daily_zip_progress").select("current_level, total_games_played");
-      if (stats && stats.length > 0) {
+      const { data: lb } = await (supabase as any).rpc("get_daily_zip_leaderboard", { _limit: 20 });
+      setLeaderboard(
+        (lb || []).map((r: any) => ({
+          user_id: r.user_id,
+          current_level: r.current_level,
+          total_games_played: r.total_games_played,
+          profiles: { full_name: r.full_name, country: r.country },
+        }))
+      );
+      const { data: stats } = await (supabase as any).rpc("get_daily_zip_community_stats");
+      const s = Array.isArray(stats) ? stats[0] : null;
+      if (s) {
         setCommunityStats({
-          totalPlayers: stats.length,
-          totalSolved: stats.reduce((s: number, r: any) => s + (r.total_games_played || 0), 0),
-          highestLevel: Math.max(...stats.map((r: any) => r.current_level || 1)),
+          totalPlayers: Number(s.total_players) || 0,
+          totalSolved: Number(s.total_solved) || 0,
+          highestLevel: Number(s.highest_level) || 1,
         });
       }
     };

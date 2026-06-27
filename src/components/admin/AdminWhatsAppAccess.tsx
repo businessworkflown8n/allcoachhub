@@ -49,7 +49,7 @@ const AdminWhatsAppAccess = () => {
       supabase.from("profiles").select("user_id, full_name, email"),
       supabase.from("user_roles").select("user_id").eq("role", "coach"),
       supabase.from("whatsapp_access").select("coach_id, is_active"),
-      supabase.from("whatsapp_credentials").select("coach_id, user_id, password, login_url, updated_at"),
+      supabase.from("whatsapp_credentials").select("coach_id, login_url, updated_at"),
       supabase.from("whatsapp_credential_requests").select("id, coach_id, status, created_at").eq("status", "pending").order("created_at", { ascending: false }),
     ]);
 
@@ -67,8 +67,8 @@ const AdminWhatsAppAccess = () => {
           full_name: p.full_name || "Unknown",
           email: p.email || "",
           is_active: access?.is_active ?? false,
-          user_login: cred?.user_id ?? null,
-          password: cred?.password ?? null,
+          user_login: null,
+          password: null,
           login_url: cred?.login_url ?? DEFAULT_LOGIN_URL,
           cred_updated_at: cred?.updated_at ?? null,
         };
@@ -131,16 +131,12 @@ const AdminWhatsAppAccess = () => {
       return;
     }
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    const payload = {
-      coach_id: editing.user_id,
-      login_url: form.login_url.trim() || DEFAULT_LOGIN_URL,
-      user_id: form.user_id.trim(),
-      password: form.password,
-      updated_by: user?.id ?? null,
-      updated_at: new Date().toISOString(),
-    };
-    const { error } = await supabase.from("whatsapp_credentials").upsert(payload, { onConflict: "coach_id" });
+    const { error } = await (supabase as any).rpc("set_whatsapp_credentials", {
+      _coach_id: editing.user_id,
+      _login_url: form.login_url.trim() || DEFAULT_LOGIN_URL,
+      _user_id: form.user_id.trim(),
+      _password: form.password,
+    });
     setSaving(false);
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });

@@ -131,16 +131,12 @@ const AdminWhatsAppAccess = () => {
       return;
     }
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    const payload = {
-      coach_id: editing.user_id,
-      login_url: form.login_url.trim() || DEFAULT_LOGIN_URL,
-      user_id: form.user_id.trim(),
-      password: form.password,
-      updated_by: user?.id ?? null,
-      updated_at: new Date().toISOString(),
-    };
-    const { error } = await supabase.from("whatsapp_credentials").upsert(payload, { onConflict: "coach_id" });
+    const { error } = await (supabase as any).rpc("set_whatsapp_credentials", {
+      _coach_id: editing.user_id,
+      _login_url: form.login_url.trim() || DEFAULT_LOGIN_URL,
+      _user_id: form.user_id.trim(),
+      _password: form.password,
+    });
     setSaving(false);
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });

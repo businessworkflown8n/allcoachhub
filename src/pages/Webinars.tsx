@@ -10,6 +10,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
 import { useSEO } from "@/hooks/useSEO";
+import { useRazorpayCheckout } from "@/hooks/useRazorpayCheckout";
 
 interface WebinarWithCoach {
   id: string;
@@ -44,6 +45,7 @@ const Webinars = () => {
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const { openCheckout } = useRazorpayCheckout();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,12 +97,45 @@ const Webinars = () => {
       .eq("user_id", user.id)
       .single();
 
+    const fullName = profile?.full_name || user.email?.split("@")[0] || "Unknown";
+    const email = profile?.email || user.email || "";
+    const phone = profile?.contact_number || "";
+
+    // Paid webinar → open Razorpay checkout
+    const priceInr = Number(webinar.price_inr ?? 0);
+    const priceUsd = Number(webinar.price_usd ?? 0);
+    const isPaid = webinar.is_paid && (priceInr > 0 || priceUsd > 0);
+
+    if (isPaid) {
+      await openCheckout({
+        webinarId: webinar.id,
+        kind: "webinar",
+        currency: priceInr > 0 ? "INR" : "USD",
+        registrationData: {
+          full_name: fullName,
+          email,
+          contact_number: phone,
+          registrant_name: fullName,
+          registrant_email: email,
+          registrant_phone: phone,
+        },
+        prefill: { name: fullName, email, contact: phone },
+        onSuccess: () => {
+          setRegisteredIds(new Set([...registeredIds, webinar.id]));
+          setRegistering(null);
+        },
+        onDismiss: () => setRegistering(null),
+      });
+      return;
+    }
+
+    // Free webinar — original flow
     const { error } = await supabase.from("webinar_registrations").insert({
       webinar_id: webinar.id,
       learner_id: user.id,
-      registrant_name: profile?.full_name || user.email?.split("@")[0] || "Unknown",
-      registrant_email: profile?.email || user.email || "",
-      registrant_phone: profile?.contact_number || "",
+      registrant_name: fullName,
+      registrant_email: email,
+      registrant_phone: phone,
     } as any);
 
     if (error) {

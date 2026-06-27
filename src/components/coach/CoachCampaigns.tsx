@@ -111,11 +111,12 @@ const CoachCampaigns = () => {
     try {
       const [accessRes, credRes] = await Promise.all([
         supabase.from("whatsapp_access").select("is_active").eq("coach_id", user.id).maybeSingle(),
-        supabase.from("whatsapp_credentials").select("login_url, user_id, password").eq("coach_id", user.id).maybeSingle(),
+        (supabase as any).rpc("get_whatsapp_credentials", { _coach_id: user.id }),
       ]);
       const enabled = !!accessRes.data?.is_active;
       setWaAccess(enabled);
-      setWaCreds(credRes.data as any);
+      const row = Array.isArray(credRes.data) ? credRes.data[0] : null;
+      setWaCreds(row as any);
     } finally {
       setWaLoading(false);
     }

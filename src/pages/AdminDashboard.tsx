@@ -12,6 +12,7 @@ import AdminCourses from "@/components/admin/AdminCourses";
 import AdminRevenue from "@/components/admin/AdminRevenue";
 import AdminReviews from "@/components/admin/AdminReviews";
 import AdminSettings from "@/components/admin/AdminSettings";
+import AdminLegalPages from "@/components/admin/AdminLegalPages";
 import AdminWebinars from "@/components/admin/AdminWebinars";
 import AdminEnrollments from "@/components/admin/AdminEnrollments";
 import AdminCoachPerformance from "@/components/admin/AdminCoachPerformance";
@@ -120,6 +121,7 @@ const navItems = [
   { label: "Assignments", path: "/admin/assignments", icon: <ClipboardList className="h-4 w-4" /> },
   { label: "LMS Oversight", path: "/admin/lms-overview", icon: <TrendingUp className="h-4 w-4" /> },
   { label: "Certificate Settings", path: "/admin/certificate-settings", icon: <Award className="h-4 w-4" /> },
+  { label: "Legal Pages", path: "/admin/legal", icon: <FileCheck className="h-4 w-4" /> },
 ];
 
 
@@ -192,6 +194,7 @@ const AdminDashboard = () => {
         <Route path="assignments" element={<AdminAssignments />} />
         <Route path="lms-overview" element={<AdminLMSOverview />} />
         <Route path="certificate-settings" element={<AdminCertificateSettings />} />
+        <Route path="legal" element={<AdminLegalPages />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
 
       </Routes>

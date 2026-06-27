@@ -138,7 +138,15 @@ Deno.serve(async (req) => {
       enrollmentId = ins.id;
     }
 
-    await admin.from('payments').insert({
+    // Generate invoice number: INV-YYYYMM-<8 chars of payment id>
+    const now = new Date();
+    const yyyymm = `${now.getUTCFullYear()}${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+    const invoiceId = `INV-${yyyymm}-${razorpay_payment_id.replace(/[^A-Za-z0-9]/g, '').slice(-8).toUpperCase()}`;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const projectRef = supabaseUrl.replace('https://', '').split('.')[0];
+    const invoiceUrl = `https://www.aicoachportal.com/invoice/${razorpay_payment_id}`;
+
+    const { data: insertedPayment } = await admin.from('payments').insert({
       enrollment_id: enrollmentId,
       user_id: userId,
       coach_id: course?.coach_id ?? orderRow.coach_id,
@@ -151,8 +159,10 @@ Deno.serve(async (req) => {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
+      invoice_id: invoiceId,
+      invoice_url: invoiceUrl,
       paid_at: new Date().toISOString(),
-    });
+    }).select('id').single();
 
     return new Response(JSON.stringify({ success: true, enrollment_id: enrollmentId }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

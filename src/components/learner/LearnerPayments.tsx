@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DollarSign } from "lucide-react";
+import { DollarSign, FileText } from "lucide-react";
+import { Link } from "react-router-dom";
 import GlobalDateRangePicker, { useDateRange } from "@/components/shared/GlobalDateRangePicker";
 
 const LearnerPayments = () => {
@@ -50,17 +51,30 @@ const LearnerPayments = () => {
                 <TableHead>Amount</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Date</TableHead>
+                <TableHead className="text-right">Invoice</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell className="text-foreground">{(p.enrollments as any)?.courses?.title || "—"}</TableCell>
-                  <TableCell className="text-foreground">{p.currency} {Number(p.amount)}</TableCell>
+                  <TableCell className="text-foreground">{p.currency} {Number(p.amount)}{Number(p.refunded_amount || 0) > 0 && <span className="ml-1 text-xs text-red-400">(−{Number(p.refunded_amount).toFixed(2)})</span>}</TableCell>
                   <TableCell>
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${p.status === "paid" ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>{p.status}</span>
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      p.status === "paid" ? "bg-green-500/20 text-green-400"
+                      : p.status === "refunded" ? "bg-red-500/20 text-red-400"
+                      : p.status === "partially_refunded" ? "bg-orange-500/20 text-orange-400"
+                      : "bg-yellow-500/20 text-yellow-400"
+                    }`}>{p.status}</span>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-right">
+                    {p.razorpay_payment_id ? (
+                      <Link to={`/invoice/${p.razorpay_payment_id}`} target="_blank" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                        <FileText className="h-3.5 w-3.5" /> View
+                      </Link>
+                    ) : <span className="text-xs text-muted-foreground">—</span>}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

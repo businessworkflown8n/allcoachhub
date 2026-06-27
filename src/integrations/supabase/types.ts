@@ -7926,15 +7926,18 @@ export type Database = {
           error_code: string | null
           error_description: string | null
           id: string
+          kind: string
           notes: Json | null
           paid_at: string | null
           razorpay_order_id: string
           razorpay_payment_id: string | null
           receipt: string | null
+          service_id: string | null
           signature_verified: boolean
           status: string
           updated_at: string
           user_id: string
+          webinar_id: string | null
         }
         Insert: {
           amount: number
@@ -7946,15 +7949,18 @@ export type Database = {
           error_code?: string | null
           error_description?: string | null
           id?: string
+          kind?: string
           notes?: Json | null
           paid_at?: string | null
           razorpay_order_id: string
           razorpay_payment_id?: string | null
           receipt?: string | null
+          service_id?: string | null
           signature_verified?: boolean
           status?: string
           updated_at?: string
           user_id: string
+          webinar_id?: string | null
         }
         Update: {
           amount?: number
@@ -7966,15 +7972,18 @@ export type Database = {
           error_code?: string | null
           error_description?: string | null
           id?: string
+          kind?: string
           notes?: Json | null
           paid_at?: string | null
           razorpay_order_id?: string
           razorpay_payment_id?: string | null
           receipt?: string | null
+          service_id?: string | null
           signature_verified?: boolean
           status?: string
           updated_at?: string
           user_id?: string
+          webinar_id?: string | null
         }
         Relationships: [
           {

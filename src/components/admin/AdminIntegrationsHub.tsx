@@ -84,7 +84,7 @@ const AdminIntegrationsHub = () => {
   const [accessCoachFilter, setAccessCoachFilter] = useState<string>("");
 
   const fetchConnections = async () => {
-    let query = supabase.from("ad_platform_connections").select("*").order("created_at", { ascending: false });
+    let query = supabase.from("ad_platform_connections").select("id, coach_id, platform, status, last_sync_at, error_log, account_id, account_name, currency, timezone, sync_frequency, token_expires_at, needs_reconnect, sync_data_scope, created_at, updated_at").order("created_at", { ascending: false });
     if (selectedCoachId !== "all") query = query.eq("coach_id", selectedCoachId);
     const { data } = await query;
     if (data) setConnections(data as unknown as Connection[]);

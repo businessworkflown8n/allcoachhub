@@ -40,14 +40,11 @@ const CoachWhatsApp = () => {
       return;
     }
     (async () => {
-      const { data } = await supabase
-        .from("whatsapp_credentials")
-        .select("login_url, user_id, password")
-        .eq("coach_id", user.id)
-        .maybeSingle();
+      const { data } = await (supabase as any).rpc("get_whatsapp_credentials", { _coach_id: user.id });
+      const row = Array.isArray(data) ? data[0] : null;
       setCreds(
-        data
-          ? { login_url: data.login_url || DEFAULT_LOGIN_URL, user_id: data.user_id, password: data.password }
+        row
+          ? { login_url: row.login_url || DEFAULT_LOGIN_URL, user_id: row.user_id, password: row.password }
           : { login_url: DEFAULT_LOGIN_URL, user_id: null, password: null }
       );
       setCredsLoading(false);

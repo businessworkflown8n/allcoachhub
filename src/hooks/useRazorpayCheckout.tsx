@@ -58,20 +58,36 @@ export function useRazorpayCheckout() {
       }
 
       const kind = args.kind ?? (args.webinarId ? "webinar" : "course");
-      const { data, error } = await supabase.functions.invoke("razorpay-create-order", {
-        body: {
-          kind,
-          course_id: args.courseId,
-          webinar_id: args.webinarId,
-          currency: args.currency ?? "INR",
-          enrollment_data: args.enrollmentData,
-          registration_data: args.registrationData,
-        },
-      });
+      let data: any = null;
+      let error: any = null;
+      try {
+        const res = await supabase.functions.invoke("razorpay-create-order", {
+          body: {
+            kind,
+            course_id: args.courseId,
+            webinar_id: args.webinarId,
+            currency: args.currency ?? "INR",
+            enrollment_data: args.enrollmentData,
+            registration_data: args.registrationData,
+          },
+        });
+        data = res.data;
+        error = res.error;
+      } catch (e: any) {
+        error = e;
+      }
       if (error || !data?.success) {
-        toast({ title: "Could not start payment", description: error?.message || data?.error || "Try again.", variant: "destructive" });
+        const msg =
+          (error as any)?.context?.error ||
+          (error as any)?.message ||
+          data?.error ||
+          "Could not reach the payment service. Please try again in a moment.";
+        console.error("[razorpay-create-order] failed", { error, data });
+        toast({ title: "Could not start payment", description: String(msg), variant: "destructive" });
+        setLoading(false);
         return;
       }
+
 
       const options = {
         key: data.key_id,

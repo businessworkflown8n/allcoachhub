@@ -4807,8 +4807,6 @@ export type Database = {
           payment_locked: boolean
           payment_status: string
           progress_percent: number | null
-          razorpay_order_id: string | null
-          razorpay_payment_id: string | null
           whatsapp_number: string
         }
         Insert: {
@@ -4838,8 +4836,6 @@ export type Database = {
           payment_locked?: boolean
           payment_status?: string
           progress_percent?: number | null
-          razorpay_order_id?: string | null
-          razorpay_payment_id?: string | null
           whatsapp_number: string
         }
         Update: {
@@ -4869,8 +4865,6 @@ export type Database = {
           payment_locked?: boolean
           payment_status?: string
           progress_percent?: number | null
-          razorpay_order_id?: string | null
-          razorpay_payment_id?: string | null
           whatsapp_number?: string
         }
         Relationships: [

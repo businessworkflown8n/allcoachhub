@@ -83,6 +83,7 @@ const navItems = [
   { label: "Webinar Analytics", path: "/admin/webinar-analytics", icon: <BarChart3 className="h-4 w-4" /> },
   { label: "Enrollments", path: "/admin/enrollments", icon: <ClipboardList className="h-4 w-4" /> },
   { label: "Payments", path: "/admin/payments", icon: <CreditCard className="h-4 w-4" /> },
+  { label: "Payment Methods", path: "/admin/payment-methods", icon: <CreditCard className="h-4 w-4" /> },
   { label: "Coach Performance", path: "/admin/performance", icon: <TrendingUp className="h-4 w-4" /> },
   { label: "Revenue", path: "/admin/revenue", icon: <DollarSign className="h-4 w-4" /> },
   { label: "Reviews", path: "/admin/reviews", icon: <Star className="h-4 w-4" /> },

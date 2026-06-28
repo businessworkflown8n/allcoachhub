@@ -3640,6 +3640,8 @@ export type Database = {
           original_price_inr: number | null
           original_price_usd: number | null
           parent_involvement: string | null
+          payment_link_url: string | null
+          payment_method: string | null
           prerequisites: string | null
           price_inr: number
           price_usd: number
@@ -3687,6 +3689,8 @@ export type Database = {
           original_price_inr?: number | null
           original_price_usd?: number | null
           parent_involvement?: string | null
+          payment_link_url?: string | null
+          payment_method?: string | null
           prerequisites?: string | null
           price_inr?: number
           price_usd?: number
@@ -3734,6 +3738,8 @@ export type Database = {
           original_price_inr?: number | null
           original_price_usd?: number | null
           parent_involvement?: string | null
+          payment_link_url?: string | null
+          payment_method?: string | null
           prerequisites?: string | null
           price_inr?: number
           price_usd?: number
@@ -9098,6 +9104,8 @@ export type Database = {
           learning_outcomes: string | null
           max_attendees: number | null
           meeting_type: string
+          payment_link_url: string | null
+          payment_method: string | null
           price_inr: number
           price_usd: number
           recurring_pattern: string | null
@@ -9138,6 +9146,8 @@ export type Database = {
           learning_outcomes?: string | null
           max_attendees?: number | null
           meeting_type?: string
+          payment_link_url?: string | null
+          payment_method?: string | null
           price_inr?: number
           price_usd?: number
           recurring_pattern?: string | null
@@ -9178,6 +9188,8 @@ export type Database = {
           learning_outcomes?: string | null
           max_attendees?: number | null
           meeting_type?: string
+          payment_link_url?: string | null
+          payment_method?: string | null
           price_inr?: number
           price_usd?: number
           recurring_pattern?: string | null

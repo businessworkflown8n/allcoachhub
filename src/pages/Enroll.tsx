@@ -180,9 +180,8 @@ const Enroll = () => {
         course_id: course.id,
         coach_id: course.coach_id,
         payment_status: "pending",
-        enrollment_status: "pending_payment",
         ...enrollmentData,
-      });
+      } as any);
       if (error) {
         setSubmitting(false);
         toast({

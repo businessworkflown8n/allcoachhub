@@ -157,6 +157,7 @@ const AdminDashboard = () => {
         <Route path="webinar-analytics" element={<AdminWebinarAnalytics />} />
         <Route path="enrollments" element={<AdminEnrollments />} />
         <Route path="payments" element={<AdminPayments />} />
+        <Route path="payment-methods" element={<AdminPaymentMethods />} />
         <Route path="performance" element={<AdminCoachPerformance />} />
         <Route path="revenue" element={<AdminRevenue />} />
         <Route path="reviews" element={<AdminReviews />} />

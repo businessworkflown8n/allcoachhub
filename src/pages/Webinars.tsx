@@ -101,12 +101,55 @@ const Webinars = () => {
     const email = profile?.email || user.email || "";
     const phone = profile?.contact_number || "";
 
-    // Paid webinar → open Razorpay checkout
+    // Paid webinar → resolve configured payment method (admin-managed)
     const priceInr = Number(webinar.price_inr ?? 0);
     const priceUsd = Number(webinar.price_usd ?? 0);
     const isPaid = webinar.is_paid && (priceInr > 0 || priceUsd > 0);
+    const method = ((webinar as any).payment_method as string | null) || (isPaid ? "razorpay_api" : "free");
+    const linkUrl = ((webinar as any).payment_link_url as string | null) || "";
+
+    // Payment Link / External URL → save pending registration, then redirect
+    if (isPaid && (method === "payment_link" || method === "external") && linkUrl) {
+      const { error } = await supabase.from("webinar_registrations").insert({
+        webinar_id: webinar.id,
+        learner_id: user.id,
+        registrant_name: fullName,
+        registrant_email: email,
+        registrant_phone: phone,
+        payment_status: "pending",
+      } as any);
+      if (error) {
+        setRegistering(null);
+        toast({ title: "Could not save registration", description: error.message, variant: "destructive" });
+        return;
+      }
+      toast({ title: "Redirecting to payment...", description: "Complete payment to confirm your seat." });
+      setTimeout(() => { window.location.href = linkUrl; }, 400);
+      return;
+    }
+
+    // Manual / Offline → just record pending and notify
+    if (isPaid && method === "manual") {
+      const { error } = await supabase.from("webinar_registrations").insert({
+        webinar_id: webinar.id,
+        learner_id: user.id,
+        registrant_name: fullName,
+        registrant_email: email,
+        registrant_phone: phone,
+        payment_status: "pending",
+      } as any);
+      setRegistering(null);
+      if (error) {
+        toast({ title: "Could not register", description: error.message, variant: "destructive" });
+        return;
+      }
+      toast({ title: "Registration received", description: "Our team will contact you to confirm payment." });
+      setRegisteredIds(new Set([...registeredIds, webinar.id]));
+      return;
+    }
 
     if (isPaid) {
+      // Default: Razorpay in-app checkout
       await openCheckout({
         webinarId: webinar.id,
         kind: "webinar",
@@ -128,6 +171,7 @@ const Webinars = () => {
       });
       return;
     }
+
 
     // Free webinar — original flow
     const { error } = await supabase.from("webinar_registrations").insert({

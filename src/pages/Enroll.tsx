@@ -89,13 +89,40 @@ const Enroll = () => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Per-course payment method override registry.
+  // Scalable: future entries can come from an admin-managed table/column
+  // (e.g. courses.payment_method = 'payment_link' | 'razorpay_api' | 'stripe' | 'free'
+  // and courses.payment_link_url). Until that column exists we resolve here.
+  const resolvePaymentMethod = (c: any): { method: "payment_link" | "razorpay_api" | "free"; url?: string } => {
+    const priceInr = Number(c?.price_inr ?? 0);
+    const priceUsd = Number(c?.price_usd ?? 0);
+    const isFree = priceInr <= 0 && priceUsd <= 0;
+
+    // 1. Prefer explicit course columns when present
+    if (c?.payment_method === "payment_link" && c?.payment_link_url) {
+      return { method: "payment_link", url: c.payment_link_url };
+    }
+    if (c?.payment_link_url && !c?.payment_method) {
+      return { method: "payment_link", url: c.payment_link_url };
+    }
+
+    // 2. Hardcoded overrides (interim, until admin UI ships)
+    const COURSE_PAYMENT_LINKS: Record<string, string> = {
+      "ai automation for beginners": "https://razorpay.com/payment-link/plink_T78Ltjk1BuOkJE",
+    };
+    const titleKey = String(c?.title ?? "").trim().toLowerCase();
+    if (COURSE_PAYMENT_LINKS[titleKey]) {
+      return { method: "payment_link", url: COURSE_PAYMENT_LINKS[titleKey] };
+    }
+
+    if (isFree) return { method: "free" };
+    return { method: "razorpay_api" };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !course) return;
-
-    const priceInr = Number(course.price_inr ?? 0);
-    const priceUsd = Number(course.price_usd ?? 0);
-    const isFree = priceInr <= 0 && priceUsd <= 0;
+    if (submitting) return; // prevent duplicate clicks
 
     // Persist profile fields up-front (non-blocking on errors)
     await supabase.from("profiles").update({
@@ -125,7 +152,9 @@ const Enroll = () => {
       learning_objective: form.learning_objective,
     };
 
-    if (isFree) {
+    const pay = resolvePaymentMethod(course);
+
+    if (pay.method === "free") {
       setSubmitting(true);
       const { error } = await supabase.from("enrollments").insert({
         learner_id: user.id,
@@ -144,7 +173,33 @@ const Enroll = () => {
       return;
     }
 
-    // Paid course: open Razorpay
+    if (pay.method === "payment_link" && pay.url) {
+      setSubmitting(true);
+      const { error } = await supabase.from("enrollments").insert({
+        learner_id: user.id,
+        course_id: course.id,
+        coach_id: course.coach_id,
+        payment_status: "pending",
+        ...enrollmentData,
+      } as any);
+      if (error) {
+        setSubmitting(false);
+        toast({
+          title: "Could not save enrollment",
+          description: error.message || "Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({ title: "Redirecting to payment...", description: "Please complete payment in the new tab." });
+      // brief delay so the toast renders before navigation
+      setTimeout(() => {
+        window.location.href = pay.url as string;
+      }, 400);
+      return;
+    }
+
+    // Default: Razorpay API checkout
     setSubmitting(true);
     await openCheckout({
       courseId: course.id,

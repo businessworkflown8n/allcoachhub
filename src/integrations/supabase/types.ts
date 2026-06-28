@@ -10278,6 +10278,7 @@ export type Database = {
       }
     }
     Functions: {
+      admin_get_puzzle_solution: { Args: { _puzzle_id: string }; Returns: Json }
       approve_notification_request: {
         Args: { _request_id: string; _reviewer_note?: string }
         Returns: Json
@@ -10332,6 +10333,7 @@ export type Database = {
         Args: { _coach_id: string; _feature_key: string; _plan?: string }
         Returns: Json
       }
+      get_owner_webinar_link: { Args: { _webinar_id: string }; Returns: string }
       get_quiz_questions_for_learner: {
         Args: { _quiz_id: string }
         Returns: {

@@ -62,6 +62,7 @@ import AdminLMSOverview from "@/components/admin/AdminLMSOverview";
 import AdminCourseCategories from "@/components/admin/AdminCourseCategories";
 import AdminAIKidsEnrollments from "@/components/admin/AdminAIKidsEnrollments";
 import AdminCertificateSettings from "@/components/admin/AdminCertificateSettings";
+import AdminPaymentMethods from "@/components/admin/AdminPaymentMethods";
 
 
 const navItems = [
@@ -82,6 +83,7 @@ const navItems = [
   { label: "Webinar Analytics", path: "/admin/webinar-analytics", icon: <BarChart3 className="h-4 w-4" /> },
   { label: "Enrollments", path: "/admin/enrollments", icon: <ClipboardList className="h-4 w-4" /> },
   { label: "Payments", path: "/admin/payments", icon: <CreditCard className="h-4 w-4" /> },
+  { label: "Payment Methods", path: "/admin/payment-methods", icon: <CreditCard className="h-4 w-4" /> },
   { label: "Coach Performance", path: "/admin/performance", icon: <TrendingUp className="h-4 w-4" /> },
   { label: "Revenue", path: "/admin/revenue", icon: <DollarSign className="h-4 w-4" /> },
   { label: "Reviews", path: "/admin/reviews", icon: <Star className="h-4 w-4" /> },
@@ -155,6 +157,7 @@ const AdminDashboard = () => {
         <Route path="webinar-analytics" element={<AdminWebinarAnalytics />} />
         <Route path="enrollments" element={<AdminEnrollments />} />
         <Route path="payments" element={<AdminPayments />} />
+        <Route path="payment-methods" element={<AdminPaymentMethods />} />
         <Route path="performance" element={<AdminCoachPerformance />} />
         <Route path="revenue" element={<AdminRevenue />} />
         <Route path="reviews" element={<AdminReviews />} />

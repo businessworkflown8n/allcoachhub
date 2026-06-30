@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     const keySecret = Deno.env.get('RAZORPAY_KEY_SECRET');
     if (!keyId || !keySecret) return json({ error: 'Payment provider not configured' }, 500);
 
-    const idSlice = (resolvedCourseId ?? resolvedWebinarId ?? 'xxxxxxxx').slice(0, 8);
+    const idSlice = (resolvedCourseId ?? resolvedWebinarId ?? resolvedPlanId ?? 'xxxxxxxx').slice(0, 8);
     const receipt = `${receiptPrefix}_${idSlice}_${Date.now().toString(36)}`.slice(0, 40);
     const authStr = btoa(`${keyId}:${keySecret}`);
 
@@ -119,8 +119,11 @@ Deno.serve(async (req) => {
       amount: priceMajor,
       currency,
       status: 'created',
-      notes: { title, kind },
-      enrollment_data: kind === 'course' ? (enrollment_data ?? null) : (registration_data ?? null),
+      notes: { title, kind, plan_id: resolvedPlanId, billing_interval: billingInterval },
+      enrollment_data:
+        kind === 'course' ? (enrollment_data ?? null)
+        : kind === 'webinar' ? (registration_data ?? null)
+        : { plan_id: resolvedPlanId, billing_interval: billingInterval },
     });
 
     return json({
@@ -132,6 +135,7 @@ Deno.serve(async (req) => {
       kind,
       course_title: kind === 'course' ? title : undefined,
       webinar_title: kind === 'webinar' ? title : undefined,
+      plan_title: kind === 'subscription' ? title : undefined,
       prefill: { email: userEmail },
     });
   } catch (e) {

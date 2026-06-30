@@ -99,7 +99,7 @@ export function useRazorpayCheckout() {
         amount: data.amount,
         currency: data.currency,
         name: "AI Coach Portal",
-        description: data.course_title || data.webinar_title || (kind === "webinar" ? "Webinar registration" : "Course enrollment"),
+        description: data.course_title || data.webinar_title || data.plan_title || (kind === "webinar" ? "Webinar registration" : kind === "subscription" ? "Subscription" : "Course enrollment"),
         order_id: data.order_id,
         prefill: { ...(data.prefill || {}), ...(args.prefill || {}) },
         theme: { color: "#84cc16" },

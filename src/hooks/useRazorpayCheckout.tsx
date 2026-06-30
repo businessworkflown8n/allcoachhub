@@ -34,7 +34,10 @@ export interface OpenCheckoutArgs {
   courseId?: string;
   /** webinar_id (when kind = 'webinar') */
   webinarId?: string;
-  kind?: "course" | "webinar";
+  /** plan_id (when kind = 'subscription') */
+  planId?: string;
+  billingInterval?: "monthly" | "yearly";
+  kind?: "course" | "webinar" | "subscription";
   currency?: "INR" | "USD";
   /** enrollment fields for courses */
   enrollmentData?: Record<string, unknown>;
@@ -57,7 +60,7 @@ export function useRazorpayCheckout() {
         return;
       }
 
-      const kind = args.kind ?? (args.webinarId ? "webinar" : "course");
+      const kind = args.kind ?? (args.planId ? "subscription" : args.webinarId ? "webinar" : "course");
       let data: any = null;
       let error: any = null;
       try {
@@ -66,6 +69,8 @@ export function useRazorpayCheckout() {
             kind,
             course_id: args.courseId,
             webinar_id: args.webinarId,
+            plan_id: args.planId,
+            billing_interval: args.billingInterval ?? "monthly",
             currency: args.currency ?? "INR",
             enrollment_data: args.enrollmentData,
             registration_data: args.registrationData,

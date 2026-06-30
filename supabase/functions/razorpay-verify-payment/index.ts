@@ -186,6 +186,34 @@ Deno.serve(async (req) => {
         payment_id: razorpay_payment_id,
         payment_status: 'paid',
       });
+    } else if (kind === 'subscription') {
+      const enrData = (orderRow.enrollment_data ?? {}) as Record<string, unknown>;
+      const planId = String(enrData.plan_id ?? '');
+      const billingInterval = String(enrData.billing_interval ?? 'monthly');
+
+      const { data: plan } = await admin
+        .from('subscription_plans').select('name').eq('id', planId).maybeSingle();
+      itemTitle = plan?.name ? `${plan.name} (${billingInterval})` : 'Subscription';
+
+      const { data: prof } = await admin
+        .from('profiles').select('full_name, email, contact_number').eq('id', userId).maybeSingle();
+      learnerEmail = prof?.email ?? '';
+      learnerName = prof?.full_name ?? '';
+      learnerPhone = prof?.contact_number ?? '';
+
+      const { error: actErr } = await admin.rpc('activate_subscription', {
+        p_user_id: userId,
+        p_plan_id: planId,
+        p_billing_interval: billingInterval,
+        p_razorpay_payment_id: razorpay_payment_id,
+        p_razorpay_order_id: razorpay_order_id,
+        p_amount: orderRow.amount,
+        p_currency: orderRow.currency,
+      });
+      if (actErr) {
+        console.error('activate_subscription error', actErr);
+        return new Response(JSON.stringify({ error: 'Subscription activation failed', details: actErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
     }
 
     await admin.from('payments').insert({

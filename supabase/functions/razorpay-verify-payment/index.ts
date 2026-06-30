@@ -202,13 +202,13 @@ Deno.serve(async (req) => {
       learnerPhone = prof?.contact_number ?? '';
 
       const { error: actErr } = await admin.rpc('activate_subscription', {
-        p_user_id: userId,
-        p_plan_id: planId,
-        p_billing_interval: billingInterval,
-        p_razorpay_payment_id: razorpay_payment_id,
-        p_razorpay_order_id: razorpay_order_id,
-        p_amount: orderRow.amount,
-        p_currency: orderRow.currency,
+        _coach_id: userId,
+        _plan_id: planId,
+        _billing_interval: billingInterval,
+        _amount: orderRow.amount,
+        _currency: orderRow.currency,
+        _razorpay_order_id: razorpay_order_id,
+        _razorpay_payment_id: razorpay_payment_id,
       });
       if (actErr) {
         console.error('activate_subscription error', actErr);

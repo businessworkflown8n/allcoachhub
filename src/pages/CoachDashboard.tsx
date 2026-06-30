@@ -43,7 +43,7 @@ import { useDigitalProductAccess } from "@/hooks/useDigitalProductAccess";
 import CoachLinkedInPost from "@/components/coach/CoachLinkedInPost";
 import { useFeatureControl } from "@/hooks/useFeatureControl";
 import { useExternalLinkControl } from "@/hooks/useExternalLinkControl";
-// CoachSubscription removed (Stripe deprecated)
+import CoachSubscription from "@/components/coach/CoachSubscription";
 import CoachCurrencySettings from "@/components/coach/CoachCurrencySettings";
 import CoachAIKidsLeads from "@/components/coach/CoachAIKidsLeads";
 import CoachCertificates from "@/components/coach/CoachCertificates";
@@ -157,7 +157,7 @@ const CoachDashboard = () => {
         <Route path="linkedin-post" element={linkedinEnabled ? <CoachLinkedInPost /> : <Navigate to="overview" replace />} />
         <Route path="digital-products/*" element={<CoachDigitalProducts />} />
         <Route path="overview" element={<CoachOverview />} />
-        {/* subscription route removed (Stripe deprecated) */}
+        <Route path="subscription" element={<CoachSubscription />} />
         <Route path="currency" element={<CoachCurrencySettings />} />
         <Route path="*" element={<Navigate to="overview" replace />} />
 

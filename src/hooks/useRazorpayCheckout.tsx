@@ -34,7 +34,10 @@ export interface OpenCheckoutArgs {
   courseId?: string;
   /** webinar_id (when kind = 'webinar') */
   webinarId?: string;
-  kind?: "course" | "webinar";
+  /** plan_id (when kind = 'subscription') */
+  planId?: string;
+  billingInterval?: "monthly" | "yearly";
+  kind?: "course" | "webinar" | "subscription";
   currency?: "INR" | "USD";
   /** enrollment fields for courses */
   enrollmentData?: Record<string, unknown>;
@@ -57,7 +60,7 @@ export function useRazorpayCheckout() {
         return;
       }
 
-      const kind = args.kind ?? (args.webinarId ? "webinar" : "course");
+      const kind = args.kind ?? (args.planId ? "subscription" : args.webinarId ? "webinar" : "course");
       let data: any = null;
       let error: any = null;
       try {
@@ -66,6 +69,8 @@ export function useRazorpayCheckout() {
             kind,
             course_id: args.courseId,
             webinar_id: args.webinarId,
+            plan_id: args.planId,
+            billing_interval: args.billingInterval ?? "monthly",
             currency: args.currency ?? "INR",
             enrollment_data: args.enrollmentData,
             registration_data: args.registrationData,
@@ -94,7 +99,7 @@ export function useRazorpayCheckout() {
         amount: data.amount,
         currency: data.currency,
         name: "AI Coach Portal",
-        description: data.course_title || data.webinar_title || (kind === "webinar" ? "Webinar registration" : "Course enrollment"),
+        description: data.course_title || data.webinar_title || data.plan_title || (kind === "webinar" ? "Webinar registration" : kind === "subscription" ? "Subscription" : "Course enrollment"),
         order_id: data.order_id,
         prefill: { ...(data.prefill || {}), ...(args.prefill || {}) },
         theme: { color: "#84cc16" },
@@ -111,7 +116,7 @@ export function useRazorpayCheckout() {
               toast({ title: "Payment verification failed", description: vErr?.message || vData?.error || "Contact support if your card was charged.", variant: "destructive" });
               return;
             }
-            toast({ title: "Payment successful", description: kind === "webinar" ? "You are now registered for the webinar." : "You are now enrolled in the course." });
+            toast({ title: "Payment successful", description: kind === "subscription" ? "Your subscription is now active." : kind === "webinar" ? "You are now registered for the webinar." : "You are now enrolled in the course." });
             args.onSuccess?.({
               enrollmentId: vData.enrollment_id,
               webinarRegistrationId: vData.webinar_registration_id,

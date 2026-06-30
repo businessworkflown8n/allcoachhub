@@ -30,13 +30,15 @@ Deno.serve(async (req) => {
       kind: rawKind,
       course_id,
       webinar_id,
+      plan_id,
+      billing_interval: rawInterval,
       currency: requestedCurrency,
       enrollment_data,
       registration_data,
     } = body ?? {};
 
-    const kind = rawKind ?? (webinar_id ? 'webinar' : 'course');
-    if (!['course', 'webinar'].includes(kind)) return json({ error: 'Unsupported kind' }, 400);
+    const kind = rawKind ?? (webinar_id ? 'webinar' : plan_id ? 'subscription' : 'course');
+    if (!['course', 'webinar', 'subscription'].includes(kind)) return json({ error: 'Unsupported kind' }, 400);
 
     const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
@@ -45,6 +47,8 @@ Deno.serve(async (req) => {
     let receiptPrefix = '';
     let resolvedCourseId: string | null = null;
     let resolvedWebinarId: string | null = null;
+    let resolvedPlanId: string | null = null;
+    const billingInterval: 'monthly' | 'yearly' = (rawInterval === 'yearly' ? 'yearly' : 'monthly');
     const notes: Record<string, unknown> = { kind, user_id: userId };
 
     if (kind === 'course') {
@@ -55,7 +59,7 @@ Deno.serve(async (req) => {
       if (error || !c) return json({ error: 'Course not found' }, 404);
       coachId = c.coach_id; priceInr = Number(c.price_inr ?? 0); priceUsd = Number(c.price_usd ?? 0); title = c.title ?? '';
       resolvedCourseId = c.id; receiptPrefix = 'c'; notes.course_id = c.id; notes.course_title = c.title;
-    } else {
+    } else if (kind === 'webinar') {
       if (!webinar_id) return json({ error: 'webinar_id required' }, 400);
       const { data: w, error } = await admin
         .from('webinars').select('id, title, coach_id, price_inr, price_usd, is_paid, is_published')
@@ -64,6 +68,20 @@ Deno.serve(async (req) => {
       if (!w.is_paid) return json({ error: 'Webinar is free — no payment required' }, 400);
       coachId = w.coach_id; priceInr = Number(w.price_inr ?? 0); priceUsd = Number(w.price_usd ?? 0); title = w.title ?? '';
       resolvedWebinarId = w.id; receiptPrefix = 'w'; notes.webinar_id = w.id; notes.webinar_title = w.title;
+    } else {
+      if (!plan_id) return json({ error: 'plan_id required' }, 400);
+      const { data: p, error } = await admin
+        .from('subscription_plans')
+        .select('id, name, slug, price, yearly_price, currency, is_active')
+        .eq('id', plan_id).maybeSingle();
+      if (error || !p) return json({ error: 'Plan not found' }, 404);
+      if (!p.is_active) return json({ error: 'Plan is not active' }, 400);
+      const amt = billingInterval === 'yearly' ? Number(p.yearly_price ?? 0) : Number(p.price ?? 0);
+      if (!amt || amt <= 0) return json({ error: 'Plan price not configured for this interval' }, 400);
+      priceInr = amt; priceUsd = 0; title = `${p.name} (${billingInterval})`;
+      resolvedPlanId = p.id; coachId = userId;
+      receiptPrefix = 's';
+      notes.plan_id = p.id; notes.plan_slug = p.slug; notes.billing_interval = billingInterval;
     }
 
     const currency = (requestedCurrency === 'USD' ? 'USD' : 'INR') as 'INR' | 'USD';
@@ -75,7 +93,7 @@ Deno.serve(async (req) => {
     const keySecret = Deno.env.get('RAZORPAY_KEY_SECRET');
     if (!keyId || !keySecret) return json({ error: 'Payment provider not configured' }, 500);
 
-    const idSlice = (resolvedCourseId ?? resolvedWebinarId ?? 'xxxxxxxx').slice(0, 8);
+    const idSlice = (resolvedCourseId ?? resolvedWebinarId ?? resolvedPlanId ?? 'xxxxxxxx').slice(0, 8);
     const receipt = `${receiptPrefix}_${idSlice}_${Date.now().toString(36)}`.slice(0, 40);
     const authStr = btoa(`${keyId}:${keySecret}`);
 
@@ -101,8 +119,11 @@ Deno.serve(async (req) => {
       amount: priceMajor,
       currency,
       status: 'created',
-      notes: { title, kind },
-      enrollment_data: kind === 'course' ? (enrollment_data ?? null) : (registration_data ?? null),
+      notes: { title, kind, plan_id: resolvedPlanId, billing_interval: billingInterval },
+      enrollment_data:
+        kind === 'course' ? (enrollment_data ?? null)
+        : kind === 'webinar' ? (registration_data ?? null)
+        : { plan_id: resolvedPlanId, billing_interval: billingInterval },
     });
 
     return json({
@@ -114,6 +135,7 @@ Deno.serve(async (req) => {
       kind,
       course_title: kind === 'course' ? title : undefined,
       webinar_title: kind === 'webinar' ? title : undefined,
+      plan_title: kind === 'subscription' ? title : undefined,
       prefill: { email: userEmail },
     });
   } catch (e) {

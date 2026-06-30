@@ -116,7 +116,7 @@ export function useRazorpayCheckout() {
               toast({ title: "Payment verification failed", description: vErr?.message || vData?.error || "Contact support if your card was charged.", variant: "destructive" });
               return;
             }
-            toast({ title: "Payment successful", description: kind === "webinar" ? "You are now registered for the webinar." : "You are now enrolled in the course." });
+            toast({ title: "Payment successful", description: kind === "subscription" ? "Your subscription is now active." : kind === "webinar" ? "You are now registered for the webinar." : "You are now enrolled in the course." });
             args.onSuccess?.({
               enrollmentId: vData.enrollment_id,
               webinarRegistrationId: vData.webinar_registration_id,

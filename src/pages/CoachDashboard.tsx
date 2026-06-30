@@ -43,7 +43,7 @@ import { useDigitalProductAccess } from "@/hooks/useDigitalProductAccess";
 import CoachLinkedInPost from "@/components/coach/CoachLinkedInPost";
 import { useFeatureControl } from "@/hooks/useFeatureControl";
 import { useExternalLinkControl } from "@/hooks/useExternalLinkControl";
-// CoachSubscription removed (Stripe deprecated)
+import CoachSubscription from "@/components/coach/CoachSubscription";
 import CoachCurrencySettings from "@/components/coach/CoachCurrencySettings";
 import CoachAIKidsLeads from "@/components/coach/CoachAIKidsLeads";
 import CoachCertificates from "@/components/coach/CoachCertificates";

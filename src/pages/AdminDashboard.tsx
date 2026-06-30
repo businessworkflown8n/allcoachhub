@@ -186,7 +186,7 @@ const AdminDashboard = () => {
         <Route path="digital-products" element={<AdminDigitalProductsControl />} />
         <Route path="plans" element={<AdminPlans />} />
         <Route path="bundles" element={<AdminBundles />} />
-        {/* subscriptions route removed (Stripe deprecated) */}
+        <Route path="subscriptions" element={<AdminSubscriptions />} />
         <Route path="feature-requests" element={<AdminFeatureRequests />} />
         <Route path="landing-pages" element={<AdminLandingPages />} />
         <Route path="course-thumbnails" element={<AdminCourseThumbnails />} />

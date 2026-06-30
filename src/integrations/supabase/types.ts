@@ -2300,39 +2300,57 @@ export type Database = {
       coach_subscriptions: {
         Row: {
           assigned_by: string | null
+          auto_renewal: boolean
+          billing_interval: string
           bundle_id: string | null
+          cancelled_at: string | null
           coach_id: string
           created_at: string
           ends_at: string | null
+          grace_until: string | null
           id: string
+          last_payment_id: string | null
           notes: string | null
           plan_id: string | null
+          razorpay_subscription_id: string | null
           starts_at: string
           status: string
           updated_at: string
         }
         Insert: {
           assigned_by?: string | null
+          auto_renewal?: boolean
+          billing_interval?: string
           bundle_id?: string | null
+          cancelled_at?: string | null
           coach_id: string
           created_at?: string
           ends_at?: string | null
+          grace_until?: string | null
           id?: string
+          last_payment_id?: string | null
           notes?: string | null
           plan_id?: string | null
+          razorpay_subscription_id?: string | null
           starts_at?: string
           status?: string
           updated_at?: string
         }
         Update: {
           assigned_by?: string | null
+          auto_renewal?: boolean
+          billing_interval?: string
           bundle_id?: string | null
+          cancelled_at?: string | null
           coach_id?: string
           created_at?: string
           ends_at?: string | null
+          grace_until?: string | null
           id?: string
+          last_payment_id?: string | null
           notes?: string | null
           plan_id?: string | null
+          razorpay_subscription_id?: string | null
           starts_at?: string
           status?: string
           updated_at?: string
@@ -8746,54 +8764,132 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_history: {
+        Row: {
+          amount: number | null
+          billing_interval: string | null
+          coach_id: string
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          event_type: string
+          from_plan_id: string | null
+          id: string
+          invoice_id: string | null
+          notes: Json | null
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          to_plan_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          billing_interval?: string | null
+          coach_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          event_type: string
+          from_plan_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          notes?: Json | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          to_plan_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          billing_interval?: string | null
+          coach_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          event_type?: string
+          from_plan_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          notes?: Json | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          to_plan_id?: string | null
+        }
+        Relationships: []
+      }
       subscription_plans: {
         Row: {
           billing_interval: string
           created_at: string
           currency: string
           description: string | null
+          feature_summary: Json
           highlight: boolean
           id: string
           is_active: boolean
+          is_recurring: boolean
           name: string
+          payment_link_url: string | null
+          payment_method: string
           price: number
           price_usd: number | null
+          razorpay_plan_id_monthly: string | null
+          razorpay_plan_id_yearly: string | null
           slug: string
           sort_order: number
           stripe_product_slug: string | null
+          tax_percent: number
+          trial_days: number
           updated_at: string
+          yearly_price: number | null
         }
         Insert: {
           billing_interval?: string
           created_at?: string
           currency?: string
           description?: string | null
+          feature_summary?: Json
           highlight?: boolean
           id?: string
           is_active?: boolean
+          is_recurring?: boolean
           name: string
+          payment_link_url?: string | null
+          payment_method?: string
           price?: number
           price_usd?: number | null
+          razorpay_plan_id_monthly?: string | null
+          razorpay_plan_id_yearly?: string | null
           slug: string
           sort_order?: number
           stripe_product_slug?: string | null
+          tax_percent?: number
+          trial_days?: number
           updated_at?: string
+          yearly_price?: number | null
         }
         Update: {
           billing_interval?: string
           created_at?: string
           currency?: string
           description?: string | null
+          feature_summary?: Json
           highlight?: boolean
           id?: string
           is_active?: boolean
+          is_recurring?: boolean
           name?: string
+          payment_link_url?: string | null
+          payment_method?: string
           price?: number
           price_usd?: number | null
+          razorpay_plan_id_monthly?: string | null
+          razorpay_plan_id_yearly?: string | null
           slug?: string
           sort_order?: number
           stripe_product_slug?: string | null
+          tax_percent?: number
+          trial_days?: number
           updated_at?: string
+          yearly_price?: number | null
         }
         Relationships: []
       }
@@ -10284,6 +10380,20 @@ export type Database = {
       }
     }
     Functions: {
+      activate_subscription: {
+        Args: {
+          _amount: number
+          _auto_renewal?: boolean
+          _billing_interval: string
+          _coach_id: string
+          _currency: string
+          _plan_id: string
+          _razorpay_order_id: string
+          _razorpay_payment_id: string
+          _razorpay_subscription_id?: string
+        }
+        Returns: Json
+      }
       admin_get_puzzle_solution: { Args: { _puzzle_id: string }; Returns: Json }
       approve_notification_request: {
         Args: { _request_id: string; _reviewer_note?: string }
@@ -10299,6 +10409,7 @@ export type Database = {
         }
         Returns: Json
       }
+      cancel_my_subscription: { Args: never; Returns: Json }
       coach_has_assignments_access: {
         Args: { _coach_id: string }
         Returns: boolean
@@ -10437,6 +10548,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      sweep_expired_subscriptions: { Args: never; Returns: Json }
       update_learner_streak: { Args: { _user_id: string }; Returns: Json }
       user_has_course_access: {
         Args: { _course_id: string; _user_id: string }

@@ -49,6 +49,7 @@ import AdminCourseThumbnails from "@/components/admin/AdminCourseThumbnails";
 import AdminNotificationCenter from "@/components/admin/AdminNotificationCenter";
 import AdminPlans from "@/components/admin/AdminPlans";
 import AdminBundles from "@/components/admin/AdminBundles";
+import AdminSubscriptions from "@/components/admin/AdminSubscriptions";
 // AdminCoachSubscriptions removed (Stripe deprecated)
 import AdminFeatureRequests from "@/components/admin/AdminFeatureRequests";
 import AdminKnowledgeHub from "@/components/admin/AdminKnowledgeHub";

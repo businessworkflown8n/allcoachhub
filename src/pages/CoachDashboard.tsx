@@ -157,7 +157,7 @@ const CoachDashboard = () => {
         <Route path="linkedin-post" element={linkedinEnabled ? <CoachLinkedInPost /> : <Navigate to="overview" replace />} />
         <Route path="digital-products/*" element={<CoachDigitalProducts />} />
         <Route path="overview" element={<CoachOverview />} />
-        {/* subscription route removed (Stripe deprecated) */}
+        <Route path="subscription" element={<CoachSubscription />} />
         <Route path="currency" element={<CoachCurrencySettings />} />
         <Route path="*" element={<Navigate to="overview" replace />} />
 

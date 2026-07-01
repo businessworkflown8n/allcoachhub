@@ -264,7 +264,10 @@ const Enroll = () => {
         <div className="mb-6 rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-primary">{course.category}</p>
           <h2 className="text-lg font-bold text-foreground">{course.title}</h2>
-          <div className="mt-2"><PriceDisplay priceInr={course.price_inr} priceUsd={course.price_usd} originalPriceInr={course.original_price_inr} originalPriceUsd={course.original_price_usd} size="lg" /></div>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-2xl font-bold text-primary">{displayPrice}</span>
+            <span className="text-xs text-muted-foreground">Billed in {currency}</span>
+          </div>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-6">

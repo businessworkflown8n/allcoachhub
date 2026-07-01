@@ -2311,6 +2311,8 @@ export type Database = {
           id: string
           last_payment_id: string | null
           notes: string | null
+          pending_billing_interval: string | null
+          pending_plan_id: string | null
           plan_id: string | null
           razorpay_subscription_id: string | null
           starts_at: string
@@ -2330,6 +2332,8 @@ export type Database = {
           id?: string
           last_payment_id?: string | null
           notes?: string | null
+          pending_billing_interval?: string | null
+          pending_plan_id?: string | null
           plan_id?: string | null
           razorpay_subscription_id?: string | null
           starts_at?: string
@@ -2349,6 +2353,8 @@ export type Database = {
           id?: string
           last_payment_id?: string | null
           notes?: string | null
+          pending_billing_interval?: string | null
+          pending_plan_id?: string | null
           plan_id?: string | null
           razorpay_subscription_id?: string | null
           starts_at?: string
@@ -2361,6 +2367,13 @@ export type Database = {
             columns: ["bundle_id"]
             isOneToOne: false
             referencedRelation: "feature_bundles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_subscriptions_pending_plan_id_fkey"
+            columns: ["pending_plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
             referencedColumns: ["id"]
           },
           {
@@ -8826,6 +8839,7 @@ export type Database = {
           id: string
           is_active: boolean
           is_recurring: boolean
+          monthly_billing_enabled: boolean
           name: string
           payment_link_url: string | null
           payment_method: string
@@ -8839,6 +8853,8 @@ export type Database = {
           tax_percent: number
           trial_days: number
           updated_at: string
+          yearly_billing_enabled: boolean
+          yearly_discount_percent: number
           yearly_price: number | null
         }
         Insert: {
@@ -8851,6 +8867,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_recurring?: boolean
+          monthly_billing_enabled?: boolean
           name: string
           payment_link_url?: string | null
           payment_method?: string
@@ -8864,6 +8881,8 @@ export type Database = {
           tax_percent?: number
           trial_days?: number
           updated_at?: string
+          yearly_billing_enabled?: boolean
+          yearly_discount_percent?: number
           yearly_price?: number | null
         }
         Update: {
@@ -8876,6 +8895,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_recurring?: boolean
+          monthly_billing_enabled?: boolean
           name?: string
           payment_link_url?: string | null
           payment_method?: string
@@ -8889,6 +8909,8 @@ export type Database = {
           tax_percent?: number
           trial_days?: number
           updated_at?: string
+          yearly_billing_enabled?: boolean
+          yearly_discount_percent?: number
           yearly_price?: number | null
         }
         Relationships: []
@@ -10538,6 +10560,10 @@ export type Database = {
       }
       revoke_certificate: {
         Args: { _certificate_id: string; _reason: string }
+        Returns: Json
+      }
+      schedule_plan_change: {
+        Args: { _billing_interval?: string; _plan_id: string }
         Returns: Json
       }
       set_whatsapp_credentials: {

@@ -195,6 +195,10 @@ type PlanRow = {
   slug: string;
   price: number | null;
   yearly_price: number | null;
+  yearly_discount_percent: number | null;
+  monthly_billing_enabled: boolean | null;
+  yearly_billing_enabled: boolean | null;
+  sort_order: number | null;
   currency: string | null;
   billing_interval: string | null;
   payment_method: string | null;
@@ -229,7 +233,7 @@ const SubscriptionPlansTable = () => {
     setLoading(true);
     const sb: any = supabase;
     const { data, error } = await sb.from("subscription_plans")
-      .select("id,name,slug,price,yearly_price,currency,billing_interval,payment_method,payment_link_url,razorpay_plan_id_monthly,razorpay_plan_id_yearly,is_recurring,tax_percent,trial_days,is_active")
+      .select("id,name,slug,price,yearly_price,yearly_discount_percent,monthly_billing_enabled,yearly_billing_enabled,sort_order,currency,billing_interval,payment_method,payment_link_url,razorpay_plan_id_monthly,razorpay_plan_id_yearly,is_recurring,tax_percent,trial_days,is_active")
       .order("sort_order", { ascending: true });
     if (error) toast({ title: "Failed to load plans", description: error.message, variant: "destructive" });
     setRows((data ?? []) as PlanRow[]);
@@ -282,8 +286,52 @@ const SubscriptionPlansTable = () => {
                 <Input type="number" value={val("price") ?? ""} onChange={(ev) => setEdit(row.id, { price: ev.target.value === "" ? null : Number(ev.target.value) })} />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground">Yearly Price</label>
-                <Input type="number" value={val("yearly_price") ?? ""} onChange={(ev) => setEdit(row.id, { yearly_price: ev.target.value === "" ? null : Number(ev.target.value) })} />
+                <label className="text-xs text-muted-foreground">Yearly Discount (%)</label>
+                <Input
+                  type="number"
+                  placeholder="20"
+                  value={val("yearly_discount_percent") ?? 20}
+                  onChange={(ev) => setEdit(row.id, { yearly_discount_percent: ev.target.value === "" ? null : Number(ev.target.value) })}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">
+                  Yearly Price (auto: {(() => {
+                    const m = Number(val("price") ?? 0);
+                    const d = Number(val("yearly_discount_percent") ?? 20);
+                    return m > 0 ? `₹${Math.round(m * 12 * (1 - d / 100)).toLocaleString("en-IN")}` : "—";
+                  })()})
+                </label>
+                <Input
+                  type="number"
+                  placeholder="Leave empty to auto-calculate"
+                  value={val("yearly_price") ?? ""}
+                  onChange={(ev) => setEdit(row.id, { yearly_price: ev.target.value === "" ? null : Number(ev.target.value) })}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Plan Order (upgrade/downgrade)</label>
+                <Input type="number" value={val("sort_order") ?? 0} onChange={(ev) => setEdit(row.id, { sort_order: Number(ev.target.value) })} />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Monthly Billing</label>
+                <Select value={val("monthly_billing_enabled") === false ? "false" : "true"} onValueChange={(v) => setEdit(row.id, { monthly_billing_enabled: v === "true" })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Enabled</SelectItem>
+                    <SelectItem value="false">Disabled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Yearly Billing</label>
+                <Select value={val("yearly_billing_enabled") === false ? "false" : "true"} onValueChange={(v) => setEdit(row.id, { yearly_billing_enabled: v === "true" })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Enabled</SelectItem>
+                    <SelectItem value="false">Disabled</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="text-xs text-muted-foreground">Currency</label>

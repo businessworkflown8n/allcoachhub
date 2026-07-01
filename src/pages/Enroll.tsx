@@ -10,8 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useRazorpayCheckout } from "@/hooks/useRazorpayCheckout";
-import { detectCurrency, priceForCurrency, type SupportedCurrency } from "@/lib/currencyRouter";
-import PriceDisplay from "@/components/shared/PriceDisplay";
+import { detectCurrency, type SupportedCurrency } from "@/lib/currencyRouter";
+
+const isIndia = (country: string) => {
+  const c = (country || "").trim().toLowerCase();
+  return c === "india" || c === "in" || c === "ind" || c === "bharat";
+};
+const formatINR = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;
+const formatUSD = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
 const Enroll = () => {
   useSEO({
@@ -84,6 +90,24 @@ const Enroll = () => {
 
     fetchData();
   }, [user, authLoading, courseId, navigate]);
+
+  // Currency detection: prefer selected country → IP-based fallback.
+  // India = INR, everything else = USD. Never converts prices.
+  useEffect(() => {
+    if (form.country) {
+      setCurrency(isIndia(form.country) ? "INR" : "USD");
+      return;
+    }
+    let cancelled = false;
+    detectCurrency().then((c) => { if (!cancelled) setCurrency(c); });
+    return () => { cancelled = true; };
+  }, [form.country]);
+
+  const priceInr = Number(course?.price_inr ?? 0);
+  const priceUsd = Number(course?.price_usd ?? 0);
+  const displayPrice = currency === "INR"
+    ? (priceInr > 0 ? formatINR(priceInr) : "Free")
+    : (priceUsd > 0 ? formatUSD(priceUsd) : "Free");
 
   const updateField = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -240,7 +264,10 @@ const Enroll = () => {
         <div className="mb-6 rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-primary">{course.category}</p>
           <h2 className="text-lg font-bold text-foreground">{course.title}</h2>
-          <div className="mt-2"><PriceDisplay priceInr={course.price_inr} priceUsd={course.price_usd} originalPriceInr={course.original_price_inr} originalPriceUsd={course.original_price_usd} size="lg" /></div>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-2xl font-bold text-primary">{displayPrice}</span>
+            <span className="text-xs text-muted-foreground">Billed in {currency}</span>
+          </div>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-6">

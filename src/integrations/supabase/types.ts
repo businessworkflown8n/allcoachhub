@@ -10419,6 +10419,7 @@ export type Database = {
         Returns: boolean
       }
       drive_get_effective_access: { Args: { _coach_id: string }; Returns: Json }
+      email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number

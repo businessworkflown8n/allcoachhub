@@ -10,8 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useRazorpayCheckout } from "@/hooks/useRazorpayCheckout";
-import { detectCurrency, priceForCurrency, type SupportedCurrency } from "@/lib/currencyRouter";
-import PriceDisplay from "@/components/shared/PriceDisplay";
+import { detectCurrency, type SupportedCurrency } from "@/lib/currencyRouter";
+
+const isIndia = (country: string) => {
+  const c = (country || "").trim().toLowerCase();
+  return c === "india" || c === "in" || c === "ind" || c === "bharat";
+};
+const formatINR = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;
+const formatUSD = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
 const Enroll = () => {
   useSEO({

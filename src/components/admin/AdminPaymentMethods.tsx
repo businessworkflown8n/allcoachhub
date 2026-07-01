@@ -195,6 +195,10 @@ type PlanRow = {
   slug: string;
   price: number | null;
   yearly_price: number | null;
+  yearly_discount_percent: number | null;
+  monthly_billing_enabled: boolean | null;
+  yearly_billing_enabled: boolean | null;
+  sort_order: number | null;
   currency: string | null;
   billing_interval: string | null;
   payment_method: string | null;

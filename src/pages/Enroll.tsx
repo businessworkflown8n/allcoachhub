@@ -91,6 +91,24 @@ const Enroll = () => {
     fetchData();
   }, [user, authLoading, courseId, navigate]);
 
+  // Currency detection: prefer selected country → IP-based fallback.
+  // India = INR, everything else = USD. Never converts prices.
+  useEffect(() => {
+    if (form.country) {
+      setCurrency(isIndia(form.country) ? "INR" : "USD");
+      return;
+    }
+    let cancelled = false;
+    detectCurrency().then((c) => { if (!cancelled) setCurrency(c); });
+    return () => { cancelled = true; };
+  }, [form.country]);
+
+  const priceInr = Number(course?.price_inr ?? 0);
+  const priceUsd = Number(course?.price_usd ?? 0);
+  const displayPrice = currency === "INR"
+    ? (priceInr > 0 ? formatINR(priceInr) : "Free")
+    : (priceUsd > 0 ? formatUSD(priceUsd) : "Free");
+
   const updateField = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };

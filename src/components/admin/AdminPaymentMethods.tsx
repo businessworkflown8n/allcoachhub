@@ -233,7 +233,7 @@ const SubscriptionPlansTable = () => {
     setLoading(true);
     const sb: any = supabase;
     const { data, error } = await sb.from("subscription_plans")
-      .select("id,name,slug,price,yearly_price,currency,billing_interval,payment_method,payment_link_url,razorpay_plan_id_monthly,razorpay_plan_id_yearly,is_recurring,tax_percent,trial_days,is_active")
+      .select("id,name,slug,price,yearly_price,yearly_discount_percent,monthly_billing_enabled,yearly_billing_enabled,sort_order,currency,billing_interval,payment_method,payment_link_url,razorpay_plan_id_monthly,razorpay_plan_id_yearly,is_recurring,tax_percent,trial_days,is_active")
       .order("sort_order", { ascending: true });
     if (error) toast({ title: "Failed to load plans", description: error.message, variant: "destructive" });
     setRows((data ?? []) as PlanRow[]);

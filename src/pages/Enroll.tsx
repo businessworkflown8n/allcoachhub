@@ -37,6 +37,9 @@ const Enroll = () => {
   const [profile, setProfile] = useState<any>(null);
   const [currency, setCurrency] = useState<SupportedCurrency>("USD");
   const { openCheckout } = useRazorpayCheckout();
+  const [payLaterOpen, setPayLaterOpen] = useState(false);
+  const [payLaterSuccessOpen, setPayLaterSuccessOpen] = useState(false);
+  const [savingPayLater, setSavingPayLater] = useState(false);
 
   const [form, setForm] = useState({
     full_name: "",

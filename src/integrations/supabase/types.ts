@@ -4831,11 +4831,16 @@ export type Database = {
           industry: string
           last_accessed_at: string | null
           last_accessed_lesson_id: string | null
+          late_fee_percentage: number | null
           learner_id: string
           learning_objective: string | null
           linkedin_profile: string | null
+          original_fee: number | null
+          pay_later_fee: number | null
+          pay_later_selected_at: string | null
           payment_id: string | null
           payment_locked: boolean
+          payment_option: string | null
           payment_status: string
           progress_percent: number | null
           whatsapp_number: string
@@ -4860,11 +4865,16 @@ export type Database = {
           industry: string
           last_accessed_at?: string | null
           last_accessed_lesson_id?: string | null
+          late_fee_percentage?: number | null
           learner_id: string
           learning_objective?: string | null
           linkedin_profile?: string | null
+          original_fee?: number | null
+          pay_later_fee?: number | null
+          pay_later_selected_at?: string | null
           payment_id?: string | null
           payment_locked?: boolean
+          payment_option?: string | null
           payment_status?: string
           progress_percent?: number | null
           whatsapp_number: string
@@ -4889,11 +4899,16 @@ export type Database = {
           industry?: string
           last_accessed_at?: string | null
           last_accessed_lesson_id?: string | null
+          late_fee_percentage?: number | null
           learner_id?: string
           learning_objective?: string | null
           linkedin_profile?: string | null
+          original_fee?: number | null
+          pay_later_fee?: number | null
+          pay_later_selected_at?: string | null
           payment_id?: string | null
           payment_locked?: boolean
+          payment_option?: string | null
           payment_status?: string
           progress_percent?: number | null
           whatsapp_number?: string

@@ -107,6 +107,7 @@ const AdminEnrollments = () => {
           <option value="all">All Payments</option>
           <option value="paid">Paid</option>
           <option value="pending">Pending</option>
+          <option value="pay_later">Pay Later</option>
           <option value="failed">Failed</option>
         </select>
         <select value={coachFilter} onChange={e => setCoachFilter(e.target.value)} className="rounded-xl border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground h-10 transition-colors hover:border-border">

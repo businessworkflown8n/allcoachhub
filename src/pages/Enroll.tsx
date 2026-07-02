@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, CheckCircle2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useRazorpayCheckout } from "@/hooks/useRazorpayCheckout";
 import { detectCurrency, type SupportedCurrency } from "@/lib/currencyRouter";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 const isIndia = (country: string) => {
   const c = (country || "").trim().toLowerCase();
@@ -36,6 +37,9 @@ const Enroll = () => {
   const [profile, setProfile] = useState<any>(null);
   const [currency, setCurrency] = useState<SupportedCurrency>("USD");
   const { openCheckout } = useRazorpayCheckout();
+  const [payLaterOpen, setPayLaterOpen] = useState(false);
+  const [payLaterSuccessOpen, setPayLaterSuccessOpen] = useState(false);
+  const [savingPayLater, setSavingPayLater] = useState(false);
 
   const [form, setForm] = useState({
     full_name: "",
@@ -238,6 +242,67 @@ const Enroll = () => {
     });
   };
 
+  const currentFee = currency === "INR" ? priceInr : priceUsd;
+  const payLaterFee = Math.round(currentFee * 1.1);
+  const feeFmt = currency === "INR" ? formatINR : formatUSD;
+
+  const openPayLater = () => {
+    const formEl = document.querySelector("form") as HTMLFormElement | null;
+    if (formEl && !formEl.checkValidity()) {
+      formEl.reportValidity();
+      return;
+    }
+    setPayLaterOpen(true);
+  };
+
+  const confirmPayLater = async () => {
+    if (!user || !course) return;
+    setSavingPayLater(true);
+    await supabase.from("profiles").update({
+      contact_number: form.contact_number,
+      whatsapp_number: form.whatsapp_number,
+      education: form.education_qualification,
+      job_title: form.current_job_title,
+      industry: form.industry,
+      experience_level: form.experience_level,
+      country: form.country,
+      city: form.city,
+      linkedin_profile: form.linkedin_profile,
+    }).eq("user_id", user.id);
+
+    const { error } = await supabase.from("enrollments").insert({
+      learner_id: user.id,
+      course_id: course.id,
+      coach_id: course.coach_id,
+      payment_status: "pay_later",
+      payment_option: "pay_later",
+      original_fee: currentFee,
+      pay_later_fee: payLaterFee,
+      late_fee_percentage: 10,
+      pay_later_selected_at: new Date().toISOString(),
+      currency,
+      full_name: form.full_name,
+      email: form.email,
+      contact_number: form.contact_number,
+      whatsapp_number: form.whatsapp_number,
+      education_qualification: form.education_qualification,
+      current_job_title: form.current_job_title,
+      industry: form.industry,
+      experience_level: form.experience_level,
+      country: form.country,
+      city: form.city,
+      linkedin_profile: form.linkedin_profile,
+      learning_objective: form.learning_objective,
+    } as any);
+    setSavingPayLater(false);
+    if (error) {
+      toast({ title: "Could not save request", description: error.message, variant: "destructive" });
+      return;
+    }
+    setPayLaterOpen(false);
+    setPayLaterSuccessOpen(true);
+  };
+
   if (loading || authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -359,9 +424,89 @@ const Enroll = () => {
               {submitting ? "Processing..." : "Proceed to Payment"}
               {!submitting && <ArrowRight className="h-4 w-4" />}
             </button>
+
+            <button
+              type="button"
+              onClick={openPayLater}
+              disabled={submitting}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border-2 py-3 font-semibold transition-all disabled:opacity-50"
+              style={{ borderColor: "#C6FF00", color: "#C6FF00", backgroundColor: "transparent" }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#C6FF00"; e.currentTarget.style.color = "#000"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#C6FF00"; }}
+            >
+              <Clock className="h-4 w-4" />
+              Pay Later
+            </button>
           </form>
         </div>
       </div>
+
+      {/* Pay Later Confirmation Dialog */}
+      <Dialog open={payLaterOpen} onOpenChange={setPayLaterOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary">
+              <Clock className="h-6 w-6" />
+            </div>
+            <DialogTitle className="text-center">Pay Later</DialogTitle>
+            <DialogDescription className="text-center">
+              You have chosen to pay later. If you complete your payment later, an additional 10% will be added to the current online course fee. Complete your payment now to secure the current price.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 rounded-xl border border-border bg-secondary/40 p-4">
+            <div>
+              <p className="text-xs text-muted-foreground">Current Course Fee</p>
+              <p className="text-xl font-bold text-foreground">{feeFmt(currentFee)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Pay Later Price</p>
+              <p className="text-xl font-bold text-primary">{feeFmt(payLaterFee)}</p>
+            </div>
+          </div>
+          <DialogFooter className="flex-col gap-2 sm:flex-col">
+            <button
+              type="button"
+              onClick={() => { setPayLaterOpen(false); (document.querySelector("form") as HTMLFormElement | null)?.requestSubmit(); }}
+              className="glow-lime w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:brightness-110"
+            >
+              Proceed to Payment Now
+            </button>
+            <button
+              type="button"
+              onClick={confirmPayLater}
+              disabled={savingPayLater}
+              className="w-full rounded-lg border-2 py-2.5 font-semibold disabled:opacity-50"
+              style={{ borderColor: "#C6FF00", color: "#C6FF00" }}
+            >
+              {savingPayLater ? "Saving..." : "Confirm Pay Later"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success Dialog */}
+      <Dialog open={payLaterSuccessOpen} onOpenChange={setPayLaterSuccessOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-green-500/15 text-green-500">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
+            <DialogTitle className="text-center">Thank You!</DialogTitle>
+            <DialogDescription className="text-center">
+              Your Pay Later request has been recorded successfully. When you decide to complete your payment, the course fee will include an additional 10% over today's online price. Our team may also contact you to assist with your enrollment.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => { setPayLaterSuccessOpen(false); navigate("/learner/courses"); }}
+              className="glow-lime w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:brightness-110"
+            >
+              Done
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

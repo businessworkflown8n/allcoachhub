@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, CheckCircle2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useRazorpayCheckout } from "@/hooks/useRazorpayCheckout";
 import { detectCurrency, type SupportedCurrency } from "@/lib/currencyRouter";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 const isIndia = (country: string) => {
   const c = (country || "").trim().toLowerCase();

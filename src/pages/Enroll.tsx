@@ -242,6 +242,67 @@ const Enroll = () => {
     });
   };
 
+  const currentFee = currency === "INR" ? priceInr : priceUsd;
+  const payLaterFee = Math.round(currentFee * 1.1);
+  const feeFmt = currency === "INR" ? formatINR : formatUSD;
+
+  const openPayLater = () => {
+    const formEl = document.querySelector("form") as HTMLFormElement | null;
+    if (formEl && !formEl.checkValidity()) {
+      formEl.reportValidity();
+      return;
+    }
+    setPayLaterOpen(true);
+  };
+
+  const confirmPayLater = async () => {
+    if (!user || !course) return;
+    setSavingPayLater(true);
+    await supabase.from("profiles").update({
+      contact_number: form.contact_number,
+      whatsapp_number: form.whatsapp_number,
+      education: form.education_qualification,
+      job_title: form.current_job_title,
+      industry: form.industry,
+      experience_level: form.experience_level,
+      country: form.country,
+      city: form.city,
+      linkedin_profile: form.linkedin_profile,
+    }).eq("user_id", user.id);
+
+    const { error } = await supabase.from("enrollments").insert({
+      learner_id: user.id,
+      course_id: course.id,
+      coach_id: course.coach_id,
+      payment_status: "pay_later",
+      payment_option: "pay_later",
+      original_fee: currentFee,
+      pay_later_fee: payLaterFee,
+      late_fee_percentage: 10,
+      pay_later_selected_at: new Date().toISOString(),
+      currency,
+      full_name: form.full_name,
+      email: form.email,
+      contact_number: form.contact_number,
+      whatsapp_number: form.whatsapp_number,
+      education_qualification: form.education_qualification,
+      current_job_title: form.current_job_title,
+      industry: form.industry,
+      experience_level: form.experience_level,
+      country: form.country,
+      city: form.city,
+      linkedin_profile: form.linkedin_profile,
+      learning_objective: form.learning_objective,
+    } as any);
+    setSavingPayLater(false);
+    if (error) {
+      toast({ title: "Could not save request", description: error.message, variant: "destructive" });
+      return;
+    }
+    setPayLaterOpen(false);
+    setPayLaterSuccessOpen(true);
+  };
+
   if (loading || authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">

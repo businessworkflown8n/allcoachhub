@@ -507,9 +507,6 @@ const Enroll = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-          </form>
-        </div>
-      </div>
     </div>
   );
 };

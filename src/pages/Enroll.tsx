@@ -424,6 +424,89 @@ const Enroll = () => {
               {submitting ? "Processing..." : "Proceed to Payment"}
               {!submitting && <ArrowRight className="h-4 w-4" />}
             </button>
+
+            <button
+              type="button"
+              onClick={openPayLater}
+              disabled={submitting}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border-2 py-3 font-semibold transition-all disabled:opacity-50"
+              style={{ borderColor: "#C6FF00", color: "#C6FF00", backgroundColor: "transparent" }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#C6FF00"; e.currentTarget.style.color = "#000"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#C6FF00"; }}
+            >
+              <Clock className="h-4 w-4" />
+              Pay Later
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Pay Later Confirmation Dialog */}
+      <Dialog open={payLaterOpen} onOpenChange={setPayLaterOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary">
+              <Clock className="h-6 w-6" />
+            </div>
+            <DialogTitle className="text-center">Pay Later</DialogTitle>
+            <DialogDescription className="text-center">
+              You have chosen to pay later. If you complete your payment later, an additional 10% will be added to the current online course fee. Complete your payment now to secure the current price.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 rounded-xl border border-border bg-secondary/40 p-4">
+            <div>
+              <p className="text-xs text-muted-foreground">Current Course Fee</p>
+              <p className="text-xl font-bold text-foreground">{feeFmt(currentFee)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Pay Later Price</p>
+              <p className="text-xl font-bold text-primary">{feeFmt(payLaterFee)}</p>
+            </div>
+          </div>
+          <DialogFooter className="flex-col gap-2 sm:flex-col">
+            <button
+              type="button"
+              onClick={() => { setPayLaterOpen(false); (document.querySelector("form") as HTMLFormElement | null)?.requestSubmit(); }}
+              className="glow-lime w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:brightness-110"
+            >
+              Proceed to Payment Now
+            </button>
+            <button
+              type="button"
+              onClick={confirmPayLater}
+              disabled={savingPayLater}
+              className="w-full rounded-lg border-2 py-2.5 font-semibold disabled:opacity-50"
+              style={{ borderColor: "#C6FF00", color: "#C6FF00" }}
+            >
+              {savingPayLater ? "Saving..." : "Confirm Pay Later"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success Dialog */}
+      <Dialog open={payLaterSuccessOpen} onOpenChange={setPayLaterSuccessOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-green-500/15 text-green-500">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
+            <DialogTitle className="text-center">Thank You!</DialogTitle>
+            <DialogDescription className="text-center">
+              Your Pay Later request has been recorded successfully. When you decide to complete your payment, the course fee will include an additional 10% over today's online price. Our team may also contact you to assist with your enrollment.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => { setPayLaterSuccessOpen(false); navigate("/learner/courses"); }}
+              className="glow-lime w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:brightness-110"
+            >
+              Done
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
           </form>
         </div>
       </div>

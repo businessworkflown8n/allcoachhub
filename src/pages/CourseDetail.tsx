@@ -20,6 +20,8 @@ const CourseDetail = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [wishlisted, setWishlisted] = useState(false);
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [joinAction, setJoinAction] = useState<"enroll" | "message" | "default">("default");
 
   useSEO({
     title: course ? `${course.title} – AI Course by ${coach?.full_name || 'Expert Coach'}` : "Course Details – AI Coach Portal",

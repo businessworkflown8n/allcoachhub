@@ -33,6 +33,9 @@ const jsonLd = {
 };
 
 const SORTS = [
+  { id: "recommended", label: "Recommended" },
+  { id: "rating", label: "Highest Rated" },
+  { id: "popular", label: "Most Popular" },
   { id: "newest", label: "Newest" },
   { id: "price_asc", label: "Price: Low to High" },
   { id: "price_desc", label: "Price: High to Low" },
@@ -47,8 +50,9 @@ const Courses = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get("category") || "All";
   const activeLevel = searchParams.get("level") || "All";
+  const activeLanguage = searchParams.get("language") || "All";
   const searchQuery = searchParams.get("q") || "";
-  const sort = searchParams.get("sort") || "newest";
+  const sort = searchParams.get("sort") || "recommended";
 
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,6 +87,9 @@ const Courses = () => {
             c.description?.toLowerCase().includes(searchQuery.toLowerCase()),
         )
       : courses;
+    if (activeLanguage !== "All") {
+      list = list.filter((c) => (c.language || "").toLowerCase() === activeLanguage.toLowerCase());
+    }
     if (sort === "price_asc") {
       list = [...list].sort(
         (a, b) => Number(a[priceKey] || 0) - Number(b[priceKey] || 0),
@@ -91,9 +98,27 @@ const Courses = () => {
       list = [...list].sort(
         (a, b) => Number(b[priceKey] || 0) - Number(a[priceKey] || 0),
       );
+    } else if (sort === "rating") {
+      list = [...list].sort((a, b) => Number(b.average_rating || 0) - Number(a.average_rating || 0));
+    } else if (sort === "popular") {
+      list = [...list].sort(
+        (a, b) => Number(b.enrollment_count || b.total_enrollments || 0) - Number(a.enrollment_count || a.total_enrollments || 0),
+      );
+    } else if (sort === "newest") {
+      list = [...list].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
     }
+    // "recommended" keeps default DB order (newest-first with any featured flag)
     return list;
-  }, [courses, searchQuery, sort, priceKey]);
+  }, [courses, searchQuery, sort, priceKey, activeLanguage]);
+
+  // Language options derived from loaded course rows
+  const languageOptions = useMemo(() => {
+    const set = new Set<string>();
+    courses.forEach((c) => c.language && set.add(c.language));
+    return ["All", ...Array.from(set).sort()];
+  }, [courses]);
 
   // Category counts from full (unfiltered by category) set — recompute against current level
   const [allCounts, setAllCounts] = useState<Record<string, number>>({});
@@ -212,6 +237,25 @@ const Courses = () => {
                   })}
                 </div>
               </div>
+
+              {languageOptions.length > 1 && (
+                <div className="border-t border-border pt-8">
+                  <h3 className="mb-4 font-display text-sm font-semibold uppercase tracking-wider text-foreground">
+                    Language
+                  </h3>
+                  <select
+                    value={activeLanguage}
+                    onChange={(e) => updateParam("language", e.target.value)}
+                    className="w-full cursor-pointer rounded-lg border border-border bg-card/40 px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                  >
+                    {languageOptions.map((lang) => (
+                      <option key={lang} value={lang} className="bg-background">
+                        {lang === "All" ? "All Languages" : lang}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="border-t border-border pt-8">
                 <h3 className="mb-4 font-display text-sm font-semibold uppercase tracking-wider text-foreground">

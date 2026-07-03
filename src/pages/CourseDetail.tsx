@@ -8,6 +8,7 @@ import { Star, Clock, Users, ArrowLeft, Heart, Share2, Lock } from "lucide-react
 import { toast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import PriceDisplay from "@/components/shared/PriceDisplay";
+import JoinAsLearnerModal from "@/components/JoinAsLearnerModal";
 
 const CourseDetail = () => {
   const { slug } = useParams();
@@ -19,6 +20,8 @@ const CourseDetail = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [wishlisted, setWishlisted] = useState(false);
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [joinAction, setJoinAction] = useState<"enroll" | "message" | "default">("default");
 
   useSEO({
     title: course ? `${course.title} – AI Course by ${coach?.full_name || 'Expert Coach'}` : "Course Details – AI Coach Portal",
@@ -130,14 +133,19 @@ const CourseDetail = () => {
 
   const handleEnroll = () => {
     if (!user) {
-      navigate(`/auth?redirect=/enroll/${courseId}`);
-    } else {
-      navigate(`/enroll/${courseId}`);
+      setJoinAction("enroll");
+      setJoinModalOpen(true);
+      return;
     }
+    navigate(`/enroll/${courseId}`);
   };
 
   const toggleWishlist = async () => {
-    if (!user) return navigate("/auth");
+    if (!user) {
+      setJoinAction("default");
+      setJoinModalOpen(true);
+      return;
+    }
     if (wishlisted) {
       await supabase.from("wishlists").delete().eq("course_id", courseId).eq("learner_id", user.id);
       setWishlisted(false);
@@ -299,6 +307,12 @@ const CourseDetail = () => {
           </div>
         </div>
       </div>
+      <JoinAsLearnerModal
+        open={joinModalOpen}
+        onOpenChange={setJoinModalOpen}
+        redirectTo={courseId ? `/enroll/${courseId}` : `/course/${slug}`}
+        action={joinAction}
+      />
     </div>
   );
 };

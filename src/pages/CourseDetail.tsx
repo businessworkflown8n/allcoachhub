@@ -307,6 +307,12 @@ const CourseDetail = () => {
           </div>
         </div>
       </div>
+      <JoinAsLearnerModal
+        open={joinModalOpen}
+        onOpenChange={setJoinModalOpen}
+        redirectTo={courseId ? `/enroll/${courseId}` : `/course/${slug}`}
+        action={joinAction}
+      />
     </div>
   );
 };

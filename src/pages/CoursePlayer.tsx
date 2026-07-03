@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { CheckCircle2, Lock, PlayCircle, FileText, BookOpen, Users, ClipboardList, Award, ArrowLeft, ExternalLink, Link2 } from "lucide-react";
+import { CheckCircle2, Lock, PlayCircle, FileText, BookOpen, Users, ClipboardList, Award, ArrowLeft, ExternalLink, Link2, RotateCcw } from "lucide-react";
 import QuizRunner from "@/components/learner/lms/QuizRunner";
 import AssignmentPanel from "@/components/learner/lms/AssignmentPanel";
 import LessonSidePanel from "@/components/learner/lms/LessonSidePanel";

@@ -8,6 +8,7 @@ import { Star, Clock, Users, ArrowLeft, Heart, Share2, Lock } from "lucide-react
 import { toast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import PriceDisplay from "@/components/shared/PriceDisplay";
+import JoinAsLearnerModal from "@/components/JoinAsLearnerModal";
 
 const CourseDetail = () => {
   const { slug } = useParams();

@@ -72,6 +72,7 @@ const WebsitePopup = lazy(() => import("./components/WebsitePopup"));
 const FloatingPromptButton = lazy(() => import("./components/prompt/FloatingPromptButton"));
 const AnalyticsTracker = lazy(() => import("./components/AnalyticsTracker"));
 const PlanUpgradeModal = lazy(() => import("./components/plan/PlanUpgradeModal"));
+const ExitIntentPopup = lazy(() => import("./components/ExitIntentPopup"));
 
 const queryClient = new QueryClient();
 

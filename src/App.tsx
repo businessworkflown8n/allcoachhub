@@ -248,6 +248,9 @@ const App = () => (
           <Suspense fallback={null}>
             <PlanUpgradeModal />
           </Suspense>
+          <Suspense fallback={null}>
+            <ExitIntentPopup />
+          </Suspense>
         </BrowserRouter>
       </AuthProvider>
       </TranslationProvider>

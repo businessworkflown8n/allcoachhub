@@ -33,6 +33,9 @@ const jsonLd = {
 };
 
 const SORTS = [
+  { id: "recommended", label: "Recommended" },
+  { id: "rating", label: "Highest Rated" },
+  { id: "popular", label: "Most Popular" },
   { id: "newest", label: "Newest" },
   { id: "price_asc", label: "Price: Low to High" },
   { id: "price_desc", label: "Price: High to Low" },

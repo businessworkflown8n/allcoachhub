@@ -321,11 +321,27 @@ const CoursePlayer = () => {
               </div>
             )}
 
-            <div className="flex items-center justify-between border-t border-border pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
               <p className="text-xs text-muted-foreground">{active.duration_minutes ? `${active.duration_minutes} min` : ""}</p>
-              <Button onClick={markComplete} disabled={completedIds.has(active.id)}>
-                {completedIds.has(active.id) ? <><CheckCircle2 className="h-4 w-4 mr-1" /> Completed</> : "Mark as Complete"}
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                {completedIds.has(active.id) && (
+                  <>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Completed
+                    </span>
+                    <Button
+                      variant="outline"
+                      onClick={() => { setReviewKey((k) => k + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                      title="Replay this lesson from the beginning"
+                    >
+                      <RotateCcw className="h-4 w-4 mr-1" /> Review Lesson
+                    </Button>
+                  </>
+                )}
+                {!completedIds.has(active.id) && (
+                  <Button onClick={markComplete}>Mark as Complete</Button>
+                )}
+              </div>
             </div>
           </div>
         )}

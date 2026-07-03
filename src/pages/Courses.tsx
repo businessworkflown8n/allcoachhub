@@ -50,8 +50,9 @@ const Courses = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get("category") || "All";
   const activeLevel = searchParams.get("level") || "All";
+  const activeLanguage = searchParams.get("language") || "All";
   const searchQuery = searchParams.get("q") || "";
-  const sort = searchParams.get("sort") || "newest";
+  const sort = searchParams.get("sort") || "recommended";
 
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

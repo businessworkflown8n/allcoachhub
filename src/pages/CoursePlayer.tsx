@@ -227,11 +227,11 @@ const CoursePlayer = () => {
             {/* Video */}
             {active.content_type === "video" && active.content_url && (
               isYouTube(active.content_url) ? (
-                <iframe src={ytEmbed(active.content_url)} className="aspect-video w-full rounded-xl" allowFullScreen title={active.title} />
+                <iframe key={`v-${active.id}-${reviewKey}`} src={ytEmbed(active.content_url)} className="aspect-video w-full rounded-xl" allowFullScreen title={active.title} />
               ) : isVimeo(active.content_url) ? (
-                <iframe src={vimeoEmbed(active.content_url)} className="aspect-video w-full rounded-xl" allowFullScreen title={active.title} />
+                <iframe key={`v-${active.id}-${reviewKey}`} src={vimeoEmbed(active.content_url)} className="aspect-video w-full rounded-xl" allowFullScreen title={active.title} />
               ) : (
-                <video src={active.content_url} controls className="aspect-video w-full rounded-xl bg-black" />
+                <video key={`v-${active.id}-${reviewKey}`} src={active.content_url} controls className="aspect-video w-full rounded-xl bg-black" />
               )
             )}
 

@@ -133,14 +133,19 @@ const CourseDetail = () => {
 
   const handleEnroll = () => {
     if (!user) {
-      navigate(`/auth?redirect=/enroll/${courseId}`);
-    } else {
-      navigate(`/enroll/${courseId}`);
+      setJoinAction("enroll");
+      setJoinModalOpen(true);
+      return;
     }
+    navigate(`/enroll/${courseId}`);
   };
 
   const toggleWishlist = async () => {
-    if (!user) return navigate("/auth");
+    if (!user) {
+      setJoinAction("default");
+      setJoinModalOpen(true);
+      return;
+    }
     if (wishlisted) {
       await supabase.from("wishlists").delete().eq("course_id", courseId).eq("learner_id", user.id);
       setWishlisted(false);

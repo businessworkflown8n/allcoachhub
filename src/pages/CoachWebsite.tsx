@@ -177,8 +177,24 @@ const CoachWebsite = () => {
     );
   }
 
+  const personJsonLd = coach ? {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": coach.full_name,
+    "jobTitle": coach.job_title || "AI Coach",
+    "description": coach.bio || site.tagline || undefined,
+    "image": coach.avatar_url || undefined,
+    "url": `https://www.aicoachportal.com/coach-website/${slug}`,
+    "sameAs": Object.values(socialLinks).filter(Boolean),
+    "knowsAbout": coach.tags || undefined,
+    "worksFor": { "@type": "Organization", "name": "AI Coach Portal", "url": "https://www.aicoachportal.com" },
+  } : null;
+
   return (
     <>
+      {personJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
+      )}
       <CoachWebsiteHeader
         logoUrl={site.logo_url}
         instituteName={site.institute_name}

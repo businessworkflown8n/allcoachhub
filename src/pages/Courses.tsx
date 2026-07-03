@@ -87,6 +87,9 @@ const Courses = () => {
             c.description?.toLowerCase().includes(searchQuery.toLowerCase()),
         )
       : courses;
+    if (activeLanguage !== "All") {
+      list = list.filter((c) => (c.language || "").toLowerCase() === activeLanguage.toLowerCase());
+    }
     if (sort === "price_asc") {
       list = [...list].sort(
         (a, b) => Number(a[priceKey] || 0) - Number(b[priceKey] || 0),
@@ -95,9 +98,27 @@ const Courses = () => {
       list = [...list].sort(
         (a, b) => Number(b[priceKey] || 0) - Number(a[priceKey] || 0),
       );
+    } else if (sort === "rating") {
+      list = [...list].sort((a, b) => Number(b.average_rating || 0) - Number(a.average_rating || 0));
+    } else if (sort === "popular") {
+      list = [...list].sort(
+        (a, b) => Number(b.enrollment_count || b.total_enrollments || 0) - Number(a.enrollment_count || a.total_enrollments || 0),
+      );
+    } else if (sort === "newest") {
+      list = [...list].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
     }
+    // "recommended" keeps default DB order (newest-first with any featured flag)
     return list;
-  }, [courses, searchQuery, sort, priceKey]);
+  }, [courses, searchQuery, sort, priceKey, activeLanguage]);
+
+  // Language options derived from loaded course rows
+  const languageOptions = useMemo(() => {
+    const set = new Set<string>();
+    courses.forEach((c) => c.language && set.add(c.language));
+    return ["All", ...Array.from(set).sort()];
+  }, [courses]);
 
   // Category counts from full (unfiltered by category) set — recompute against current level
   const [allCounts, setAllCounts] = useState<Record<string, number>>({});

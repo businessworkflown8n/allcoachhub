@@ -238,6 +238,25 @@ const Courses = () => {
                 </div>
               </div>
 
+              {languageOptions.length > 1 && (
+                <div className="border-t border-border pt-8">
+                  <h3 className="mb-4 font-display text-sm font-semibold uppercase tracking-wider text-foreground">
+                    Language
+                  </h3>
+                  <select
+                    value={activeLanguage}
+                    onChange={(e) => updateParam("language", e.target.value)}
+                    className="w-full cursor-pointer rounded-lg border border-border bg-card/40 px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                  >
+                    {languageOptions.map((lang) => (
+                      <option key={lang} value={lang} className="bg-background">
+                        {lang === "All" ? "All Languages" : lang}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="border-t border-border pt-8">
                 <h3 className="mb-4 font-display text-sm font-semibold uppercase tracking-wider text-foreground">
                   Search

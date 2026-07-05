@@ -239,6 +239,12 @@ const SearchDialog = () => {
     if (value.length >= 3) trackSearch(value, ranked.high.length, "command_dialog");
   };
 
+  const handleSubmitSearch = () => {
+    if (ranked.high.length > 0) {
+      handleSelect(ranked.high[0], 0);
+    }
+  };
+
   const handleSelect = (item: SearchItem, index: number) => {
     trackSearchResultClick(searchTerm, item.title, index);
     trackEvent("voice_search_result_click", { query: searchTerm, kind: item.kind });

@@ -377,7 +377,7 @@ const SearchDialog = () => {
             value={searchTerm}
             onValueChange={handleSearchChange}
           />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+          <div className="absolute right-12 top-1/2 -translate-y-1/2 flex items-center gap-1">
             <select
               value={voiceLang}
               onChange={(e) => setVoiceLang(e.target.value as any)}
@@ -392,7 +392,7 @@ const SearchDialog = () => {
               onClick={listening ? stopVoice : startVoice}
               disabled={!voiceSupported}
               className={cn(
-                "relative inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors",
+                "relative inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors",
                 listening ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary",
                 !voiceSupported && "opacity-50 cursor-not-allowed"
               )}
@@ -405,6 +405,17 @@ const SearchDialog = () => {
                 <span className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-primary/40" />
               )}
             </button>
+            {searchTerm && !listening && voiceState !== "processing" && (
+              <button
+                type="button"
+                onClick={handleSubmitSearch}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                aria-label="Search"
+                title="Search"
+              >
+                <Search className="h-5 w-5" />
+              </button>
+            )}
           </div>
         </div>
 

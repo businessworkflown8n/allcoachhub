@@ -89,6 +89,12 @@ const LoginForm = () => {
 
     trackLogin("email");
 
+    // Honor safe redirect (e.g. OAuth consent return) before role-based routing
+    if (safeRedirect) {
+      navigate(safeRedirect);
+      return;
+    }
+
     // Redirect based on user role
     if (authData?.user) {
       const { data: roleData } = await supabase

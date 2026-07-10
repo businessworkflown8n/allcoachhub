@@ -64,6 +64,7 @@ const AIKidsProCourses = lazy(() => import("./pages/AIKidsProCourses"));
 const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
 const LegalPage = lazy(() => import("./pages/LegalPage"));
 const Invoice = lazy(() => import("./pages/Invoice"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 
 // Lazy-loaded global widgets (non-critical)
 

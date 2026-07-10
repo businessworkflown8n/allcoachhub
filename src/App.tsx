@@ -155,6 +155,7 @@ const App = () => (
           </Suspense>
           <Routes>
             <Route path="/" element={<Suspense fallback={<PageFallback />}><Index /></Suspense>} />
+            <Route path="/.lovable/oauth/consent" element={<Suspense fallback={<PageFallback />}><OAuthConsent /></Suspense>} />
             <Route path="/auth" element={<Suspense fallback={<PageFallback />}><RoleSelect /></Suspense>} />
             <Route path="/login/:role" element={<Suspense fallback={<PageFallback />}><Login /></Suspense>} />
             <Route path="/signup/:role" element={<Suspense fallback={<PageFallback />}><Signup /></Suspense>} />

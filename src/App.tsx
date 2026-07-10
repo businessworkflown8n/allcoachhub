@@ -64,6 +64,7 @@ const AIKidsProCourses = lazy(() => import("./pages/AIKidsProCourses"));
 const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
 const LegalPage = lazy(() => import("./pages/LegalPage"));
 const Invoice = lazy(() => import("./pages/Invoice"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 
 // Lazy-loaded global widgets (non-critical)
 
@@ -154,6 +155,7 @@ const App = () => (
           </Suspense>
           <Routes>
             <Route path="/" element={<Suspense fallback={<PageFallback />}><Index /></Suspense>} />
+            <Route path="/.lovable/oauth/consent" element={<Suspense fallback={<PageFallback />}><OAuthConsent /></Suspense>} />
             <Route path="/auth" element={<Suspense fallback={<PageFallback />}><RoleSelect /></Suspense>} />
             <Route path="/login/:role" element={<Suspense fallback={<PageFallback />}><Login /></Suspense>} />
             <Route path="/signup/:role" element={<Suspense fallback={<PageFallback />}><Signup /></Suspense>} />

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { trackLogin, trackPasswordReset, trackFormError } from "@/lib/analytics";
 
 const LoginForm = () => {
@@ -17,14 +17,19 @@ const LoginForm = () => {
   const [resetLoading, setResetLoading] = useState(false);
   const [showReset, setShowReset] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
+  const safeRedirect = redirectParam && redirectParam.startsWith("/") && !redirectParam.startsWith("//") ? redirectParam : null;
 
   // Use production domain for OAuth on the live site; fall back to current origin in preview/dev
   const getOAuthRedirectUri = () => {
     const host = window.location.hostname;
-    if (host === "www.aicoachportal.com" || host === "aicoachportal.com") {
-      return "https://www.aicoachportal.com";
-    }
-    return window.location.origin;
+    const base =
+      host === "www.aicoachportal.com" || host === "aicoachportal.com"
+        ? "https://www.aicoachportal.com"
+        : window.location.origin;
+    // Preserve the OAuth consent return URL through Google/Apple sign-in.
+    return safeRedirect ? `${base}${safeRedirect}` : base;
   };
 
   const handleGoogleSignIn = async () => {
@@ -83,6 +88,12 @@ const LoginForm = () => {
     }
 
     trackLogin("email");
+
+    // Honor safe redirect (e.g. OAuth consent return) before role-based routing
+    if (safeRedirect) {
+      navigate(safeRedirect);
+      return;
+    }
 
     // Redirect based on user role
     if (authData?.user) {

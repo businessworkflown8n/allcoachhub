@@ -17,6 +17,9 @@ const LoginForm = () => {
   const [resetLoading, setResetLoading] = useState(false);
   const [showReset, setShowReset] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
+  const safeRedirect = redirectParam && redirectParam.startsWith("/") && !redirectParam.startsWith("//") ? redirectParam : null;
 
   // Use production domain for OAuth on the live site; fall back to current origin in preview/dev
   const getOAuthRedirectUri = () => {

@@ -24,10 +24,12 @@ const LoginForm = () => {
   // Use production domain for OAuth on the live site; fall back to current origin in preview/dev
   const getOAuthRedirectUri = () => {
     const host = window.location.hostname;
-    if (host === "www.aicoachportal.com" || host === "aicoachportal.com") {
-      return "https://www.aicoachportal.com";
-    }
-    return window.location.origin;
+    const base =
+      host === "www.aicoachportal.com" || host === "aicoachportal.com"
+        ? "https://www.aicoachportal.com"
+        : window.location.origin;
+    // Preserve the OAuth consent return URL through Google/Apple sign-in.
+    return safeRedirect ? `${base}${safeRedirect}` : base;
   };
 
   const handleGoogleSignIn = async () => {

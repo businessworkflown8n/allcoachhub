@@ -131,10 +131,6 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background" />
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 text-center">
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-secondary/80 backdrop-blur px-4 py-1.5 animate-fade-in-up">
-          <span className="text-primary ambient-glow">✦</span>
-          <span className="text-sm text-muted-foreground">{t("hero.badge")}</span>
-        </div>
 
         <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl md:text-7xl animate-fade-in-up-delay-1">
           {t("hero.titleStart")}{" "}

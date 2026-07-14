@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useSEO } from "@/hooks/useSEO";
 import PromptGeneratorForm from "@/components/prompt/PromptGeneratorForm";
+import PromptGeneratorGuard from "@/components/prompt/PromptGeneratorGuard";
 import { Sparkles } from "lucide-react";
 
 const PromptGenerator = () => {

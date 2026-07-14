@@ -26,9 +26,11 @@ const PromptGenerator = () => {
               Create structured, high-performing prompts for any use case — marketing, coding, automation and more.
             </p>
           </div>
-          <div className="rounded-xl border border-border bg-card p-6">
-            <PromptGeneratorForm />
-          </div>
+          <PromptGeneratorGuard>
+            <div className="rounded-xl border border-border bg-card p-6">
+              <PromptGeneratorForm />
+            </div>
+          </PromptGeneratorGuard>
         </div>
       </main>
       <Footer />

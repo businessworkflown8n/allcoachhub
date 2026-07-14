@@ -185,6 +185,7 @@ const AdminDashboard = () => {
         <Route path="feature-control" element={<AdminFeatureControlSystem />} />
         <Route path="feature-control-system" element={<AdminFeatureControlSystem />} />
         <Route path="coach-feature-approval" element={<AdminCoachFeatureControl />} />
+        <Route path="prompt-generator-access" element={<AdminPromptGeneratorAccess />} />
         <Route path="digital-products" element={<AdminDigitalProductsControl />} />
         <Route path="plans" element={<AdminPlans />} />
         <Route path="bundles" element={<AdminBundles />} />

@@ -64,6 +64,7 @@ import AdminCourseCategories from "@/components/admin/AdminCourseCategories";
 import AdminAIKidsEnrollments from "@/components/admin/AdminAIKidsEnrollments";
 import AdminCertificateSettings from "@/components/admin/AdminCertificateSettings";
 import AdminPaymentMethods from "@/components/admin/AdminPaymentMethods";
+import AdminPromptGeneratorAccess from "@/components/admin/AdminPromptGeneratorAccess";
 
 
 const navItems = [
@@ -184,6 +185,7 @@ const AdminDashboard = () => {
         <Route path="feature-control" element={<AdminFeatureControlSystem />} />
         <Route path="feature-control-system" element={<AdminFeatureControlSystem />} />
         <Route path="coach-feature-approval" element={<AdminCoachFeatureControl />} />
+        <Route path="prompt-generator-access" element={<AdminPromptGeneratorAccess />} />
         <Route path="digital-products" element={<AdminDigitalProductsControl />} />
         <Route path="plans" element={<AdminPlans />} />
         <Route path="bundles" element={<AdminBundles />} />

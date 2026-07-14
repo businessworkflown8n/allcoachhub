@@ -7558,6 +7558,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          approval_status: string
           avatar_url: string | null
           bio: string | null
           category: string | null
@@ -7599,6 +7600,7 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
+          approval_status?: string
           avatar_url?: string | null
           bio?: string | null
           category?: string | null
@@ -7640,6 +7642,7 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
+          approval_status?: string
           avatar_url?: string | null
           bio?: string | null
           category?: string | null
@@ -10447,6 +10450,10 @@ export type Database = {
         Returns: Json
       }
       cancel_my_subscription: { Args: never; Returns: Json }
+      check_prompt_generator_access: {
+        Args: { _user_id: string }
+        Returns: Json
+      }
       coach_has_assignments_access: {
         Args: { _coach_id: string }
         Returns: boolean

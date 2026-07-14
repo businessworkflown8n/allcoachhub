@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useSEO } from "@/hooks/useSEO";
 import PromptGeneratorForm from "@/components/prompt/PromptGeneratorForm";
+import PromptGeneratorGuard from "@/components/prompt/PromptGeneratorGuard";
 import { Sparkles } from "lucide-react";
 
 const PromptGenerator = () => {
@@ -25,9 +26,11 @@ const PromptGenerator = () => {
               Create structured, high-performing prompts for any use case — marketing, coding, automation and more.
             </p>
           </div>
-          <div className="rounded-xl border border-border bg-card p-6">
-            <PromptGeneratorForm />
-          </div>
+          <PromptGeneratorGuard>
+            <div className="rounded-xl border border-border bg-card p-6">
+              <PromptGeneratorForm />
+            </div>
+          </PromptGeneratorGuard>
         </div>
       </main>
       <Footer />

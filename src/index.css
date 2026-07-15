@@ -419,3 +419,152 @@ input[type="week"]::-webkit-calendar-picker-indicator:hover {
   filter: none;
   background-color: hsl(var(--primary) / 0.1);
 }
+
+/* ============================================================
+   Premium 3D Enroll CTA (AI Kids Pro Hero)
+   ============================================================ */
+.enroll-3d-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2.25rem;
+  border-radius: 9999px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  color: #0a0f00;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 45%),
+    linear-gradient(135deg, #d4ff3a 0%, #c6ff00 45%, #a8e600 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 -2px 0 rgba(0, 0, 0, 0.18) inset,
+    0 10px 24px -8px rgba(198, 255, 0, 0.55),
+    0 18px 40px -12px rgba(198, 255, 0, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transform: translateZ(0);
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2),
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
+  animation: enroll3dPulse 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.enroll-3d-cta:hover {
+  transform: translateY(-5px) scale(1.03);
+  filter: brightness(1.05);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 -2px 0 rgba(0, 0, 0, 0.2) inset,
+    0 16px 32px -8px rgba(198, 255, 0, 0.7),
+    0 26px 52px -12px rgba(198, 255, 0, 0.45),
+    0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.enroll-3d-cta:active {
+  transform: translateY(1px) scale(0.985);
+  transition-duration: 0.08s;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.25) inset,
+    0 4px 10px -4px rgba(198, 255, 0, 0.45),
+    0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.enroll-3d-cta:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px hsl(var(--background)),
+    0 0 0 6px #c6ff00,
+    0 16px 32px -8px rgba(198, 255, 0, 0.7);
+}
+
+.enroll-3d-cta__label {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.enroll-3d-cta__arrow {
+  transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.enroll-3d-cta:hover .enroll-3d-cta__arrow {
+  transform: translateX(6px);
+}
+
+.enroll-3d-cta__shine {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.55) 48%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0.55) 52%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  animation: enroll3dShine 4.5s ease-in-out infinite;
+  mix-blend-mode: overlay;
+}
+
+@keyframes enroll3dShine {
+  0%, 55% {
+    transform: translateX(-120%);
+  }
+  75% {
+    transform: translateX(120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes enroll3dPulse {
+  0%, 100% {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.55) inset,
+      0 -2px 0 rgba(0, 0, 0, 0.18) inset,
+      0 10px 24px -8px rgba(198, 255, 0, 0.55),
+      0 18px 40px -12px rgba(198, 255, 0, 0.35),
+      0 2px 4px rgba(0, 0, 0, 0.25);
+  }
+  50% {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.55) inset,
+      0 -2px 0 rgba(0, 0, 0, 0.18) inset,
+      0 14px 30px -8px rgba(198, 255, 0, 0.75),
+      0 24px 48px -12px rgba(198, 255, 0, 0.5),
+      0 2px 4px rgba(0, 0, 0, 0.25);
+  }
+}
+
+@media (max-width: 640px) {
+  .enroll-3d-cta {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enroll-3d-cta,
+  .enroll-3d-cta__shine,
+  .enroll-3d-cta__arrow {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+

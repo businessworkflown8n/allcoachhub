@@ -83,8 +83,8 @@ const PromptGeneratorGuard = ({ children }: Props) => {
     },
     pending_approval: {
       icon: Clock,
-      title: "Waiting for Admin Approval",
-      message: "Your account is under review. You'll get access to the AI Prompt Generator once an administrator approves your registration.",
+      title: "Pending Admin Approval",
+      message: "Your account has been created successfully. Your AI Prompt Generator access is pending Admin approval. You will be notified once access is enabled.",
     },
     suspended: {
       icon: XCircle,

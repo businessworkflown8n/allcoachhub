@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { useSEO } from "@/hooks/useSEO";
 import CourseThumbnail from "@/components/shared/CourseThumbnail";
 import PriceDisplay from "@/components/shared/PriceDisplay";
+import EnrollChildCTA from "@/components/ai-kids/EnrollChildCTA";
 
 const TARGET_CLASSES = ["All", "Class 5-6", "Class 7-8", "Class 9-10", "Class 11-12"];
 const LEVELS = ["All", "AI Explorer", "AI Creator", "AI Innovator", "AI Future Leader"];
@@ -95,6 +96,9 @@ const AIKidsProCourses = () => {
                     {b}
                   </span>
                 ))}
+              </div>
+              <div className="mt-8 flex justify-center px-4 sm:px-0">
+                <EnrollChildCTA />
               </div>
             </div>
           </div>

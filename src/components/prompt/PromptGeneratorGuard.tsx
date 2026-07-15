@@ -65,8 +65,8 @@ const PromptGeneratorGuard = ({ children }: Props) => {
       message: "Please sign up as a Coach or Learner to access the AI Prompt Generator.",
       cta: (
         <div className="flex gap-2 justify-center">
-          <Link to="/signup"><Button>Sign up</Button></Link>
-          <Link to="/login"><Button variant="outline">Log in</Button></Link>
+          <a href="/auth?mode=login&redirect=/prompt-generator"><Button>Sign up</Button></a>
+          <a href="/auth?mode=login&redirect=/prompt-generator"><Button variant="outline">Log in</Button></a>
         </div>
       ),
     },
@@ -74,7 +74,7 @@ const PromptGeneratorGuard = ({ children }: Props) => {
       icon: AlertTriangle,
       title: "Complete your registration",
       message: "Your account setup is incomplete. Please finish signing up as a Coach or Learner.",
-      cta: <Link to="/signup"><Button>Complete signup</Button></Link>,
+      cta: <a href="/auth?mode=login&redirect=/prompt-generator"><Button>Complete signup</Button></a>,
     },
     invalid_role: {
       icon: ShieldAlert,
@@ -83,8 +83,8 @@ const PromptGeneratorGuard = ({ children }: Props) => {
     },
     pending_approval: {
       icon: Clock,
-      title: "Waiting for Admin Approval",
-      message: "Your account is under review. You'll get access to the AI Prompt Generator once an administrator approves your registration.",
+      title: "Pending Admin Approval",
+      message: "Your account has been created successfully. Your AI Prompt Generator access is pending Admin approval. You will be notified once access is enabled.",
     },
     suspended: {
       icon: XCircle,

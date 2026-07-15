@@ -97,6 +97,9 @@ const AIKidsProCourses = () => {
                   </span>
                 ))}
               </div>
+              <div className="mt-8 flex justify-center px-4 sm:px-0">
+                <EnrollChildCTA />
+              </div>
             </div>
           </div>
         </section>

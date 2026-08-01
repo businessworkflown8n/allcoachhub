@@ -981,6 +981,7 @@ export type Database = {
           is_default: boolean
           is_premium: boolean | null
           is_system: boolean | null
+          name: string | null
           orientation: string | null
           preview_image_url: string | null
           style_tags: string[] | null
@@ -988,7 +989,7 @@ export type Database = {
           template_design: Json
           template_kind: string
           tier: string
-          title: string
+          title: string | null
           updated_at: string
           workshop_id: string | null
         }
@@ -1007,6 +1008,7 @@ export type Database = {
           is_default?: boolean
           is_premium?: boolean | null
           is_system?: boolean | null
+          name?: string | null
           orientation?: string | null
           preview_image_url?: string | null
           style_tags?: string[] | null
@@ -1014,7 +1016,7 @@ export type Database = {
           template_design?: Json
           template_kind?: string
           tier?: string
-          title: string
+          title?: string | null
           updated_at?: string
           workshop_id?: string | null
         }
@@ -1033,6 +1035,7 @@ export type Database = {
           is_default?: boolean
           is_premium?: boolean | null
           is_system?: boolean | null
+          name?: string | null
           orientation?: string | null
           preview_image_url?: string | null
           style_tags?: string[] | null
@@ -1040,7 +1043,7 @@ export type Database = {
           template_design?: Json
           template_kind?: string
           tier?: string
-          title?: string
+          title?: string | null
           updated_at?: string
           workshop_id?: string | null
         }

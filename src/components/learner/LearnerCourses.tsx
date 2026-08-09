@@ -46,7 +46,7 @@ const LearnerCourses = () => {
       }
 
       // Module / lesson counts per course
-      const courseIds = Array.from(new Set(list.map((e: any) => e.course_id)));
+      const courseIds = Array.from(new Set<string>(list.map((e: any) => e.course_id).filter(Boolean)));
       if (courseIds.length) {
         const { data: mods } = await supabase.from("course_modules").select("id, course_id").in("course_id", courseIds).eq("is_published", true);
         const modIds = (mods || []).map((m: any) => m.id);

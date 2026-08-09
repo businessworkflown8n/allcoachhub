@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/compatClient";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { BookOpen, Clock, PlayCircle, Search, Award, TrendingUp, CheckCircle2, Loader2, User as UserIcon } from "lucide-react";

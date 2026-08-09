@@ -4,8 +4,9 @@ const corsHeaders = {
 };
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getAiApiKey, AI_CHAT_URL, mapAiModel, aiAuthHeaders, aiChatCompletions, generateImageDataUrl } from "../_shared/ai.ts";
 
-const AI_URL = 'https://ai.gateway.lovable.dev/v1/chat/completions';
+const AI_URL = AI_CHAT_URL;
 
 // Topic-specific image mapping
 const TOPIC_IMAGES: Record<string, string> = {
@@ -106,7 +107,7 @@ async function callAI(apiKey: string, messages: { role: string; content: string 
   const response = await fetch(AI_URL, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'google/gemini-2.5-flash', messages, temperature: 0.7 }),
+    body: JSON.stringify({ model: 'gemini-2.5-flash', messages, temperature: 0.7 }),
   });
   if (!response.ok) {
     const err = await response.text();
@@ -120,8 +121,8 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
+    const AI_API_KEY = getAiApiKey();
+    if (!AI_API_KEY) throw new Error('GEMINI_API_KEY is not configured');
     const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
     // Allow CRON_SECRET (scheduled jobs) or admin JWT
@@ -147,7 +148,7 @@ Deno.serve(async (req) => {
     const allInserts: any[] = [];
 
     if (type === 'trends') {
-      const parsed = await callAI(LOVABLE_API_KEY, [
+      const parsed = await callAI(AI_API_KEY, [
         { role: 'system', content: 'Respond ONLY with a JSON object. No other text.' },
         { role: 'user', content: `Date: ${today}. Return 3 trending AI articles as JSON: {"articles":[{"title":"...","excerpt":"...","content":"...","read_time":"5 min read"}]}. Content should be 300+ words markdown. Topics: latest AI news, breakthroughs, industry updates.` },
       ]);
@@ -157,7 +158,7 @@ Deno.serve(async (req) => {
     }
 
     if (type === 'jobs') {
-      const parsed = await callAI(LOVABLE_API_KEY, [
+      const parsed = await callAI(AI_API_KEY, [
         { role: 'system', content: 'You output ONLY valid JSON. No extra text. Keep descriptions under 80 words. Do not use special unicode characters.' },
         { role: 'user', content: `Date: ${today}. Generate 6 AI job listings as JSON:
 {"jobs":[{"title":"ML Engineer","company":"Google","location":"Bangalore","salary":"25-40 LPA INR","source":"Naukri.com","job_type":"Full-time","exp":"3-5 years","skills":["Python","PyTorch"],"desc":"Short job description"}]}
@@ -176,7 +177,7 @@ Rules: 2 from Naukri.com (Indian cos, INR), 2 from Google Jobs (USD), 2 from Lin
     }
 
     if (type === 'other') {
-      const parsed = await callAI(LOVABLE_API_KEY, [
+      const parsed = await callAI(AI_API_KEY, [
         { role: 'system', content: 'Respond ONLY with JSON. No extra text.' },
         { role: 'user', content: `Date: ${today}. Generate 3 articles as JSON: {"articles":[{"title":"...","excerpt":"...","content":"300 word markdown","category":"AI Tools","read_time":"5 min read"}]}. Categories: one "AI Tools", one "AI in Education", one "AI Research".` },
       ]);

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { getAiApiKey, generateImageDataUrl } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,50 +18,20 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    getAiApiKey(); // ensure configured
 
     const numImages = Math.min(Math.max(count, 1), 4);
     const images: string[] = [];
 
-    // Generate images sequentially to avoid rate limits
     for (let i = 0; i < numImages; i++) {
-      const variation = i === 0 ? prompt : `${prompt}, variation ${i + 1}, slightly different color scheme and layout`;
-      
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3.1-flash-image-preview",
-          messages: [{ role: "user", content: variation }],
-          modalities: ["image", "text"],
-        }),
-      });
+      const variation = i === 0
+        ? prompt
+        : `${prompt}, variation ${i + 1}, slightly different color scheme and layout`;
 
-      if (!response.ok) {
-        if (response.status === 429) {
-          return new Response(JSON.stringify({ error: "Rate limited, please try again shortly." }), {
-            status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-        if (response.status === 402) {
-          return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
-            status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-        console.error("AI error:", response.status, await response.text());
-        continue;
-      }
-
-      const data = await response.json();
-      const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+      const imageUrl = await generateImageDataUrl(variation);
       if (imageUrl) images.push(imageUrl);
 
-      // Small delay between requests
-      if (i < numImages - 1) await new Promise(r => setTimeout(r, 1500));
+      if (i < numImages - 1) await new Promise((r) => setTimeout(r, 1500));
     }
 
     if (images.length === 0) {

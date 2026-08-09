@@ -159,7 +159,7 @@ RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, exte
 DECLARE
   v_url TEXT;
   v_topic_slug TEXT;
-  v_endpoint TEXT := 'https://iipxwwrzkdkestikxcpg.supabase.co/functions/v1/auto-indexer';
+  v_endpoint TEXT := 'https://fwtmgvszacuebhxnshct.supabase.co/functions/v1/auto-indexer';
 BEGIN
   IF TG_TABLE_NAME = 'knowledge_topics' AND NEW.is_published = true THEN
     v_url := '/knowledge/' || NEW.slug;

@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Local Lovable/Supabase database dumps (do not commit)
+.backup/
+
+# Supabase CLI local link metadata
+supabase/.temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -2,6 +2,7 @@
 // Generates: ai_summary (40-60 words), detailed_explanation (markdown),
 // key_takeaways, faqs, meta_title, meta_description, focus_keyword, secondary_keywords.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { getAiApiKey, AI_CHAT_URL, mapAiModel, aiAuthHeaders, aiChatCompletions, generateImageDataUrl } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,8 +20,8 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const AI_API_KEY = getAiApiKey();
+    if (!AI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
     const systemPrompt = `You are a senior SEO + AEO + GEO content strategist for AI Coach Portal (https://www.aicoachportal.com), an AI coaching marketplace.
 Your goal: produce an answer page optimized to be (a) ranked on Google, (b) extracted as a Featured Snippet, and (c) cited verbatim by ChatGPT, Perplexity, Claude, and Gemini.
@@ -42,14 +43,14 @@ Generate:
 7. focus_keyword — short phrase (2-4 words).
 8. secondary_keywords — 4-6 related keyword phrases.`;
 
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiResp = await fetch(AI_CHAT_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${AI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },

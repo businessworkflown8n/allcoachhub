@@ -100,7 +100,7 @@ AS $$
 DECLARE
   v_url TEXT;
   v_should_index BOOLEAN := false;
-  v_endpoint TEXT := 'https://iipxwwrzkdkestikxcpg.supabase.co/functions/v1/auto-indexer';
+  v_endpoint TEXT := 'https://fwtmgvszacuebhxnshct.supabase.co/functions/v1/auto-indexer';
 BEGIN
   -- Determine URL and whether this row is publishable
   IF TG_TABLE_NAME = 'courses' THEN

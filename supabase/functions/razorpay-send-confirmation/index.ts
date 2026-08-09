@@ -55,41 +55,27 @@ Deno.serve(async (req) => {
     let emailStatus = 'skipped';
     let emailError: string | null = null;
 
-    // Try Lovable AI Gateway → Resend connector first; fall back to direct RESEND_API_KEY
-    const lovableKey = Deno.env.get('LOVABLE_API_KEY');
+    // Send via Resend directly (no Lovable gateway)
     const resendKey = Deno.env.get('RESEND_API_KEY');
     const fromAddress = 'AI Coach Portal <noreply@aicoachportal.com>';
     const subject = `Payment confirmed — ${item_title || (kind === 'webinar' ? 'webinar' : 'course')}`;
 
-    const tryResendDirect = async () => {
-      if (!resendKey) return false;
+    if (!resendKey) {
+      emailStatus = 'failed';
+      emailError = 'RESEND_API_KEY is not configured';
+    } else {
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ from: fromAddress, to: [recipient_email], subject, html }),
       });
-      if (!res.ok) { emailError = await res.text(); return false; }
-      return true;
-    };
-
-    const tryResendGateway = async () => {
-      if (!lovableKey || !resendKey) return false;
-      const res = await fetch('https://connector-gateway.lovable.dev/resend/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${lovableKey}`,
-          'X-Connection-Api-Key': resendKey,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ from: fromAddress, to: [recipient_email], subject, html }),
-      });
-      if (!res.ok) { emailError = await res.text(); return false; }
-      return true;
-    };
-
-    if (await tryResendGateway()) emailStatus = 'sent';
-    else if (await tryResendDirect()) emailStatus = 'sent';
-    else emailStatus = 'failed';
+      if (!res.ok) {
+        emailError = await res.text();
+        emailStatus = 'failed';
+      } else {
+        emailStatus = 'sent';
+      }
+    }
 
     // Best-effort WhatsApp via existing whatsapp_messages / Digital SMS credentials (optional)
     let whatsappStatus = 'skipped';

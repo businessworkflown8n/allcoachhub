@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getAiApiKey, generateImageDataUrl } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -38,8 +39,7 @@ serve(async (req) => {
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    getAiApiKey(); // ensure GEMINI_API_KEY is configured
 
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
 
@@ -87,31 +87,8 @@ Description hint: ${desc}
 Instructor: ${coachName}
 Requirements: Bold, large readable course title text overlay; high-contrast modern LMS design; cinematic background; visually rich but clean; no watermark; no random letters; no spelling mistakes; emphasize the title.`;
 
-    // Generate image
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
-        messages: [{ role: "user", content: prompt }],
-        modalities: ["image", "text"],
-      }),
-    });
-
-    if (!aiRes.ok) {
-      const errTxt = await aiRes.text();
-      console.error("AI gateway error", aiRes.status, errTxt);
-      return new Response(JSON.stringify({ error: "ai_failed", status: aiRes.status }), {
-        status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const aiData = await aiRes.json();
-    const imageUrl: string | undefined =
-      aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    getAiApiKey(); // ensure configured
+    const imageUrl = await generateImageDataUrl(prompt);
     if (!imageUrl?.startsWith("data:image/")) {
       return new Response(JSON.stringify({ error: "no_image_returned" }), {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },

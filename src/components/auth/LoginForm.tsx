@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowRight } from "lucide-react";
@@ -22,39 +21,41 @@ const LoginForm = () => {
   const safeRedirect = redirectParam && redirectParam.startsWith("/") && !redirectParam.startsWith("//") ? redirectParam : null;
 
   // Use production domain for OAuth on the live site; fall back to current origin in preview/dev
-  const getOAuthRedirectUri = () => {
+  const getOAuthRedirectTo = () => {
     const host = window.location.hostname;
     const base =
       host === "www.aicoachportal.com" || host === "aicoachportal.com"
         ? "https://www.aicoachportal.com"
         : window.location.origin;
-    // Preserve the OAuth consent return URL through Google/Apple sign-in.
+    // Preserve post-login destination through Google/Apple sign-in.
     return safeRedirect ? `${base}${safeRedirect}` : base;
   };
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: getOAuthRedirectUri(),
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: getOAuthRedirectTo() },
     });
     setGoogleLoading(false);
     if (error) {
       console.error("Google OAuth error:", error);
-      toast({ title: "Google Sign-In failed", description: String(error), variant: "destructive" });
+      toast({ title: "Google Sign-In failed", description: error.message, variant: "destructive" });
     }
   };
 
   const handleAppleSignIn = async () => {
     setAppleLoading(true);
-    const redirectUri = getOAuthRedirectUri();
-    const { error } = await lovable.auth.signInWithOAuth("apple", {
-      redirect_uri: redirectUri,
+    const redirectTo = getOAuthRedirectTo();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "apple",
+      options: { redirectTo },
     });
     setAppleLoading(false);
     if (error) {
-      console.error("Apple OAuth error:", error, "redirect_uri:", redirectUri);
-      const msg = String(error);
-      const isRedirectIssue = msg.toLowerCase().includes("redirect_uri") || msg.toLowerCase().includes("invalid_request");
+      console.error("Apple OAuth error:", error, "redirectTo:", redirectTo);
+      const msg = error.message;
+      const isRedirectIssue = msg.toLowerCase().includes("redirect") || msg.toLowerCase().includes("invalid_request");
       toast({
         title: "Apple Sign-In failed",
         description: isRedirectIssue

@@ -1,6 +1,7 @@
 // @ts-nocheck
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { getAiApiKey, AI_CHAT_URL, mapAiModel, aiAuthHeaders, aiChatCompletions, generateImageDataUrl } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,8 +13,8 @@ serve(async (req) => {
 
   try {
     const { mode, context, userPrompt } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
+    const AI_API_KEY = getAiApiKey();
+    if (!AI_API_KEY) throw new Error("GEMINI_API_KEY missing");
 
     const systemPrompts: Record<string, string> = {
       pre_session: "You are a coaching copilot. Generate a concise pre-session brief: client status, last session recap, suggested agenda (3 bullets), key questions to ask. Plain text, under 200 words.",
@@ -29,11 +30,11 @@ serve(async (req) => {
     const system = systemPrompts[mode] || "You are a helpful coaching assistant.";
     const user = `${context ? `Context:\n${context}\n\n` : ""}${userPrompt || ""}`.trim();
 
-    const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const r = await fetch(AI_CHAT_URL, {
       method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${AI_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gemini-2.5-flash",
         messages: [{ role: "system", content: system }, { role: "user", content: user }],
       }),
     });

@@ -4,8 +4,9 @@ const corsHeaders = {
 };
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getAiApiKey, AI_CHAT_URL, mapAiModel, aiAuthHeaders, aiChatCompletions, generateImageDataUrl } from "../_shared/ai.ts";
 
-const AI_URL = 'https://ai.gateway.lovable.dev/v1/chat/completions';
+const AI_URL = AI_CHAT_URL;
 
 const SEO_ARTICLES = [
   {
@@ -219,7 +220,7 @@ async function generateAutoTopics(supabase: any, apiKey: string, count: number):
     method: 'POST',
     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
+      model: 'gemini-2.5-flash',
       messages: [
         {
           role: 'system',
@@ -274,7 +275,7 @@ Return ONLY the JSON array, no other text.`,
         method: 'POST',
         headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
+          model: 'gemini-2.5-flash',
           messages: [
             {
               role: 'system',
@@ -357,8 +358,8 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
+    const AI_API_KEY = getAiApiKey();
+    if (!AI_API_KEY) throw new Error('GEMINI_API_KEY is not configured');
     const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
     // Allow CRON_SECRET (scheduled jobs) or admin JWT
@@ -385,7 +386,7 @@ Deno.serve(async (req) => {
     const count = body.count ?? 3; // number of articles for auto mode
 
     if (mode === 'auto') {
-      const generated = await generateAutoTopics(supabase, LOVABLE_API_KEY, count);
+      const generated = await generateAutoTopics(supabase, AI_API_KEY, count);
       return new Response(JSON.stringify({ success: true, mode: 'auto', generated }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -415,9 +416,9 @@ Deno.serve(async (req) => {
 
       const response = await fetch(AI_URL, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
+        headers: { 'Authorization': `Bearer ${AI_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
+          model: 'gemini-2.5-flash',
           messages: [
             { role: 'system', content: 'You are an expert SEO content writer. Write the article directly in markdown format. Do NOT wrap in JSON. Write naturally and comprehensively. Minimum 2000 words.' },
             { role: 'user', content: article.prompt },

@@ -3,6 +3,7 @@
 //   → skill logic → language → memory → fallback → response format.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getAiApiKey, AI_CHAT_URL, mapAiModel, aiAuthHeaders, aiChatCompletions, generateImageDataUrl } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -147,8 +148,8 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const AI_API_KEY = getAiApiKey();
+    if (!AI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
     // STEP 1 — feature gates with safe defaults
     const fc: Required<FeatureControl> = { ...DEFAULT_FC, ...(body.feature_control || {}) };
@@ -168,10 +169,10 @@ serve(async (req) => {
       { role: "user", content: body.user_query },
     ];
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiRes = await fetch(AI_CHAT_URL, {
       method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages }),
+      headers: { Authorization: `Bearer ${AI_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "gemini-2.5-flash", messages }),
     });
 
     if (!aiRes.ok) {

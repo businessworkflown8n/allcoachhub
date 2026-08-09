@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/compatClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,7 @@ const AdminFeatureRequests = () => {
     const { data } = await supabase.from("feature_access_requests").select("*").order("created_at", { ascending: false });
     const ids = Array.from(new Set((data || []).map((r: any) => r.coach_id)));
     const { data: profs } = await supabase.from("profiles").select("user_id, full_name, email").in("user_id", ids);
-    const map = new Map((profs || []).map((p: any) => [p.user_id, p]));
+    const map = new Map<string, any>((profs || []).map((p: any) => [p.user_id, p]));
     setReqs((data || []).map((r: any) => ({ ...r, coach_name: map.get(r.coach_id)?.full_name, coach_email: map.get(r.coach_id)?.email })));
     setLoading(false);
   };

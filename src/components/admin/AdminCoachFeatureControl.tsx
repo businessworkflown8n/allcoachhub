@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/compatClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -71,7 +71,7 @@ const AdminCoachFeatureControl = () => {
     const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "coach");
     const coachIds = new Set((roles || []).map((r) => r.user_id));
     const { data: flags } = await supabase.from("coach_feature_flags").select("*");
-    const flagMap = new Map((flags || []).map((f: any) => [f.coach_id, f]));
+    const flagMap = new Map<string, any>((flags || []).map((f: any) => [f.coach_id, f]));
     const { data: waRows } = await supabase.from("whatsapp_access").select("coach_id, is_active");
     const waMap = new Map((waRows || []).map((w: any) => [w.coach_id, !!w.is_active]));
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/compatClient";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { BookOpen, Clock, PlayCircle, Search, Award, TrendingUp, CheckCircle2, Loader2, User as UserIcon } from "lucide-react";
@@ -46,7 +46,7 @@ const LearnerCourses = () => {
       }
 
       // Module / lesson counts per course
-      const courseIds = Array.from(new Set(list.map((e: any) => e.course_id)));
+      const courseIds = Array.from(new Set<string>(list.map((e: any) => e.course_id).filter(Boolean)));
       if (courseIds.length) {
         const { data: mods } = await supabase.from("course_modules").select("id, course_id").in("course_id", courseIds).eq("is_published", true);
         const modIds = (mods || []).map((m: any) => m.id);

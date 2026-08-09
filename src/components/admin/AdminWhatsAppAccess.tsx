@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/compatClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -54,8 +54,8 @@ const AdminWhatsAppAccess = () => {
     ]);
 
     const coachIds = new Set((roles || []).map((r: any) => r.user_id));
-    const accessMap = new Map((accessRows || []).map((a: any) => [a.coach_id, a]));
-    const credMap = new Map((credRows || []).map((c: any) => [c.coach_id, c]));
+    const accessMap = new Map<string, any>((accessRows || []).map((a: any) => [a.coach_id, a]));
+    const credMap = new Map<string, any>((credRows || []).map((c: any) => [c.coach_id, c]));
 
     const list: CoachAccess[] = (profiles || [])
       .filter((p: any) => coachIds.has(p.user_id))

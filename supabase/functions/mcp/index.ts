@@ -7,7 +7,7 @@ import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@0.20.1";
 
 // src/lib/mcp/tools/list-courses.ts
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.1";
-import { createClient } from "npm:@supabase/supabase-js@^2.108.2";
+import { createClient } from "npm:@supabase/supabase-js@^2.112.2";
 import { z } from "npm:zod@^3.25.76";
 function anonSupabase() {
   return createClient(
@@ -44,7 +44,7 @@ var list_courses_default = defineTool({
 
 // src/lib/mcp/tools/search-coaches.ts
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.1";
-import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.108.2";
+import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.112.2";
 import { z as z2 } from "npm:zod@^3.25.76";
 function anonSupabase2() {
   return createClient2(
@@ -83,7 +83,7 @@ var search_coaches_default = defineTool2({
 
 // src/lib/mcp/tools/my-enrollments.ts
 import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.1";
-import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.108.2";
+import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.112.2";
 function userSupabase(ctx) {
   return createClient3(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
@@ -112,7 +112,7 @@ var my_enrollments_default = defineTool3({
 
 // src/lib/mcp/tools/my-profile.ts
 import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.20.1";
-import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.108.2";
+import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.112.2";
 function userSupabase2(ctx) {
   return createClient4(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
@@ -144,7 +144,7 @@ var my_profile_default = defineTool4({
 });
 
 // src/lib/mcp/index.ts
-var projectRef = "fwtmgvszacuebhxnshct";
+var projectRef = "uekegatmucrqnogrqpnf";
 var mcp_default = defineMcp({
   name: "ai-coach-portal-mcp",
   title: "AI Coach Portal",

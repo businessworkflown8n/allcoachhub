@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/compatClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useContactAccess } from "@/hooks/useContactAccess";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -78,7 +78,7 @@ const CoachEnrollments = () => {
             .from("profiles")
             .select("user_id, full_name, email, contact_number, country, city, industry, current_job_title, whatsapp_number, education_qualification, experience_level")
             .in("user_id", regs.map((r: any) => r.learner_id));
-          const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+          const profileMap = new Map<string, any>((profiles || []).map((p: any) => [p.user_id, p]));
 
           const webinarRows = regs.map((r: any) => {
             const profile = profileMap.get(r.learner_id);

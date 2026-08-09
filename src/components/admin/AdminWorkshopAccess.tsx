@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/compatClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -30,7 +30,7 @@ const AdminWorkshopAccess = () => {
     const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "coach");
     const coachIds = new Set((roles || []).map((r) => r.user_id));
     const { data: accessRows } = await supabase.from("workshop_access").select("*");
-    const accessMap = new Map((accessRows || []).map((a) => [a.coach_id, a]));
+    const accessMap = new Map<string, any>((accessRows || []).map((a: any) => [a.coach_id, a]));
 
     const list: CoachWorkshopAccess[] = (profiles || [])
       .filter((p) => coachIds.has(p.user_id))

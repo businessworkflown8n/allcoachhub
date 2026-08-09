@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/compatClient";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,8 +80,8 @@ export default function LearnerSessions() {
       supabase.from("session_resources").select("session_id").in("session_id", sessionIds),
     ]);
 
-    const pMap = new Map((profs || []).map((p: any) => [p.user_id, p.full_name]));
-    const cMap = new Map((courses || []).map((c: any) => [c.id, c.title]));
+    const pMap = new Map<string, string>((profs || []).map((p: any) => [p.user_id, p.full_name]));
+    const cMap = new Map<string, string>((courses || []).map((c: any) => [c.id, c.title]));
     const tally = (arr: any[] | null) => {
       const m: Record<string, number> = {};
       for (const r of arr || []) m[r.session_id] = (m[r.session_id] || 0) + 1;

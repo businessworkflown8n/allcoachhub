@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/compatClient";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { KeyRound, Check, X, Clock, Search } from "lucide-react";
@@ -43,7 +43,7 @@ const AdminContactRequests = () => {
         .select("user_id, full_name, email")
         .in("user_id", allUserIds);
 
-      const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+      const profileMap = new Map<string, any>((profiles || []).map((p: any) => [p.user_id, p]));
 
       setRequests(data.map((r: any) => ({
         ...r,

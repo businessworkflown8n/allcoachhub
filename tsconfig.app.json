@@ -11,6 +11,7 @@
     "module": "ESNext",
     "moduleDetection": "force",
     "moduleResolution": "bundler",
+    "baseUrl": ".",
     "noEmit": true,
     "noFallthroughCasesInSwitch": false,
     "noImplicitAny": false,

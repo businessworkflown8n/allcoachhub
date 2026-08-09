@@ -43,7 +43,7 @@ const AdminContactRequests = () => {
         .select("user_id, full_name, email")
         .in("user_id", allUserIds);
 
-      const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+      const profileMap = new Map<string, any>((profiles || []).map((p: any) => [p.user_id, p]));
 
       setRequests(data.map((r: any) => ({
         ...r,

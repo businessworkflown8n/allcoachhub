@@ -1,9 +1,6 @@
+// Compatibility export for the active backend while generated schema types are unavailable.
+// The generated client remains the single runtime connection; this shim only relaxes
+// compile-time table inference until the backend schema is introspected again.
 import { supabase as generatedSupabase } from "./client";
 
-/**
- * Compatibility client used while the connected backend schema is being
- * provisioned. Runtime behavior is identical to the generated client; this
- * keeps legacy table queries usable when generated typings are temporarily
- * empty.
- */
-export const supabase = generatedSupabase as any;
+export const supabase: any = generatedSupabase;

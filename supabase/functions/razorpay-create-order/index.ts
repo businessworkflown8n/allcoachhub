@@ -6,24 +6,47 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+/** Structured, human-readable error. Never includes secret values. */
+const fail = (error: string, code: string, status: number, extra?: Record<string, unknown>) => {
+  console.error(`[razorpay-create-order] ${code}: ${error}`, extra ?? {});
+  return json({ success: false, error, code, ...(extra ?? {}) }, status);
+};
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) return json({ error: 'Unauthorized' }, 401);
+    // --- Server configuration checks (fail loudly with the exact missing name) ---
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? Deno.env.get('SUPABASE_PUBLISHABLE_KEY');
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SB_SECRET_KEY');
+    const missingEnv = [
+      !supabaseUrl && 'SUPABASE_URL',
+      !anonKey && 'SUPABASE_ANON_KEY',
+      !serviceKey && 'SUPABASE_SERVICE_ROLE_KEY',
+    ].filter(Boolean) as string[];
+    if (missingEnv.length) {
+      return fail(
+        `Payment service is misconfigured. Missing server setting(s): ${missingEnv.join(', ')}.`,
+        'SERVER_MISCONFIGURED',
+        500,
+      );
+    }
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return fail('You must be signed in to start a payment.', 'NOT_AUTHENTICATED', 401);
+    }
+
+    const supabase = createClient(supabaseUrl!, anonKey!, { global: { headers: { Authorization: authHeader } } });
     const token = authHeader.replace('Bearer ', '');
     const { data: claims, error: claimsErr } = await supabase.auth.getClaims(token);
-    if (claimsErr || !claims?.claims) return json({ error: 'Unauthorized' }, 401);
+    if (claimsErr || !claims?.claims) {
+      return fail('Your session has expired. Please sign in again and retry.', 'SESSION_INVALID', 401);
+    }
     const userId = claims.claims.sub as string;
     const userEmail = (claims.claims.email as string | undefined) ?? '';
+
 
     const body = await req.json().catch(() => ({}));
     const {
@@ -38,9 +61,12 @@ Deno.serve(async (req) => {
     } = body ?? {};
 
     const kind = rawKind ?? (webinar_id ? 'webinar' : plan_id ? 'subscription' : 'course');
-    if (!['course', 'webinar', 'subscription'].includes(kind)) return json({ error: 'Unsupported kind' }, 400);
+    if (!['course', 'webinar', 'subscription'].includes(kind)) {
+      return fail(`Unsupported purchase type "${String(kind)}".`, 'INVALID_KIND', 400);
+    }
 
-    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+    const admin = createClient(supabaseUrl!, serviceKey!);
+
 
     let coachId: string | null = null;
     let priceInr = 0, priceUsd = 0, title = '';
@@ -52,32 +78,35 @@ Deno.serve(async (req) => {
     const notes: Record<string, unknown> = { kind, user_id: userId };
 
     if (kind === 'course') {
-      if (!course_id) return json({ error: 'course_id required' }, 400);
+      if (!course_id) return fail('No course was specified for this payment.', 'MISSING_COURSE_ID', 400);
       const { data: c, error } = await admin
         .from('courses').select('id, title, coach_id, price_inr, price_usd, is_published')
         .eq('id', course_id).maybeSingle();
-      if (error || !c) return json({ error: 'Course not found' }, 404);
+      if (error) return fail(`Could not load the course: ${error.message}`, 'DB_COURSE_LOOKUP_FAILED', 500);
+      if (!c) return fail('This course no longer exists.', 'COURSE_NOT_FOUND', 404);
       coachId = c.coach_id; priceInr = Number(c.price_inr ?? 0); priceUsd = Number(c.price_usd ?? 0); title = c.title ?? '';
       resolvedCourseId = c.id; receiptPrefix = 'c'; notes.course_id = c.id; notes.course_title = c.title;
     } else if (kind === 'webinar') {
-      if (!webinar_id) return json({ error: 'webinar_id required' }, 400);
+      if (!webinar_id) return fail('No webinar was specified for this payment.', 'MISSING_WEBINAR_ID', 400);
       const { data: w, error } = await admin
         .from('webinars').select('id, title, coach_id, price_inr, price_usd, is_paid, is_published')
         .eq('id', webinar_id).maybeSingle();
-      if (error || !w) return json({ error: 'Webinar not found' }, 404);
-      if (!w.is_paid) return json({ error: 'Webinar is free — no payment required' }, 400);
+      if (error) return fail(`Could not load the webinar: ${error.message}`, 'DB_WEBINAR_LOOKUP_FAILED', 500);
+      if (!w) return fail('This webinar no longer exists.', 'WEBINAR_NOT_FOUND', 404);
+      if (!w.is_paid) return fail('This webinar is free — no payment is required.', 'WEBINAR_IS_FREE', 400);
       coachId = w.coach_id; priceInr = Number(w.price_inr ?? 0); priceUsd = Number(w.price_usd ?? 0); title = w.title ?? '';
       resolvedWebinarId = w.id; receiptPrefix = 'w'; notes.webinar_id = w.id; notes.webinar_title = w.title;
     } else {
-      if (!plan_id) return json({ error: 'plan_id required' }, 400);
+      if (!plan_id) return fail('No subscription plan was specified.', 'MISSING_PLAN_ID', 400);
       const { data: p, error } = await admin
         .from('subscription_plans')
         .select('id, name, slug, price, yearly_price, currency, is_active')
         .eq('id', plan_id).maybeSingle();
-      if (error || !p) return json({ error: 'Plan not found' }, 404);
-      if (!p.is_active) return json({ error: 'Plan is not active' }, 400);
+      if (error) return fail(`Could not load the plan: ${error.message}`, 'DB_PLAN_LOOKUP_FAILED', 500);
+      if (!p) return fail('This subscription plan no longer exists.', 'PLAN_NOT_FOUND', 404);
+      if (!p.is_active) return fail('This subscription plan is no longer available.', 'PLAN_INACTIVE', 400);
       const amt = billingInterval === 'yearly' ? Number(p.yearly_price ?? 0) : Number(p.price ?? 0);
-      if (!amt || amt <= 0) return json({ error: 'Plan price not configured for this interval' }, 400);
+      if (!amt || amt <= 0) return fail(`No ${billingInterval} price is configured for this plan.`, 'PLAN_PRICE_MISSING', 400);
       priceInr = amt; priceUsd = 0; title = `${p.name} (${billingInterval})`;
       resolvedPlanId = p.id; coachId = userId;
       receiptPrefix = 's';
@@ -86,29 +115,52 @@ Deno.serve(async (req) => {
 
     const currency = (requestedCurrency === 'USD' ? 'USD' : 'INR') as 'INR' | 'USD';
     const priceMajor = currency === 'INR' ? priceInr : priceUsd;
-    if (!priceMajor || priceMajor <= 0) return json({ error: 'Item is free or has no price set' }, 400);
+    if (!priceMajor || priceMajor <= 0) {
+      return fail(`No ${currency} price is set for this item. Please contact support.`, 'PRICE_NOT_SET', 400);
+    }
+
     const amountMinor = Math.round(priceMajor * 100);
 
     const keyId = Deno.env.get('RAZORPAY_KEY_ID');
     const keySecret = Deno.env.get('RAZORPAY_KEY_SECRET');
-    if (!keyId || !keySecret) return json({ error: 'Payment provider not configured' }, 500);
+    if (!keyId || !keySecret) {
+      const missing = [!keyId && 'RAZORPAY_KEY_ID', !keySecret && 'RAZORPAY_KEY_SECRET'].filter(Boolean).join(', ');
+      return fail(`Payment provider is not configured. Missing: ${missing}.`, 'PAYMENT_PROVIDER_NOT_CONFIGURED', 500);
+    }
 
     const idSlice = (resolvedCourseId ?? resolvedWebinarId ?? resolvedPlanId ?? 'xxxxxxxx').slice(0, 8);
     const receipt = `${receiptPrefix}_${idSlice}_${Date.now().toString(36)}`.slice(0, 40);
     const authStr = btoa(`${keyId}:${keySecret}`);
 
-    const rzpRes = await fetch('https://api.razorpay.com/v1/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Basic ${authStr}` },
-      body: JSON.stringify({ amount: amountMinor, currency, receipt, notes }),
-    });
-    const rzpJson = await rzpRes.json();
-    if (!rzpRes.ok) {
-      console.error('Razorpay order create failed', rzpJson);
-      return json({ error: rzpJson?.error?.description ?? 'Razorpay error' }, 502);
+    let rzpRes: Response;
+    let rzpJson: any;
+    try {
+      rzpRes = await fetch('https://api.razorpay.com/v1/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Basic ${authStr}` },
+        body: JSON.stringify({ amount: amountMinor, currency, receipt, notes }),
+      });
+      rzpJson = await rzpRes.json().catch(() => ({}));
+    } catch (e) {
+      return fail(`Could not reach Razorpay: ${(e as Error).message}`, 'PAYMENT_GATEWAY_UNREACHABLE', 502);
     }
 
-    await admin.from('razorpay_orders').insert({
+    if (!rzpRes.ok) {
+      // Razorpay returns 401 for bad/expired API keys — surface that distinctly.
+      if (rzpRes.status === 401) {
+        return fail(
+          'Razorpay rejected the API credentials. The RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET secrets need to be updated.',
+          'PAYMENT_PROVIDER_AUTH_FAILED',
+          502,
+        );
+      }
+      const desc = rzpJson?.error?.description ?? `Razorpay returned HTTP ${rzpRes.status}`;
+      return fail(desc, 'PAYMENT_CREATION_FAILED', 502, { provider_status: rzpRes.status });
+    }
+
+    // Persist the order in Supabase BEFORE handing the user to checkout, so the
+    // webhook/verify step always has a record to reconcile against.
+    const { error: orderInsertErr } = await admin.from('razorpay_orders').insert({
       user_id: userId,
       kind,
       course_id: resolvedCourseId,
@@ -125,6 +177,13 @@ Deno.serve(async (req) => {
         : kind === 'webinar' ? (registration_data ?? null)
         : { plan_id: resolvedPlanId, billing_interval: billingInterval },
     });
+    if (orderInsertErr) {
+      return fail(
+        `Payment order could not be recorded: ${orderInsertErr.message}`,
+        'DB_ORDER_INSERT_FAILED',
+        500,
+      );
+    }
 
     return json({
       success: true,
@@ -139,7 +198,7 @@ Deno.serve(async (req) => {
       prefill: { email: userEmail },
     });
   } catch (e) {
-    console.error('create-order error', e);
-    return json({ error: (e as Error).message }, 500);
+    return fail(`Unexpected payment error: ${(e as Error).message}`, 'UNEXPECTED_ERROR', 500);
   }
 });
+

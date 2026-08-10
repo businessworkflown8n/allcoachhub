@@ -29,6 +29,29 @@ function loadScript(src: string): Promise<boolean> {
   });
 }
 
+/** Extracts the real, structured error the Edge Function returned.
+ *  supabase-js throws FunctionsHttpError with a generic message
+ *  ("Edge Function returned a non-2xx status code") and keeps the actual
+ *  response on `error.context`. We read that body so the user sees the truth. */
+async function extractFunctionError(error: any, data: any): Promise<{ message: string; code?: string }> {
+  const res: Response | undefined = error?.context instanceof Response ? error.context : undefined;
+  if (res) {
+    try {
+      const body = await res.clone().json();
+      if (body?.error) return { message: String(body.error), code: body.code };
+    } catch {
+      try {
+        const text = await res.clone().text();
+        if (text) return { message: text.slice(0, 300) };
+      } catch { /* ignore */ }
+    }
+    return { message: `Payment service error (HTTP ${res.status})` };
+  }
+  if (data?.error) return { message: String(data.error), code: data.code };
+  if (error?.message) return { message: String(error.message) };
+  return { message: "Could not reach the payment service. Please try again in a moment." };
+}
+
 export interface OpenCheckoutArgs {
   /** course_id (when kind = 'course') */
   courseId?: string;
@@ -46,17 +69,27 @@ export interface OpenCheckoutArgs {
   prefill?: { name?: string; email?: string; contact?: string };
   onSuccess?: (info: { enrollmentId?: string; webinarRegistrationId?: string; paymentId: string; invoiceUrl?: string }) => void;
   onDismiss?: () => void;
+  /** Called whenever checkout could not start or failed — always fires so callers can clear their own loading state. */
+  onError?: (info: { message: string; code?: string }) => void;
 }
+
 
 export function useRazorpayCheckout() {
   const [loading, setLoading] = useState(false);
 
   const openCheckout = useCallback(async (args: OpenCheckoutArgs) => {
     setLoading(true);
+    const fail = (message: string, code?: string) => {
+      console.error("[razorpay-checkout] failed", { message, code });
+      toast({ title: "Could not start payment", description: message, variant: "destructive" });
+      setLoading(false);
+      args.onError?.({ message, code });
+    };
+
     try {
       const ok = await loadScript(RAZORPAY_SCRIPT);
       if (!ok || !window.Razorpay) {
-        toast({ title: "Payment unavailable", description: "Could not load Razorpay. Check your connection and try again.", variant: "destructive" });
+        fail("Could not load Razorpay. Check your connection and try again.", "SCRIPT_LOAD_FAILED");
         return;
       }
 
@@ -82,16 +115,11 @@ export function useRazorpayCheckout() {
         error = e;
       }
       if (error || !data?.success) {
-        const msg =
-          (error as any)?.context?.error ||
-          (error as any)?.message ||
-          data?.error ||
-          "Could not reach the payment service. Please try again in a moment.";
-        console.error("[razorpay-create-order] failed", { error, data });
-        toast({ title: "Could not start payment", description: String(msg), variant: "destructive" });
-        setLoading(false);
+        const info = await extractFunctionError(error, data);
+        fail(info.message, info.code);
         return;
       }
+
 
 
       const options = {
@@ -133,15 +161,20 @@ export function useRazorpayCheckout() {
 
       const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", (resp: any) => {
-        toast({ title: "Payment failed", description: resp?.error?.description ?? "Please try again.", variant: "destructive" });
+        const message = resp?.error?.description ?? "Please try again.";
+        toast({ title: "Payment failed", description: message, variant: "destructive" });
         setLoading(false);
+        args.onError?.({ message, code: resp?.error?.code ?? "PAYMENT_FAILED" });
       });
       rzp.open();
     } catch (e: any) {
-      toast({ title: "Checkout error", description: e?.message ?? "Unknown error", variant: "destructive" });
+      const message = e?.message ?? "Unknown error";
+      toast({ title: "Checkout error", description: message, variant: "destructive" });
       setLoading(false);
+      args.onError?.({ message, code: "CHECKOUT_EXCEPTION" });
     }
   }, []);
+
 
   return { openCheckout, loading };
 }

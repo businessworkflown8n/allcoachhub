@@ -168,6 +168,8 @@ const Webinars = () => {
           setRegistering(null);
         },
         onDismiss: () => setRegistering(null),
+        onError: () => setRegistering(null),
+
       });
       return;
     }

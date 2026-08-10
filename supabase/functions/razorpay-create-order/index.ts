@@ -16,13 +16,8 @@ const FN_VERSION = '2026-08-10.1';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (new URL(req.url).searchParams.get('health') === '1') {
-    return json({
-      version: FN_VERSION,
-      razorpay_key_id: !!Deno.env.get('RAZORPAY_KEY_ID'),
-      razorpay_key_secret: !!Deno.env.get('RAZORPAY_KEY_SECRET'),
-    });
-  }
+  console.log(`[razorpay-create-order] v${FN_VERSION}`);
+
 
 
   try {

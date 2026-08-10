@@ -29,6 +29,29 @@ function loadScript(src: string): Promise<boolean> {
   });
 }
 
+/** Extracts the real, structured error the Edge Function returned.
+ *  supabase-js throws FunctionsHttpError with a generic message
+ *  ("Edge Function returned a non-2xx status code") and keeps the actual
+ *  response on `error.context`. We read that body so the user sees the truth. */
+async function extractFunctionError(error: any, data: any): Promise<{ message: string; code?: string }> {
+  const res: Response | undefined = error?.context instanceof Response ? error.context : undefined;
+  if (res) {
+    try {
+      const body = await res.clone().json();
+      if (body?.error) return { message: String(body.error), code: body.code };
+    } catch {
+      try {
+        const text = await res.clone().text();
+        if (text) return { message: text.slice(0, 300) };
+      } catch { /* ignore */ }
+    }
+    return { message: `Payment service error (HTTP ${res.status})` };
+  }
+  if (data?.error) return { message: String(data.error), code: data.code };
+  if (error?.message) return { message: String(error.message) };
+  return { message: "Could not reach the payment service. Please try again in a moment." };
+}
+
 export interface OpenCheckoutArgs {
   /** course_id (when kind = 'course') */
   courseId?: string;
@@ -46,7 +69,10 @@ export interface OpenCheckoutArgs {
   prefill?: { name?: string; email?: string; contact?: string };
   onSuccess?: (info: { enrollmentId?: string; webinarRegistrationId?: string; paymentId: string; invoiceUrl?: string }) => void;
   onDismiss?: () => void;
+  /** Called whenever checkout could not start or failed — always fires so callers can clear their own loading state. */
+  onError?: (info: { message: string; code?: string }) => void;
 }
+
 
 export function useRazorpayCheckout() {
   const [loading, setLoading] = useState(false);

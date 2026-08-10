@@ -12,7 +12,7 @@ const fail = (error: string, code: string, status: number, extra?: Record<string
   return json({ success: false, error, code, ...(extra ?? {}) }, status);
 };
 
-const FN_VERSION = '2026-08-10.1';
+const FN_VERSION = '2026-08-10.2';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });

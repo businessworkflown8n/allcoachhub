@@ -123,24 +123,44 @@ Deno.serve(async (req) => {
 
     const keyId = Deno.env.get('RAZORPAY_KEY_ID');
     const keySecret = Deno.env.get('RAZORPAY_KEY_SECRET');
-    if (!keyId || !keySecret) return json({ error: 'Payment provider not configured' }, 500);
+    if (!keyId || !keySecret) {
+      const missing = [!keyId && 'RAZORPAY_KEY_ID', !keySecret && 'RAZORPAY_KEY_SECRET'].filter(Boolean).join(', ');
+      return fail(`Payment provider is not configured. Missing: ${missing}.`, 'PAYMENT_PROVIDER_NOT_CONFIGURED', 500);
+    }
 
     const idSlice = (resolvedCourseId ?? resolvedWebinarId ?? resolvedPlanId ?? 'xxxxxxxx').slice(0, 8);
     const receipt = `${receiptPrefix}_${idSlice}_${Date.now().toString(36)}`.slice(0, 40);
     const authStr = btoa(`${keyId}:${keySecret}`);
 
-    const rzpRes = await fetch('https://api.razorpay.com/v1/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Basic ${authStr}` },
-      body: JSON.stringify({ amount: amountMinor, currency, receipt, notes }),
-    });
-    const rzpJson = await rzpRes.json();
-    if (!rzpRes.ok) {
-      console.error('Razorpay order create failed', rzpJson);
-      return json({ error: rzpJson?.error?.description ?? 'Razorpay error' }, 502);
+    let rzpRes: Response;
+    let rzpJson: any;
+    try {
+      rzpRes = await fetch('https://api.razorpay.com/v1/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Basic ${authStr}` },
+        body: JSON.stringify({ amount: amountMinor, currency, receipt, notes }),
+      });
+      rzpJson = await rzpRes.json().catch(() => ({}));
+    } catch (e) {
+      return fail(`Could not reach Razorpay: ${(e as Error).message}`, 'PAYMENT_GATEWAY_UNREACHABLE', 502);
     }
 
-    await admin.from('razorpay_orders').insert({
+    if (!rzpRes.ok) {
+      // Razorpay returns 401 for bad/expired API keys — surface that distinctly.
+      if (rzpRes.status === 401) {
+        return fail(
+          'Razorpay rejected the API credentials. The RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET secrets need to be updated.',
+          'PAYMENT_PROVIDER_AUTH_FAILED',
+          502,
+        );
+      }
+      const desc = rzpJson?.error?.description ?? `Razorpay returned HTTP ${rzpRes.status}`;
+      return fail(desc, 'PAYMENT_CREATION_FAILED', 502, { provider_status: rzpRes.status });
+    }
+
+    // Persist the order in Supabase BEFORE handing the user to checkout, so the
+    // webhook/verify step always has a record to reconcile against.
+    const { error: orderInsertErr } = await admin.from('razorpay_orders').insert({
       user_id: userId,
       kind,
       course_id: resolvedCourseId,
@@ -157,6 +177,13 @@ Deno.serve(async (req) => {
         : kind === 'webinar' ? (registration_data ?? null)
         : { plan_id: resolvedPlanId, billing_interval: billingInterval },
     });
+    if (orderInsertErr) {
+      return fail(
+        `Payment order could not be recorded: ${orderInsertErr.message}`,
+        'DB_ORDER_INSERT_FAILED',
+        500,
+      );
+    }
 
     return json({
       success: true,
@@ -171,7 +198,7 @@ Deno.serve(async (req) => {
       prefill: { email: userEmail },
     });
   } catch (e) {
-    console.error('create-order error', e);
-    return json({ error: (e as Error).message }, 500);
+    return fail(`Unexpected payment error: ${(e as Error).message}`, 'UNEXPECTED_ERROR', 500);
   }
 });
+

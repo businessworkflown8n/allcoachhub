@@ -12,8 +12,13 @@ const fail = (error: string, code: string, status: number, extra?: Record<string
   return json({ success: false, error, code, ...(extra ?? {}) }, status);
 };
 
+const FN_VERSION = '2026-08-10.1';
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  console.log(`[razorpay-create-order] v${FN_VERSION}`);
+
+
 
   try {
     // --- Server configuration checks (fail loudly with the exact missing name) ---

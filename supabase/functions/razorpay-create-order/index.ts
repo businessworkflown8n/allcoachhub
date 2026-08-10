@@ -6,24 +6,47 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+/** Structured, human-readable error. Never includes secret values. */
+const fail = (error: string, code: string, status: number, extra?: Record<string, unknown>) => {
+  console.error(`[razorpay-create-order] ${code}: ${error}`, extra ?? {});
+  return json({ success: false, error, code, ...(extra ?? {}) }, status);
+};
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) return json({ error: 'Unauthorized' }, 401);
+    // --- Server configuration checks (fail loudly with the exact missing name) ---
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? Deno.env.get('SUPABASE_PUBLISHABLE_KEY');
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SB_SECRET_KEY');
+    const missingEnv = [
+      !supabaseUrl && 'SUPABASE_URL',
+      !anonKey && 'SUPABASE_ANON_KEY',
+      !serviceKey && 'SUPABASE_SERVICE_ROLE_KEY',
+    ].filter(Boolean) as string[];
+    if (missingEnv.length) {
+      return fail(
+        `Payment service is misconfigured. Missing server setting(s): ${missingEnv.join(', ')}.`,
+        'SERVER_MISCONFIGURED',
+        500,
+      );
+    }
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return fail('You must be signed in to start a payment.', 'NOT_AUTHENTICATED', 401);
+    }
+
+    const supabase = createClient(supabaseUrl!, anonKey!, { global: { headers: { Authorization: authHeader } } });
     const token = authHeader.replace('Bearer ', '');
     const { data: claims, error: claimsErr } = await supabase.auth.getClaims(token);
-    if (claimsErr || !claims?.claims) return json({ error: 'Unauthorized' }, 401);
+    if (claimsErr || !claims?.claims) {
+      return fail('Your session has expired. Please sign in again and retry.', 'SESSION_INVALID', 401);
+    }
     const userId = claims.claims.sub as string;
     const userEmail = (claims.claims.email as string | undefined) ?? '';
+
 
     const body = await req.json().catch(() => ({}));
     const {

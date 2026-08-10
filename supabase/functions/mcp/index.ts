@@ -144,7 +144,7 @@ var my_profile_default = defineTool4({
 });
 
 // src/lib/mcp/index.ts
-var projectRef = "ykpmozgwepyjokhfluot";
+var projectRef = "fwtmgvszacuebhxnshct";
 var mcp_default = defineMcp({
   name: "ai-coach-portal-mcp",
   title: "AI Coach Portal",

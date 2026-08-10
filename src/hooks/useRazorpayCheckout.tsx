@@ -161,15 +161,20 @@ export function useRazorpayCheckout() {
 
       const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", (resp: any) => {
-        toast({ title: "Payment failed", description: resp?.error?.description ?? "Please try again.", variant: "destructive" });
+        const message = resp?.error?.description ?? "Please try again.";
+        toast({ title: "Payment failed", description: message, variant: "destructive" });
         setLoading(false);
+        args.onError?.({ message, code: resp?.error?.code ?? "PAYMENT_FAILED" });
       });
       rzp.open();
     } catch (e: any) {
-      toast({ title: "Checkout error", description: e?.message ?? "Unknown error", variant: "destructive" });
+      const message = e?.message ?? "Unknown error";
+      toast({ title: "Checkout error", description: message, variant: "destructive" });
       setLoading(false);
+      args.onError?.({ message, code: "CHECKOUT_EXCEPTION" });
     }
   }, []);
+
 
   return { openCheckout, loading };
 }

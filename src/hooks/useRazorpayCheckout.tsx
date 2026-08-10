@@ -79,10 +79,17 @@ export function useRazorpayCheckout() {
 
   const openCheckout = useCallback(async (args: OpenCheckoutArgs) => {
     setLoading(true);
+    const fail = (message: string, code?: string) => {
+      console.error("[razorpay-checkout] failed", { message, code });
+      toast({ title: "Could not start payment", description: message, variant: "destructive" });
+      setLoading(false);
+      args.onError?.({ message, code });
+    };
+
     try {
       const ok = await loadScript(RAZORPAY_SCRIPT);
       if (!ok || !window.Razorpay) {
-        toast({ title: "Payment unavailable", description: "Could not load Razorpay. Check your connection and try again.", variant: "destructive" });
+        fail("Could not load Razorpay. Check your connection and try again.", "SCRIPT_LOAD_FAILED");
         return;
       }
 
@@ -108,16 +115,11 @@ export function useRazorpayCheckout() {
         error = e;
       }
       if (error || !data?.success) {
-        const msg =
-          (error as any)?.context?.error ||
-          (error as any)?.message ||
-          data?.error ||
-          "Could not reach the payment service. Please try again in a moment.";
-        console.error("[razorpay-create-order] failed", { error, data });
-        toast({ title: "Could not start payment", description: String(msg), variant: "destructive" });
-        setLoading(false);
+        const info = await extractFunctionError(error, data);
+        fail(info.message, info.code);
         return;
       }
+
 
 
       const options = {

@@ -61,9 +61,12 @@ Deno.serve(async (req) => {
     } = body ?? {};
 
     const kind = rawKind ?? (webinar_id ? 'webinar' : plan_id ? 'subscription' : 'course');
-    if (!['course', 'webinar', 'subscription'].includes(kind)) return json({ error: 'Unsupported kind' }, 400);
+    if (!['course', 'webinar', 'subscription'].includes(kind)) {
+      return fail(`Unsupported purchase type "${String(kind)}".`, 'INVALID_KIND', 400);
+    }
 
-    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+    const admin = createClient(supabaseUrl!, serviceKey!);
+
 
     let coachId: string | null = null;
     let priceInr = 0, priceUsd = 0, title = '';

@@ -78,32 +78,35 @@ Deno.serve(async (req) => {
     const notes: Record<string, unknown> = { kind, user_id: userId };
 
     if (kind === 'course') {
-      if (!course_id) return json({ error: 'course_id required' }, 400);
+      if (!course_id) return fail('No course was specified for this payment.', 'MISSING_COURSE_ID', 400);
       const { data: c, error } = await admin
         .from('courses').select('id, title, coach_id, price_inr, price_usd, is_published')
         .eq('id', course_id).maybeSingle();
-      if (error || !c) return json({ error: 'Course not found' }, 404);
+      if (error) return fail(`Could not load the course: ${error.message}`, 'DB_COURSE_LOOKUP_FAILED', 500);
+      if (!c) return fail('This course no longer exists.', 'COURSE_NOT_FOUND', 404);
       coachId = c.coach_id; priceInr = Number(c.price_inr ?? 0); priceUsd = Number(c.price_usd ?? 0); title = c.title ?? '';
       resolvedCourseId = c.id; receiptPrefix = 'c'; notes.course_id = c.id; notes.course_title = c.title;
     } else if (kind === 'webinar') {
-      if (!webinar_id) return json({ error: 'webinar_id required' }, 400);
+      if (!webinar_id) return fail('No webinar was specified for this payment.', 'MISSING_WEBINAR_ID', 400);
       const { data: w, error } = await admin
         .from('webinars').select('id, title, coach_id, price_inr, price_usd, is_paid, is_published')
         .eq('id', webinar_id).maybeSingle();
-      if (error || !w) return json({ error: 'Webinar not found' }, 404);
-      if (!w.is_paid) return json({ error: 'Webinar is free — no payment required' }, 400);
+      if (error) return fail(`Could not load the webinar: ${error.message}`, 'DB_WEBINAR_LOOKUP_FAILED', 500);
+      if (!w) return fail('This webinar no longer exists.', 'WEBINAR_NOT_FOUND', 404);
+      if (!w.is_paid) return fail('This webinar is free — no payment is required.', 'WEBINAR_IS_FREE', 400);
       coachId = w.coach_id; priceInr = Number(w.price_inr ?? 0); priceUsd = Number(w.price_usd ?? 0); title = w.title ?? '';
       resolvedWebinarId = w.id; receiptPrefix = 'w'; notes.webinar_id = w.id; notes.webinar_title = w.title;
     } else {
-      if (!plan_id) return json({ error: 'plan_id required' }, 400);
+      if (!plan_id) return fail('No subscription plan was specified.', 'MISSING_PLAN_ID', 400);
       const { data: p, error } = await admin
         .from('subscription_plans')
         .select('id, name, slug, price, yearly_price, currency, is_active')
         .eq('id', plan_id).maybeSingle();
-      if (error || !p) return json({ error: 'Plan not found' }, 404);
-      if (!p.is_active) return json({ error: 'Plan is not active' }, 400);
+      if (error) return fail(`Could not load the plan: ${error.message}`, 'DB_PLAN_LOOKUP_FAILED', 500);
+      if (!p) return fail('This subscription plan no longer exists.', 'PLAN_NOT_FOUND', 404);
+      if (!p.is_active) return fail('This subscription plan is no longer available.', 'PLAN_INACTIVE', 400);
       const amt = billingInterval === 'yearly' ? Number(p.yearly_price ?? 0) : Number(p.price ?? 0);
-      if (!amt || amt <= 0) return json({ error: 'Plan price not configured for this interval' }, 400);
+      if (!amt || amt <= 0) return fail(`No ${billingInterval} price is configured for this plan.`, 'PLAN_PRICE_MISSING', 400);
       priceInr = amt; priceUsd = 0; title = `${p.name} (${billingInterval})`;
       resolvedPlanId = p.id; coachId = userId;
       receiptPrefix = 's';
@@ -112,7 +115,10 @@ Deno.serve(async (req) => {
 
     const currency = (requestedCurrency === 'USD' ? 'USD' : 'INR') as 'INR' | 'USD';
     const priceMajor = currency === 'INR' ? priceInr : priceUsd;
-    if (!priceMajor || priceMajor <= 0) return json({ error: 'Item is free or has no price set' }, 400);
+    if (!priceMajor || priceMajor <= 0) {
+      return fail(`No ${currency} price is set for this item. Please contact support.`, 'PRICE_NOT_SET', 400);
+    }
+
     const amountMinor = Math.round(priceMajor * 100);
 
     const keyId = Deno.env.get('RAZORPAY_KEY_ID');

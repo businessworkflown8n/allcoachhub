@@ -239,6 +239,8 @@ const Enroll = () => {
         navigate("/learner/courses");
       },
       onDismiss: () => setSubmitting(false),
+      onError: () => setSubmitting(false),
+
     });
   };
 

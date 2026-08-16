@@ -134,10 +134,14 @@ const CoachCourseForm = () => {
   const uploadThumbnail = async (courseId: string): Promise<string | null> => {
     if (!thumbnailFile || !user) return null;
     const ext = thumbnailFile.name.split(".").pop();
-    const path = `course-thumbnails/${user.id}/${courseId}.${ext}`;
-    const { error } = await supabase.storage.from("logos").upload(path, thumbnailFile, { upsert: true });
-    if (error) { console.error("Thumbnail upload error:", error); return null; }
-    const { data: urlData } = supabase.storage.from("logos").getPublicUrl(path);
+    const path = `${user.id}/${courseId}.${ext}`;
+    const { error } = await supabase.storage.from("course-thumbnails").upload(path, thumbnailFile, { upsert: true });
+    if (error) {
+      console.error("Thumbnail upload error:", error);
+      toast({ title: "Thumbnail upload failed", description: error.message, variant: "destructive" });
+      return null;
+    }
+    const { data: urlData } = supabase.storage.from("course-thumbnails").getPublicUrl(path);
     return urlData.publicUrl;
   };
 

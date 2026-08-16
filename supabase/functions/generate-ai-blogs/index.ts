@@ -107,7 +107,7 @@ async function callAI(apiKey: string, messages: { role: string; content: string 
   const response = await fetch(AI_URL, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'gemini-2.5-flash', messages, temperature: 0.7 }),
+    body: JSON.stringify({ model: 'gemini-3.7-flash', messages, temperature: 0.7 }),
   });
   if (!response.ok) {
     const err = await response.text();

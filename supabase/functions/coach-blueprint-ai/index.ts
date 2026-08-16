@@ -222,7 +222,7 @@ Deno.serve(async (req) => {
       method: "POST",
       headers: { Authorization: `Bearer ${AI_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.7-flash",
         messages: [
           { role: "system", content: promptCfg.system },
           { role: "user", content: userMsg },

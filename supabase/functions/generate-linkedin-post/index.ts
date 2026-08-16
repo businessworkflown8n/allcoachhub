@@ -99,7 +99,7 @@ Uniqueness seed: ${Date.now()}-${cert.id.slice(0, 8)}`;
         "Authorization": `Bearer ${AI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.7-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },

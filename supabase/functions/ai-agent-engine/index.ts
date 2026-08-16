@@ -172,7 +172,7 @@ serve(async (req) => {
     const aiRes = await fetch(AI_CHAT_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${AI_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "gemini-2.5-flash", messages }),
+      body: JSON.stringify({ model: "gemini-3.7-flash", messages }),
     });
 
     if (!aiRes.ok) {

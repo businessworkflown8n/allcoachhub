@@ -22,18 +22,19 @@ export function aiAuthHeaders(apiKey?: string): HeadersInit {
   };
 }
 
-/** Map legacy Lovable gateway model IDs → Gemini API model IDs */
+/** Map legacy/retired Gemini model IDs → currently available Gemini API model IDs */
 export function mapAiModel(model: string): string {
   const m = model.replace(/^google\//, "");
   const table: Record<string, string> = {
-    "gemini-3-flash-preview": "gemini-2.5-flash",
-    "gemini-3.1-flash-image-preview": "gemini-2.5-flash",
-    "gemini-2.5-flash-image": "gemini-2.5-flash",
-    "gemini-2.5-flash-lite": "gemini-2.0-flash-lite",
-    "gemini-2.5-flash": "gemini-2.5-flash",
-    "gemini-2.0-flash": "gemini-2.0-flash",
+    "gemini-3-flash-preview": "gemini-3.7-flash",
+    "gemini-3.1-flash-image-preview": "gemini-3.1-flash-image",
+    "gemini-2.5-flash-image": "gemini-3.1-flash-image",
+    "gemini-2.5-flash-lite": "gemini-3.1-flash-lite",
+    "gemini-2.5-flash": "gemini-3.7-flash",
+    "gemini-2.0-flash": "gemini-3.7-flash",
+    "gemini-2.0-flash-lite": "gemini-3.1-flash-lite",
   };
-  return table[m] || (m.startsWith("gemini-") ? m : "gemini-2.5-flash");
+  return table[m] || (m.startsWith("gemini-") ? m : "gemini-3.7-flash");
 }
 
 export async function aiChatCompletions(
@@ -60,7 +61,7 @@ export async function generateImageDataUrl(
   apiKey?: string,
 ): Promise<string | null> {
   const key = apiKey ?? getAiApiKey();
-  const model = "gemini-2.0-flash-preview-image-generation";
+  const model = "gemini-3.1-flash-image";
   const url =
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent` +
     `?key=${encodeURIComponent(key)}`;

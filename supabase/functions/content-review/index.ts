@@ -35,7 +35,7 @@ Respond ONLY with valid JSON, no markdown.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.7-flash",
         messages: [
           { role: "system", content: "You are an AI video content analyst. Always respond with valid JSON only." },
           { role: "user", content: prompt },

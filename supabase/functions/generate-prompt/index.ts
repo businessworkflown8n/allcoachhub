@@ -68,7 +68,7 @@ Expand on this template to make it detailed, specific, and highly actionable. In
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.7-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userMessage },

@@ -220,7 +220,7 @@ async function generateAutoTopics(supabase: any, apiKey: string, count: number):
     method: 'POST',
     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.7-flash',
       messages: [
         {
           role: 'system',
@@ -275,7 +275,7 @@ Return ONLY the JSON array, no other text.`,
         method: 'POST',
         headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.7-flash',
           messages: [
             {
               role: 'system',
@@ -418,7 +418,7 @@ Deno.serve(async (req) => {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${AI_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.7-flash',
           messages: [
             { role: 'system', content: 'You are an expert SEO content writer. Write the article directly in markdown format. Do NOT wrap in JSON. Write naturally and comprehensively. Minimum 2000 words.' },
             { role: 'user', content: article.prompt },

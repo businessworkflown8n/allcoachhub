@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface DigitalProductAccess {
@@ -32,6 +32,7 @@ const DEFAULT: DigitalProductAccess = {
 export function useDigitalProductAccess(coachId?: string) {
   const [data, setData] = useState<DigitalProductAccess>(DEFAULT);
   const [loading, setLoading] = useState(true);
+  const instanceId = useRef(Math.random().toString(36).slice(2));
 
   const refresh = useCallback(async () => {
     let uid = coachId;
@@ -56,7 +57,7 @@ export function useDigitalProductAccess(coachId?: string) {
   useEffect(() => {
     refresh();
     const channel = supabase
-      .channel("dp-access")
+      .channel(`dp-access-${instanceId.current}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "digital_product_settings" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "digital_product_coach_access" }, refresh)
       .subscribe();

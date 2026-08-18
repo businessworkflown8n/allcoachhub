@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "AI Coach Portal <onboarding@resend.dev>",
+          from: "AI Coach Portal <notifications@support.aicoachportal.com>",
           to: ["aicoachportal@gmail.com"],
           subject: `🎓 New Learner Signup – ${fullName}`,
           html: emailHtml,

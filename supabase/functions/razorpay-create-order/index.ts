@@ -59,14 +59,15 @@ Deno.serve(async (req) => {
       course_id,
       webinar_id,
       plan_id,
+      digital_product_id,
       billing_interval: rawInterval,
       currency: requestedCurrency,
       enrollment_data,
       registration_data,
     } = body ?? {};
 
-    const kind = rawKind ?? (webinar_id ? 'webinar' : plan_id ? 'subscription' : 'course');
-    if (!['course', 'webinar', 'subscription'].includes(kind)) {
+    const kind = rawKind ?? (webinar_id ? 'webinar' : plan_id ? 'subscription' : digital_product_id ? 'digital_product' : 'course');
+    if (!['course', 'webinar', 'subscription', 'digital_product'].includes(kind)) {
       return fail(`Unsupported purchase type "${String(kind)}".`, 'INVALID_KIND', 400);
     }
 
@@ -79,6 +80,8 @@ Deno.serve(async (req) => {
     let resolvedCourseId: string | null = null;
     let resolvedWebinarId: string | null = null;
     let resolvedPlanId: string | null = null;
+    let resolvedDigitalProductId: string | null = null;
+    let forcedCurrency: 'INR' | 'USD' | null = null;
     const billingInterval: 'monthly' | 'yearly' = (rawInterval === 'yearly' ? 'yearly' : 'monthly');
     const notes: Record<string, unknown> = { kind, user_id: userId };
 
@@ -101,6 +104,26 @@ Deno.serve(async (req) => {
       if (!w.is_paid) return fail('This webinar is free — no payment is required.', 'WEBINAR_IS_FREE', 400);
       coachId = w.coach_id; priceInr = Number(w.price_inr ?? 0); priceUsd = Number(w.price_usd ?? 0); title = w.title ?? '';
       resolvedWebinarId = w.id; receiptPrefix = 'w'; notes.webinar_id = w.id; notes.webinar_title = w.title;
+    } else if (kind === 'digital_product') {
+      if (!digital_product_id) return fail('No product was specified for this payment.', 'MISSING_DIGITAL_PRODUCT_ID', 400);
+      const { data: dp, error } = await admin
+        .from('digital_products')
+        .select('id, title, coach_id, price, discount_price, currency, is_paid, status, approval_status')
+        .eq('id', digital_product_id).maybeSingle();
+      if (error) return fail(`Could not load the product: ${error.message}`, 'DB_DIGITAL_PRODUCT_LOOKUP_FAILED', 500);
+      if (!dp) return fail('This product no longer exists.', 'DIGITAL_PRODUCT_NOT_FOUND', 404);
+      if (dp.status !== 'published' || dp.approval_status !== 'approved') {
+        return fail('This product is not available for purchase.', 'DIGITAL_PRODUCT_NOT_PUBLISHED', 400);
+      }
+      const amt = Number(dp.discount_price ?? dp.price ?? 0);
+      if (!dp.is_paid || !amt || amt <= 0) {
+        return fail('This product is free — no payment is required.', 'DIGITAL_PRODUCT_IS_FREE', 400);
+      }
+      coachId = dp.coach_id; title = dp.title ?? '';
+      forcedCurrency = dp.currency === 'USD' ? 'USD' : 'INR';
+      priceInr = forcedCurrency === 'INR' ? amt : 0;
+      priceUsd = forcedCurrency === 'USD' ? amt : 0;
+      resolvedDigitalProductId = dp.id; receiptPrefix = 'd'; notes.digital_product_id = dp.id; notes.digital_product_title = dp.title;
     } else {
       if (!plan_id) return fail('No subscription plan was specified.', 'MISSING_PLAN_ID', 400);
       const { data: p, error } = await admin
@@ -118,7 +141,7 @@ Deno.serve(async (req) => {
       notes.plan_id = p.id; notes.plan_slug = p.slug; notes.billing_interval = billingInterval;
     }
 
-    const currency = (requestedCurrency === 'USD' ? 'USD' : 'INR') as 'INR' | 'USD';
+    const currency = forcedCurrency ?? ((requestedCurrency === 'USD' ? 'USD' : 'INR') as 'INR' | 'USD');
     const priceMajor = currency === 'INR' ? priceInr : priceUsd;
     if (!priceMajor || priceMajor <= 0) {
       return fail(`No ${currency} price is set for this item. Please contact support.`, 'PRICE_NOT_SET', 400);
@@ -133,7 +156,7 @@ Deno.serve(async (req) => {
       return fail(`Payment provider is not configured. Missing: ${missing}.`, 'PAYMENT_PROVIDER_NOT_CONFIGURED', 500);
     }
 
-    const idSlice = (resolvedCourseId ?? resolvedWebinarId ?? resolvedPlanId ?? 'xxxxxxxx').slice(0, 8);
+    const idSlice = (resolvedCourseId ?? resolvedWebinarId ?? resolvedPlanId ?? resolvedDigitalProductId ?? 'xxxxxxxx').slice(0, 8);
     const receipt = `${receiptPrefix}_${idSlice}_${Date.now().toString(36)}`.slice(0, 40);
     const authStr = btoa(`${keyId}:${keySecret}`);
 
@@ -170,6 +193,7 @@ Deno.serve(async (req) => {
       kind,
       course_id: resolvedCourseId,
       webinar_id: resolvedWebinarId,
+      digital_product_id: resolvedDigitalProductId,
       coach_id: coachId,
       razorpay_order_id: rzpJson.id,
       receipt,
@@ -180,6 +204,7 @@ Deno.serve(async (req) => {
       enrollment_data:
         kind === 'course' ? (enrollment_data ?? null)
         : kind === 'webinar' ? (registration_data ?? null)
+        : kind === 'digital_product' ? (enrollment_data ?? null)
         : { plan_id: resolvedPlanId, billing_interval: billingInterval },
     });
     if (orderInsertErr) {
@@ -200,6 +225,7 @@ Deno.serve(async (req) => {
       course_title: kind === 'course' ? title : undefined,
       webinar_title: kind === 'webinar' ? title : undefined,
       plan_title: kind === 'subscription' ? title : undefined,
+      digital_product_title: kind === 'digital_product' ? title : undefined,
       prefill: { email: userEmail },
     });
   } catch (e) {

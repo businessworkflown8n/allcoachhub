@@ -23,6 +23,7 @@ const ThankYouCoach = lazy(() => import("./pages/ThankYouCoach"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminOTPLogin = lazy(() => import("./pages/AdminOTPLogin"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
+const ServicePage = lazy(() => import("./pages/ServicePage"));
 const CoursePlayer = lazy(() => import("./pages/CoursePlayer"));
 const Enroll = lazy(() => import("./pages/Enroll"));
 const RedeemInvite = lazy(() => import("./pages/RedeemInvite"));
@@ -210,6 +211,7 @@ const App = () => (
             <Route path="/coach-website/:slug" element={<Suspense fallback={<PageFallback />}><CoachWebsite /></Suspense>} />
             <Route path="/coach-website/:slug/thank-you" element={<Suspense fallback={<PageFallback />}><CoachWebsiteThankYou /></Suspense>} />
             <Route path="/course/:slug" element={<Suspense fallback={<PageFallback />}><CourseDetail /></Suspense>} />
+            <Route path="/service/:slug" element={<Suspense fallback={<PageFallback />}><ServicePage /></Suspense>} />
             <Route path="/enroll/:courseId" element={
               <ProtectedRoute allowedRole="learner">
                 <Suspense fallback={<PageFallback />}><Enroll /></Suspense>

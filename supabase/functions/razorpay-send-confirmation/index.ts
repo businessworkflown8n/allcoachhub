@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
 
     const symbol = currency === 'INR' ? '₹' : currency === 'USD' ? '$' : `${currency} `;
     const amountStr = `${symbol}${Number(amount ?? 0).toFixed(2)} ${currency ?? ''}`.trim();
-    const itemLabel = kind === 'webinar' ? 'webinar registration' : 'course enrollment';
+    const itemLabel = kind === 'webinar' ? 'webinar registration' : kind === 'digital_product' ? 'purchase' : 'course enrollment';
 
     const html = `
       <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; color: #1a1a1a; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">

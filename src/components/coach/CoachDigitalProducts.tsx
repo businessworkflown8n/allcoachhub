@@ -10,11 +10,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Video, Image as ImgIcon, Type, Link as LinkIcon, Package, Lock, Plus, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FileText, Video, Image as ImgIcon, Type, Link as LinkIcon, Package, Lock, Plus, Trash2, BookOpen, ExternalLink } from "lucide-react";
 
 const TYPE_ICONS: Record<string, any> = {
   document: FileText, video: Video, image: ImgIcon, text: Type, link: LinkIcon, physical: Package,
+  course: BookOpen, webinar: Video, workshop: Video,
 };
+
+/** Product types backed by an existing owned Course/Webinar/Workshop rather than raw content.
+ * Always offered regardless of digital_product_settings.allowed_types, since that setting
+ * governs raw content uploads, not linking something the coach already owns. */
+const LINKED_TYPES = ["course", "webinar", "workshop"] as const;
 
 function UpgradeLock() {
   return (
@@ -110,6 +117,11 @@ function ProductList() {
               </div>
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" className="flex-1" onClick={() => navigate(`/coach/digital-products/${p.id}/edit`)}>Edit</Button>
+                {p.slug && (
+                  <Button size="sm" variant="outline" asChild>
+                    <a href={`/service/${p.slug}`} target="_blank" rel="noopener noreferrer" title="Preview"><ExternalLink className="h-4 w-4" /></a>
+                  </Button>
+                )}
                 <Button size="sm" variant="outline" onClick={() => duplicate(p)}>Duplicate</Button>
                 <Button size="sm" variant="outline" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
               </div>
@@ -128,10 +140,14 @@ function ProductForm() {
   const { access } = useDigitalProductAccess();
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
+  const [ownedCourses, setOwnedCourses] = useState<{ id: string; title: string }[]>([]);
+  const [ownedWebinars, setOwnedWebinars] = useState<{ id: string; title: string }[]>([]);
+  const [ownedWorkshops, setOwnedWorkshops] = useState<{ id: string; title: string }[]>([]);
   const [form, setForm] = useState<any>({
     title: "", description: "", product_type: "", content_url: "", content_text: "",
     cover_image_url: "", faq: [], tags: [], is_paid: false, price: "", discount_price: "",
     currency: "INR", pass_gateway_fees: false, limited_time: false,
+    linked_course_id: null, linked_webinar_id: null, linked_workshop_id: null,
   });
 
   useEffect(() => {
@@ -140,6 +156,15 @@ function ProductForm() {
       if (data) setForm({ ...data, price: data.price ?? "", discount_price: data.discount_price ?? "" });
     });
   }, [id]);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: u }) => {
+      if (!u.user) return;
+      supabase.from("courses").select("id, title").eq("coach_id", u.user.id).then(({ data }) => setOwnedCourses(data || []));
+      supabase.from("webinars").select("id, title").eq("coach_id", u.user.id).then(({ data }) => setOwnedWebinars(data || []));
+      supabase.from("workshops").select("id, title").eq("coach_id", u.user.id).then(({ data }) => setOwnedWorkshops(data || []));
+    });
+  }, []);
 
   const update = (patch: any) => setForm({ ...form, ...patch });
 
@@ -157,6 +182,9 @@ function ProductForm() {
       cover_image_url: form.cover_image_url || null,
       faq: form.faq,
       tags: form.tags,
+      linked_course_id: form.product_type === "course" ? form.linked_course_id || null : null,
+      linked_webinar_id: form.product_type === "webinar" ? form.linked_webinar_id || null : null,
+      linked_workshop_id: form.product_type === "workshop" ? form.linked_workshop_id || null : null,
       is_paid: form.is_paid,
       price: form.is_paid && form.price !== "" ? Number(form.price) : null,
       discount_price: form.is_paid && form.discount_price !== "" ? Number(form.discount_price) : null,
@@ -193,7 +221,8 @@ function ProductForm() {
 
       {step === 1 && (
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Choose content type</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-1">Choose content type</h3>
+          <p className="text-xs text-muted-foreground mb-4">Upload raw content, or sell access to something you already offer.</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {allowedTypes.map((t: string) => {
               const Icon = TYPE_ICONS[t] || FileText;
@@ -203,6 +232,18 @@ function ProductForm() {
                   className={`p-4 rounded-lg border text-left transition ${selected ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
                   <Icon className="h-6 w-6 text-foreground mb-2" />
                   <div className="font-medium text-foreground capitalize">{t}</div>
+                </button>
+              );
+            })}
+            {LINKED_TYPES.map((t) => {
+              const Icon = TYPE_ICONS[t];
+              const selected = form.product_type === t;
+              return (
+                <button key={t} onClick={() => update({ product_type: t })}
+                  className={`p-4 rounded-lg border text-left transition ${selected ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
+                  <Icon className="h-6 w-6 text-foreground mb-2" />
+                  <div className="font-medium text-foreground capitalize">My {t}</div>
+                  <div className="text-xs text-muted-foreground">Link an existing {t}</div>
                 </button>
               );
             })}
@@ -238,6 +279,42 @@ function ProductForm() {
           )}
           {form.product_type === "physical" && (
             <div><Label>Shipping note</Label><Textarea rows={3} value={form.content_text} onChange={e => update({ content_text: e.target.value })} /></div>
+          )}
+          {form.product_type === "course" && (
+            <div>
+              <Label>Which course does this Service unlock?</Label>
+              <Select value={form.linked_course_id || ""} onValueChange={(v) => update({ linked_course_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Select one of your courses" /></SelectTrigger>
+                <SelectContent>
+                  {ownedCourses.map((c) => <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              {ownedCourses.length === 0 && <p className="text-xs text-muted-foreground mt-1">You don't have any courses yet.</p>}
+            </div>
+          )}
+          {form.product_type === "webinar" && (
+            <div>
+              <Label>Which webinar does this Service unlock?</Label>
+              <Select value={form.linked_webinar_id || ""} onValueChange={(v) => update({ linked_webinar_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Select one of your webinars" /></SelectTrigger>
+                <SelectContent>
+                  {ownedWebinars.map((w) => <SelectItem key={w.id} value={w.id}>{w.title}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              {ownedWebinars.length === 0 && <p className="text-xs text-muted-foreground mt-1">You don't have any webinars yet.</p>}
+            </div>
+          )}
+          {form.product_type === "workshop" && (
+            <div>
+              <Label>Which workshop does this Service register learners into?</Label>
+              <Select value={form.linked_workshop_id || ""} onValueChange={(v) => update({ linked_workshop_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Select one of your workshops" /></SelectTrigger>
+                <SelectContent>
+                  {ownedWorkshops.map((w) => <SelectItem key={w.id} value={w.id}>{w.title}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              {ownedWorkshops.length === 0 && <p className="text-xs text-muted-foreground mt-1">You don't have any workshops yet.</p>}
+            </div>
           )}
           <div>
             <Label>Tags (comma-separated)</Label>
@@ -282,10 +359,18 @@ function ProductForm() {
           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
             <div className="flex gap-2">
+              {form.slug && (
+                <Button variant="ghost" asChild>
+                  <a href={`/service/${form.slug}`} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4 mr-1" /> Preview
+                  </a>
+                </Button>
+              )}
               <Button variant="outline" onClick={() => save(false)} disabled={saving}>Save draft</Button>
               <Button onClick={() => save(true)} disabled={saving}>{access.require_approval ? "Submit for approval" : "Publish"}</Button>
             </div>
           </div>
+          {!form.slug && <p className="text-xs text-muted-foreground text-right">Save as a draft first to get a preview link.</p>}
         </Card>
       )}
     </div>

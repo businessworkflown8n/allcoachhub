@@ -95,6 +95,7 @@ Deno.serve(async (req) => {
 
     let enrollmentId: string | undefined;
     let webinarRegId: string | undefined;
+    let digitalProductOrderId: string | undefined;
     let coachId: string | null = orderRow.coach_id;
     let itemTitle = '';
     let learnerEmail = '';
@@ -186,6 +187,130 @@ Deno.serve(async (req) => {
         payment_id: razorpay_payment_id,
         payment_status: 'paid',
       });
+    } else if (kind === 'digital_product') {
+      const { data: product } = await admin
+        .from('digital_products')
+        .select('coach_id, title, currency, product_type, linked_course_id, linked_webinar_id, linked_workshop_id')
+        .eq('id', orderRow.digital_product_id).maybeSingle();
+      if (!product) {
+        return new Response(JSON.stringify({ error: 'Product no longer exists' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      coachId = product.coach_id ?? orderRow.coach_id;
+      itemTitle = product.title ?? '';
+
+      const enrollmentData = (orderRow.enrollment_data ?? {}) as Record<string, unknown>;
+      learnerEmail = String(enrollmentData.email ?? '');
+      learnerName = String(enrollmentData.full_name ?? '');
+      learnerPhone = String(enrollmentData.contact_number ?? '');
+
+      const { data: settings } = await admin
+        .from('digital_product_settings').select('platform_commission_percent').limit(1).maybeSingle();
+      const commissionPct = Number(settings?.platform_commission_percent ?? 0);
+      const amount = Number(orderRow.amount ?? 0);
+      const platformFee = Math.round(amount * (commissionPct / 100) * 100) / 100;
+      const netToCoach = Math.round((amount - platformFee) * 100) / 100;
+      const isLinked = !!(product.linked_course_id || product.linked_webinar_id || product.linked_workshop_id);
+      const instantContent = ['document', 'video', 'image', 'text', 'link'].includes(product.product_type);
+
+      const { data: existingDpOrder } = await admin
+        .from('digital_product_orders').select('id')
+        .eq('product_id', orderRow.digital_product_id).eq('buyer_id', userId).maybeSingle();
+
+      if (existingDpOrder?.id) {
+        await admin.from('digital_product_orders').update({
+          payment_status: 'paid', payment_ref: razorpay_payment_id, updated_at: new Date().toISOString(),
+        }).eq('id', existingDpOrder.id);
+        digitalProductOrderId = existingDpOrder.id;
+      } else {
+        const { data: ins, error: insErr } = await admin.from('digital_product_orders').insert({
+          product_id: orderRow.digital_product_id,
+          coach_id: coachId,
+          buyer_id: userId,
+          amount_paid: amount,
+          platform_fee: platformFee,
+          gateway_fee: 0,
+          net_to_coach: netToCoach,
+          currency: orderRow.currency,
+          payment_status: 'paid',
+          payment_ref: razorpay_payment_id,
+          delivery_status: isLinked || instantContent ? 'delivered' : 'pending',
+        }).select('id').single();
+        if (insErr) {
+          console.error('digital product order insert error', insErr);
+          return new Response(JSON.stringify({ error: 'Order recording failed', details: insErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+        digitalProductOrderId = ins.id;
+      }
+
+      const { data: curProduct } = await admin.from('digital_products').select('sales_count').eq('id', orderRow.digital_product_id).maybeSingle();
+      await admin.from('digital_products').update({ sales_count: (curProduct?.sales_count ?? 0) + 1 }).eq('id', orderRow.digital_product_id);
+
+      if (product.linked_course_id) {
+        const enrollmentPayload: Record<string, unknown> = {
+          learner_id: userId,
+          course_id: product.linked_course_id,
+          coach_id: coachId,
+          payment_status: 'paid',
+          payment_id: razorpay_payment_id,
+          amount_paid: orderRow.amount,
+          currency: orderRow.currency,
+          payment_locked: true,
+          razorpay_order_id,
+          razorpay_payment_id,
+          ...enrollmentData,
+        };
+        const { data: existingEnr } = await admin
+          .from('enrollments').select('id').eq('learner_id', userId).eq('course_id', product.linked_course_id).maybeSingle();
+        if (existingEnr?.id) {
+          await admin.from('enrollments').update(enrollmentPayload).eq('id', existingEnr.id);
+          enrollmentId = existingEnr.id;
+        } else {
+          const { data: ins, error: insErr } = await admin.from('enrollments').insert(enrollmentPayload).select('id').single();
+          if (insErr) {
+            console.error('linked-course enrollment insert error', insErr);
+            return new Response(JSON.stringify({ error: 'Enrollment failed', details: insErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+          enrollmentId = ins.id;
+        }
+      }
+
+      if (product.linked_webinar_id) {
+        const { data: existingReg } = await admin
+          .from('webinar_registrations').select('id')
+          .eq('webinar_id', product.linked_webinar_id).eq('learner_id', userId).maybeSingle();
+        const regPayload = {
+          webinar_id: product.linked_webinar_id,
+          learner_id: userId,
+          registrant_name: learnerName,
+          registrant_email: learnerEmail,
+          registrant_phone: learnerPhone,
+          payment_status: 'paid',
+          amount_paid: orderRow.amount,
+          payment_id: razorpay_payment_id,
+        };
+        if (existingReg?.id) {
+          await admin.from('webinar_registrations').update(regPayload).eq('id', existingReg.id);
+          webinarRegId = existingReg.id;
+        } else {
+          const { data: ins } = await admin.from('webinar_registrations').insert(regPayload).select('id').single();
+          webinarRegId = ins?.id;
+        }
+        await admin.from('webinar_payments').insert({
+          webinar_id: product.linked_webinar_id,
+          learner_id: userId,
+          amount: orderRow.amount,
+          currency: orderRow.currency,
+          payment_id: razorpay_payment_id,
+          payment_status: 'paid',
+        });
+      }
+
+      if (product.linked_workshop_id) {
+        await admin.from('workshop_registrations').upsert(
+          { workshop_id: product.linked_workshop_id, user_id: userId, status: 'registered' },
+          { onConflict: 'workshop_id,user_id' },
+        );
+      }
     } else if (kind === 'subscription') {
       const enrData = (orderRow.enrollment_data ?? {}) as Record<string, unknown>;
       const planId = String(enrData.plan_id ?? '');
@@ -253,7 +378,7 @@ Deno.serve(async (req) => {
       console.warn('confirmation invoke failed (non-blocking)', (e as Error).message);
     }
 
-    return new Response(JSON.stringify({ success: true, enrollment_id: enrollmentId, webinar_registration_id: webinarRegId, invoice_url: invoiceUrl }), {
+    return new Response(JSON.stringify({ success: true, enrollment_id: enrollmentId, webinar_registration_id: webinarRegId, digital_product_order_id: digitalProductOrderId, invoice_url: invoiceUrl }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {

@@ -59,15 +59,17 @@ export interface OpenCheckoutArgs {
   webinarId?: string;
   /** plan_id (when kind = 'subscription') */
   planId?: string;
+  /** digital_product_id (when kind = 'digital_product') */
+  productId?: string;
   billingInterval?: "monthly" | "yearly";
-  kind?: "course" | "webinar" | "subscription";
+  kind?: "course" | "webinar" | "subscription" | "digital_product";
   currency?: "INR" | "USD";
-  /** enrollment fields for courses */
+  /** enrollment fields for courses (and for a digital product linked to a course) */
   enrollmentData?: Record<string, unknown>;
   /** registration fields for webinars */
   registrationData?: Record<string, unknown>;
   prefill?: { name?: string; email?: string; contact?: string };
-  onSuccess?: (info: { enrollmentId?: string; webinarRegistrationId?: string; paymentId: string; invoiceUrl?: string }) => void;
+  onSuccess?: (info: { enrollmentId?: string; webinarRegistrationId?: string; digitalProductOrderId?: string; paymentId: string; invoiceUrl?: string }) => void;
   onDismiss?: () => void;
   /** Called whenever checkout could not start or failed — always fires so callers can clear their own loading state. */
   onError?: (info: { message: string; code?: string }) => void;
@@ -93,7 +95,7 @@ export function useRazorpayCheckout() {
         return;
       }
 
-      const kind = args.kind ?? (args.planId ? "subscription" : args.webinarId ? "webinar" : "course");
+      const kind = args.kind ?? (args.planId ? "subscription" : args.webinarId ? "webinar" : args.productId ? "digital_product" : "course");
       let data: any = null;
       let error: any = null;
       try {
@@ -103,6 +105,7 @@ export function useRazorpayCheckout() {
             course_id: args.courseId,
             webinar_id: args.webinarId,
             plan_id: args.planId,
+            digital_product_id: args.productId,
             billing_interval: args.billingInterval ?? "monthly",
             currency: args.currency ?? "INR",
             enrollment_data: args.enrollmentData,
@@ -127,7 +130,7 @@ export function useRazorpayCheckout() {
         amount: data.amount,
         currency: data.currency,
         name: "AI Coach Portal",
-        description: data.course_title || data.webinar_title || data.plan_title || (kind === "webinar" ? "Webinar registration" : kind === "subscription" ? "Subscription" : "Course enrollment"),
+        description: data.course_title || data.webinar_title || data.plan_title || data.digital_product_title || (kind === "webinar" ? "Webinar registration" : kind === "subscription" ? "Subscription" : kind === "digital_product" ? "Purchase" : "Course enrollment"),
         order_id: data.order_id,
         prefill: { ...(data.prefill || {}), ...(args.prefill || {}) },
         theme: { color: "#84cc16" },
@@ -144,10 +147,11 @@ export function useRazorpayCheckout() {
               toast({ title: "Payment verification failed", description: vErr?.message || vData?.error || "Contact support if your card was charged.", variant: "destructive" });
               return;
             }
-            toast({ title: "Payment successful", description: kind === "subscription" ? "Your subscription is now active." : kind === "webinar" ? "You are now registered for the webinar." : "You are now enrolled in the course." });
+            toast({ title: "Payment successful", description: kind === "subscription" ? "Your subscription is now active." : kind === "webinar" ? "You are now registered for the webinar." : kind === "digital_product" ? "Your purchase is complete." : "You are now enrolled in the course." });
             args.onSuccess?.({
               enrollmentId: vData.enrollment_id,
               webinarRegistrationId: vData.webinar_registration_id,
+              digitalProductOrderId: vData.digital_product_order_id,
               paymentId: response.razorpay_payment_id,
               invoiceUrl: vData.invoice_url,
             });

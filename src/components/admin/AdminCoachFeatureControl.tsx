@@ -35,6 +35,7 @@ interface CoachFlags {
   external_materials_access: boolean;
   kids_courses_access: boolean;
   whatsapp_dashboard_access: boolean;
+  digital_products_access: boolean;
 }
 
 const FEATURES = [
@@ -58,6 +59,7 @@ const FEATURES = [
   { key: "external_materials_access", label: "Material Links (External Only)" },
   { key: "kids_courses_access", label: "🚀 AI Kids Pro Courses" },
   { key: "whatsapp_dashboard_access", label: "📱 WhatsApp Dashboard" },
+  { key: "digital_products_access", label: "🛍️ Digital Products / Services" },
 ] as const;
 
 const AdminCoachFeatureControl = () => {
@@ -74,6 +76,8 @@ const AdminCoachFeatureControl = () => {
     const flagMap = new Map<string, any>((flags || []).map((f: any) => [f.coach_id, f]));
     const { data: waRows } = await supabase.from("whatsapp_access").select("coach_id, is_active");
     const waMap = new Map((waRows || []).map((w: any) => [w.coach_id, !!w.is_active]));
+    const { data: dpRows } = await supabase.from("digital_product_coach_access").select("coach_id, enabled");
+    const dpMap = new Map((dpRows || []).map((d: any) => [d.coach_id, !!d.enabled]));
 
     const list: CoachFlags[] = (profiles || [])
       .filter((p) => coachIds.has(p.user_id))
@@ -104,6 +108,7 @@ const AdminCoachFeatureControl = () => {
           external_materials_access: f?.external_materials_access ?? false,
           kids_courses_access: f?.kids_courses_access ?? false,
           whatsapp_dashboard_access: waMap.get(p.user_id) ?? false,
+          digital_products_access: dpMap.get(p.user_id) ?? false,
         };
       });
     setCoaches(list);
@@ -133,6 +138,28 @@ const AdminCoachFeatureControl = () => {
       });
       setCoaches((prev) => prev.map((c) => c.coach_id === coachId ? { ...c, whatsapp_dashboard_access: newVal } : c));
       toast({ title: `WhatsApp Dashboard ${newVal ? "enabled" : "disabled"}` });
+      return;
+    }
+    if (field === "digital_products_access") {
+      const newVal = !current;
+      const { data: existingDP } = await supabase.from("digital_product_coach_access").select("id").eq("coach_id", coachId).maybeSingle();
+      if (existingDP) {
+        await supabase.from("digital_product_coach_access").update({ enabled: newVal, updated_at: new Date().toISOString() }).eq("coach_id", coachId);
+      } else {
+        await supabase.from("digital_product_coach_access").insert({ coach_id: coachId, enabled: newVal });
+      }
+      // Notify coach
+      await supabase.from("learner_notifications").insert({
+        learner_id: coachId,
+        coach_id: coachId,
+        title: newVal ? "Digital Products Access Enabled" : "Digital Products Access Disabled",
+        message: newVal
+          ? "Congratulations! Digital Products / Services access has been enabled for your account."
+          : "Your Digital Products / Services access has been disabled by the administrator.",
+        cta_link: newVal ? "/coach/digital-products" : null,
+      });
+      setCoaches((prev) => prev.map((c) => c.coach_id === coachId ? { ...c, digital_products_access: newVal } : c));
+      toast({ title: `Digital Products access ${newVal ? "enabled" : "disabled"}` });
       return;
     }
     const { data: existing } = await supabase.from("coach_feature_flags").select("id").eq("coach_id", coachId).maybeSingle();

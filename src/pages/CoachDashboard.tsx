@@ -18,6 +18,8 @@ import CurriculumBuilder from "@/components/coach/curriculum/CurriculumBuilder";
 import CoachEnrollments from "@/components/coach/CoachEnrollments";
 import CoachEarnings from "@/components/coach/CoachEarnings";
 import CoachWebinars from "@/components/coach/CoachWebinars";
+import CoachManageWebinar from "@/components/coach/CoachManageWebinar";
+import { useWebinarManagementAccess } from "@/hooks/useWebinarManagementAccess";
 import SocialMediaHub from "@/components/shared/SocialMediaHub";
 import CoachCampaigns from "@/components/coach/CoachCampaigns";
 import CoachOverview from "@/components/coach/CoachOverview";
@@ -64,6 +66,7 @@ const CoachDashboard = () => {
   const { hasAccess: hasWorkshopAccess } = useWorkshopAccess();
   const features = useCoachFeatures();
   const { access: dpAccess } = useDigitalProductAccess();
+  const { hasAccess: hasWebinarMgmt, loading: webinarMgmtLoading } = useWebinarManagementAccess();
   const { data: linkedinFeature } = useFeatureControl("linkedin_post");
   const linkedinEnabled = !!linkedinFeature?.enabled;
   const { enabled: aiJobsLinkedInEnabled } = useExternalLinkControl("ai_jobs_news_linkedin_post");
@@ -78,6 +81,7 @@ const CoachDashboard = () => {
     ...(features.workshops_access ? [
       { label: "My Webinars", path: "/coach/webinars", icon: <Video className="h-4 w-4" /> },
     ] : []),
+    ...(hasWebinarMgmt ? [{ label: "Manage Webinar", path: "/coach/manage-webinar", icon: <Calendar className="h-4 w-4" /> }] : []),
     { label: "Enrollments", path: "/coach/enrollments", icon: <BarChart3 className="h-4 w-4" /> },
     { label: "AI Kids Leads", path: "/coach/ai-kids-leads", icon: <Sparkles className="h-4 w-4" /> },
     ...((features as any).crm_access ? [{ label: "Clients", path: "/coach/clients", icon: <Users className="h-4 w-4" /> }] : []),
@@ -124,6 +128,7 @@ const CoachDashboard = () => {
         <Route path="courses/:id/edit" element={features.courses_access ? <CoachCourseForm /> : <Navigate to="overview" replace />} />
         <Route path="courses/:id/curriculum" element={features.courses_access ? <CurriculumBuilder /> : <Navigate to="overview" replace />} />
         <Route path="webinars" element={features.workshops_access ? <CoachWebinars /> : <Navigate to="overview" replace />} />
+        <Route path="manage-webinar" element={hasWebinarMgmt || webinarMgmtLoading ? <CoachManageWebinar /> : <Navigate to="overview" replace />} />
         <Route path="enrollments" element={<CoachEnrollments />} />
         <Route path="ai-kids-leads" element={<CoachAIKidsLeads />} />
         <Route path="clients" element={(features as any).crm_access ? <CoachClients /> : <Navigate to="overview" replace />} />

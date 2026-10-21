@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { webinarStartUtc } from "../_shared/webinarTime.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,12 +17,13 @@ Deno.serve(async (req) => {
 
     const now = new Date();
 
-    // Fetch upcoming webinars with registrations that need reminders
+    // Fetch upcoming webinars with registrations that need reminders. webinar_date is
+    // a local date in the webinar's timezone, so look back one UTC day.
     const { data: webinars } = await supabase
       .from("webinars")
       .select("*")
       .eq("is_published", true)
-      .gte("webinar_date", now.toISOString().split("T")[0]);
+      .gte("webinar_date", new Date(now.getTime() - 86_400_000).toISOString().split("T")[0]);
 
     if (!webinars || webinars.length === 0) {
       return new Response(JSON.stringify({ message: "No upcoming webinars" }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -30,7 +32,8 @@ Deno.serve(async (req) => {
     let totalSent = 0;
 
     for (const webinar of webinars) {
-      const webinarStart = new Date(`${webinar.webinar_date}T${webinar.webinar_time}`);
+      // Interpret date/time in the webinar's own timezone (previously read as UTC).
+      const webinarStart = webinarStartUtc(webinar);
       const diffMs = webinarStart.getTime() - now.getTime();
       const diffHours = diffMs / (1000 * 60 * 60);
       const diffMinutes = diffMs / (1000 * 60);
@@ -89,7 +92,7 @@ Deno.serve(async (req) => {
             <p>${reminderType === "24h" ? "This is a friendly reminder that" : reminderType === "1h" ? "Get ready!" : "It's almost time!"} <strong>"${webinar.title}"</strong> ${reminderType === "24h" ? "is happening tomorrow" : reminderType === "1h" ? "starts in about 1 hour" : "starts in just 10 minutes"}.</p>
             <div style="background:#f5f3ff;padding:16px;border-radius:8px;margin:16px 0;">
               <p style="margin:4px 0;"><strong>📅 Date:</strong> ${webinar.webinar_date}</p>
-              <p style="margin:4px 0;"><strong>🕐 Time:</strong> ${webinar.webinar_time}</p>
+              <p style="margin:4px 0;"><strong>🕐 Time:</strong> ${String(webinar.webinar_time).slice(0, 5)} (${webinar.timezone || "Asia/Kolkata"})</p>
               <p style="margin:4px 0;"><strong>⏱ Duration:</strong> ${webinar.duration_minutes} minutes</p>
             </div>
             ${webinar.webinar_link_status === "approved" ? `<a href="${webinar.webinar_link}" style="display:inline-block;background:#6C3CE1;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;margin:12px 0;">Join Webinar</a>` : "<p>The join link will be available at start time.</p>"}

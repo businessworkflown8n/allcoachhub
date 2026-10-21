@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { toGCalUtc, webinarStartUtc } from "../_shared/webinarTime.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,12 +65,13 @@ Deno.serve(async (req) => {
       month: "long",
       day: "numeric",
     });
-    const timeStr = webinar.webinar_time.slice(0, 5);
+    const timeStr = `${webinar.webinar_time.slice(0, 5)} (${webinar.timezone || "Asia/Kolkata"})`;
 
     // Google Calendar link
-    const startDt = new Date(`${webinar.webinar_date}T${webinar.webinar_time}`);
+    // Start in the webinar's own timezone so calendar entries land at the right time.
+    const startDt = webinarStartUtc(webinar);
     const endDt = new Date(startDt.getTime() + webinar.duration_minutes * 60000);
-    const toGCalFormat = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    const toGCalFormat = toGCalUtc;
     const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(webinar.title)}&dates=${toGCalFormat(startDt)}/${toGCalFormat(endDt)}&details=${encodeURIComponent(webinar.description || "")}&location=${encodeURIComponent(webinar.webinar_link)}`;
 
     if (resendApiKey) {

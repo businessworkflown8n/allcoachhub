@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
 import { useSEO } from "@/hooks/useSEO";
 import { useRazorpayCheckout } from "@/hooks/useRazorpayCheckout";
+import { googleCalendarUrl, zonedTimeToUtc } from "@/lib/webinarManagement";
 
 interface WebinarWithCoach {
   id: string;
@@ -30,6 +31,7 @@ interface WebinarWithCoach {
   timezone: string;
   is_recurring: boolean;
   webinar_type: string;
+  whatsapp_group_url?: string | null;
 }
 
 const Webinars = () => {
@@ -202,14 +204,10 @@ const Webinars = () => {
   };
 
   const now = new Date();
-  const getEndTime = (w: WebinarWithCoach) => {
-    const start = new Date(`${w.webinar_date}T${w.webinar_time}`);
-    return new Date(start.getTime() + w.duration_minutes * 60000);
-  };
-  const isLive = (w: WebinarWithCoach) => {
-    const start = new Date(`${w.webinar_date}T${w.webinar_time}`);
-    return now >= start && now <= getEndTime(w);
-  };
+  // webinar_date/webinar_time are wall-clock values in the webinar's own timezone.
+  const getStartTime = (w: WebinarWithCoach) => zonedTimeToUtc(w.webinar_date, w.webinar_time, w.timezone);
+  const getEndTime = (w: WebinarWithCoach) => new Date(getStartTime(w).getTime() + w.duration_minutes * 60000);
+  const isLive = (w: WebinarWithCoach) => now >= getStartTime(w) && now <= getEndTime(w);
 
   const upcoming = webinars.filter((w) => getEndTime(w) >= now);
   const filtered = upcoming.filter((w) =>
@@ -269,8 +267,8 @@ const Webinars = () => {
                     <User className="h-3.5 w-3.5" /> {w.coach_name}
                   </div>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{format(new Date(w.webinar_date), "MMM d, yyyy")}</span>
-                    <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{w.webinar_time.slice(0, 5)}</span>
+                    <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{format(new Date(`${w.webinar_date}T00:00:00`), "MMM d, yyyy")}</span>
+                    <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{w.webinar_time.slice(0, 5)} {w.timezone && <span className="text-xs">({w.timezone})</span>}</span>
                     <span>{w.duration_minutes} min</span>
                   </div>
                   {w.is_paid && (
@@ -289,7 +287,16 @@ const Webinars = () => {
                       ) : live && w.webinar_link_status !== "approved" ? (
                         <p className="text-sm text-yellow-400">Webinar link is under admin approval. Please wait.</p>
                       ) : (
-                        <span className="text-sm text-primary font-medium">✓ Registered</span>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                          <span className="text-sm text-primary font-medium">✓ Registered</span>
+                          <a
+                            href={googleCalendarUrl({ title: w.title, date: w.webinar_date, time: w.webinar_time.slice(0, 5), durationMinutes: w.duration_minutes, timezone: w.timezone })}
+                            target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground underline hover:text-foreground"
+                          >Add to calendar</a>
+                          {w.whatsapp_group_url && (
+                            <a href={w.whatsapp_group_url} target="_blank" rel="noopener noreferrer" className="text-xs text-green-500 underline">Join WhatsApp group</a>
+                          )}
+                        </div>
                       )
                     ) : (
                       <Button size="sm" className="w-full" onClick={() => registerForWebinar(w)} disabled={registering === w.id}>

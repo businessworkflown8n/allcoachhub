@@ -100,7 +100,8 @@ Coach (Manage Webinar) ──► webinar-management edge fn ──► wm_save_dr
    | Destination | Secrets |
    |---|---|
    | Google Sheets | `WEBINAR_SYNC_SHEET_ID`, `GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON` (falls back to `GOOGLE_INDEXING_SERVICE_ACCOUNT_JSON`), optional `WEBINAR_SYNC_SHEET_TAB` (default `Webinars`). Share the sheet with the service account's `client_email` as Editor and enable the Sheets API in its Google Cloud project. |
-   | Workflows (n8n / Zapier / Make) | `WEBINAR_SYNC_WEBHOOK_URLS` (comma-separated https URLs), `WEBINAR_SYNC_WEBHOOK_SECRET` (HMAC-SHA256 of the body in `X-Webinar-Signature: sha256=…`). Dedupe on `Idempotency-Key` / `event_id`. |
+   | Google Sheets without a key (in use) | `WEBINAR_SYNC_SHEETS_WEBAPP_URL` + `WEBINAR_SYNC_SHEETS_WEBAPP_TOKEN`: an Apps Script web app owned by the sheet owner (`docs/webinar-sheet-sync.gs`, deployed as Execute as: Me / Access: Anyone). Used when no service-account JSON is set. Sync sheet: https://docs.google.com/spreadsheets/d/10GXTSodwqTOW6Ov3uZDJGCsZFykQ3u7eTcPXlZW8J1Q |
+| Workflows (n8n / Zapier / Make) | `WEBINAR_SYNC_WEBHOOK_URLS` (comma-separated https URLs), `WEBINAR_SYNC_WEBHOOK_SECRET` (HMAC-SHA256 of the body in `X-Webinar-Signature: sha256=…`). Dedupe on `Idempotency-Key` / `event_id`. |
 
 5. Grant permissions under Admin → Webinar Management → Permissions.
 

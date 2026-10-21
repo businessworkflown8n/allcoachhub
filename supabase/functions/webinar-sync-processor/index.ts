@@ -177,10 +177,58 @@ async function googleAccessToken(sa: { client_email: string; private_key: string
   return data.access_token as string;
 }
 
+function sheetRow(job: SyncJob): string[] {
+  const e = eventPayload(job, "");
+  return [
+    e.webinar_id, String(e.config_version), e.coach_id, e.title, e.date, e.start_time, e.end_time, e.timezone,
+    e.start_at_utc ?? "", e.webinar_url ?? "", e.webinar_url_status ?? "", e.whatsapp_url ?? "", e.registration_url ?? "",
+    e.is_published ? "TRUE" : "FALSE", e.published_at ?? "",
+  ];
+}
+
+// Alternative to a service account: a Google Apps Script web app owned by the sheet
+// owner (see docs/webinar-sheet-sync.gs). It performs the same upsert-by-webinar_id
+// with a version check, under a script lock.
+async function syncGoogleSheetsViaWebApp(job: SyncJob, url: string, token: string): Promise<Outcome> {
+  let resp: Response;
+  try {
+    resp = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ token, action: "upsert", header: SHEET_HEADER, row: sheetRow(job), version: job.config_version }),
+      redirect: "follow",
+      signal: AbortSignal.timeout(30_000),
+    });
+  } catch (e) {
+    throw new SyncError(`Sheets web app unreachable: ${(e as Error).message}`, "SHEETS_WEBAPP_NETWORK", true);
+  }
+  const text = await resp.text();
+  let data: Json = null;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    // A non-JSON page usually means the web app is not deployed for "Anyone" access.
+    throw new SyncError(`Sheets web app returned HTTP ${resp.status} without JSON. Check it is deployed with access "Anyone".`, "SHEETS_WEBAPP_RESPONSE", httpTransient(resp.status));
+  }
+  if (!resp.ok || !data?.ok) {
+    const permanent = data?.code === "UNAUTHORIZED" || data?.code === "BAD_REQUEST";
+    throw new SyncError(`Sheets web app error: ${data?.error ?? resp.status}`, `SHEETS_WEBAPP_${data?.code ?? resp.status}`, !permanent);
+  }
+  if (data.superseded) return { status: "superseded", message: `Sheet already holds version ${data.sheet_version}` };
+  return {
+    status: "synced",
+    message: data.mode === "update" ? `Updated existing row ${data.row}` : `Added row ${data.row} for this webinar`,
+    response: { row: data.row, mode: data.mode, via: "apps_script" },
+  };
+}
+
 async function syncGoogleSheets(job: SyncJob): Promise<Outcome> {
   const sheetId = Deno.env.get("WEBINAR_SYNC_SHEET_ID");
   const saRaw = Deno.env.get("GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON") ?? Deno.env.get("GOOGLE_INDEXING_SERVICE_ACCOUNT_JSON");
-  const missing = [!sheetId && "WEBINAR_SYNC_SHEET_ID", !saRaw && "GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON"].filter(Boolean);
+  const webAppUrl = Deno.env.get("WEBINAR_SYNC_SHEETS_WEBAPP_URL");
+  const webAppToken = Deno.env.get("WEBINAR_SYNC_SHEETS_WEBAPP_TOKEN");
+  if (!saRaw && webAppUrl && webAppToken) return syncGoogleSheetsViaWebApp(job, webAppUrl, webAppToken);
+  const missing = [!sheetId && "WEBINAR_SYNC_SHEET_ID", !saRaw && "GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON (or WEBINAR_SYNC_SHEETS_WEBAPP_URL + _TOKEN)"].filter(Boolean);
   if (missing.length) {
     return { status: "skipped", code: "NOT_CONFIGURED", message: `Google Sheets not configured. Missing secret(s): ${missing.join(", ")}` };
   }
@@ -219,12 +267,7 @@ async function syncGoogleSheets(job: SyncJob): Promise<Outcome> {
     });
   }
 
-  const e = eventPayload(job, "");
-  const row = [
-    e.webinar_id, String(e.config_version), e.coach_id, e.title, e.date, e.start_time, e.end_time, e.timezone,
-    e.start_at_utc ?? "", e.webinar_url ?? "", e.webinar_url_status ?? "", e.whatsapp_url ?? "", e.registration_url ?? "",
-    e.is_published ? "TRUE" : "FALSE", e.published_at ?? "",
-  ];
+  const row = sheetRow(job);
   const lastCol = String.fromCharCode("A".charCodeAt(0) + SHEET_HEADER.length - 1);
 
   const index = rows.findIndex((r, i) => i > 0 && r[0] === job.webinar_id);
